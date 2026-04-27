@@ -18,7 +18,6 @@
     .nav-links a { color: white; text-decoration: none; font-size: 14px; transition: color 0.2s; }
     .nav-links a:hover { color: #C9A84C; }
     .nav-links a.nav-cta { background: #C9A84C; color: #193278; padding: 8px 20px; font-weight: 600; border-radius: 3px; font-size: 13px; }
-    .nav-links a.nav-cta:hover { background: #e0bc5a; color: #193278; }
     .hamburger { display: none; flex-direction: column; gap: 5px; cursor: pointer; background: none; border: none; padding: 4px; }
     .hamburger span { display: block; width: 24px; height: 2px; background: white; border-radius: 2px; transition: all 0.3s; }
     .hamburger.open span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
@@ -32,7 +31,7 @@
     .hero p { font-size: 18px; color: rgba(255,255,255,0.85); margin-bottom: 16px; max-width: 680px; margin-left: auto; margin-right: auto; font-weight: 300; }
     .hero .tagline { font-size: 14px; color: #C9A84C; font-style: italic; margin-bottom: 40px; }
     .cta-group { display: flex; flex-direction: column; align-items: center; gap: 14px; }
-    .btn-primary { display: inline-block; background: #C9A84C; color: #193278; font-size: 15px; font-weight: 600; padding: 14px 36px; border-radius: 4px; text-decoration: none; }
+    .btn-primary { display: inline-block; background: #C9A84C; color: #193278; font-size: 15px; font-weight: 600; padding: 14px 36px; border-radius: 4px; text-decoration: none; cursor: pointer; border: none; }
     .btn-primary:hover { background: #e0bc5a; }
     .btn-secondary { display: inline-block; background: transparent; color: white; font-size: 14px; padding: 12px 28px; border-radius: 4px; text-decoration: none; border: 1px solid rgba(255,255,255,0.3); }
     .btn-secondary:hover { border-color: #C9A84C; color: #C9A84C; }
@@ -49,13 +48,16 @@
     .feature h3 { color: #193278; margin-bottom: 10px; font-size: 17px; }
     .feature p { color: #666; font-size: 14px; line-height: 1.7; }
     .waitlist-section { background: white; padding: 70px 40px; }
-    .waitlist-container { max-width: 900px; margin: 0 auto; }
-    .waitlist-section h2 { font-size: 32px; color: #193278; margin-bottom: 12px; text-align: center; }
-    .waitlist-section .deadline { text-align: center; font-size: 13px; color: #C9A84C; margin-bottom: 36px; font-weight: 500; }
+    .waitlist-container { max-width: 900px; margin: 0 auto; text-align: center; }
+    .waitlist-section h2 { font-size: 32px; color: #193278; margin-bottom: 12px; }
+    .waitlist-section .deadline { font-size: 13px; color: #C9A84C; margin-bottom: 24px; font-weight: 500; }
+    .waitlist-section .description { font-size: 16px; color: #555; max-width: 500px; margin: 0 auto 32px; line-height: 1.8; }
+    .apply-btn { display: inline-block; background: #193278; color: white; font-size: 16px; font-weight: 600; padding: 16px 40px; border-radius: 4px; text-decoration: none; border: none; cursor: pointer; }
+    .apply-btn:hover { background: #1a3a8f; }
+    .form-note { color: #999; font-size: 13px; margin-top: 16px; }
     .privacy-disclaimer { background: #f5f5f5; padding: 30px 40px; text-align: center; font-size: 13px; color: #666; line-height: 1.7; }
     .privacy-disclaimer p { margin-bottom: 8px; }
     .privacy-disclaimer a { color: #1E90FF; text-decoration: none; }
-    .privacy-disclaimer a:hover { text-decoration: underline; }
     footer { background: #193278; padding: 40px; text-align: center; color: white; border-top: 3px solid #C9A84C; }
     footer p { margin: 8px 0; font-size: 14px; }
     footer .brand { font-size: 16px; font-weight: bold; color: #C9A84C; margin-bottom: 8px; }
@@ -75,7 +77,7 @@
       .problem, .solution, .waitlist-section { padding: 50px 20px; }
       .problem h2, .solution h2, .waitlist-section h2 { font-size: 24px; }
       footer { padding: 30px 20px; }
-      .btn-primary, .btn-secondary { width: 100%; text-align: center; }
+      .btn-primary, .btn-secondary, .apply-btn { width: 100%; text-align: center; }
     }
   </style>
 </head>
@@ -145,11 +147,9 @@
   <div class="waitlist-container">
     <h2>Apply for Beta Access</h2>
     <div class="deadline">Application deadline: 11:59 PM ET, May 9, 2026</div>
-    <div style="text-align:center; padding: 20px 0;">
-      <p style="color:#555; font-size:16px; margin-bottom:28px; line-height:1.8; max-width:500px; margin-left:auto; margin-right:auto;">We're selecting 4 organizations for Phase 1. Applications are reviewed based on compliance risk, ATS usage, and organizational readiness.</p>
-      <button data-tf-popup="k2gAoSQw" data-tf-opacity="100" style="display:inline-block; background:#193278; color:white; font-size:16px; font-weight:600; padding:16px 40px; border-radius:4px; border:none; cursor:pointer;">Apply for Beta Access →</button>
-      <p style="color:#999; font-size:13px; margin-top:16px;">Takes less than 3 minutes. Your data is confidential and encrypted.</p>
-    </div>
+    <p class="description">We're selecting 4 organizations for Phase 1. Applications are reviewed based on compliance risk, ATS usage, and organizational readiness.</p>
+    <a href="https://form.typeform.com/to/k2gAoSQw" target="_blank" class="apply-btn">Submit Your Application →</a>
+    <p class="form-note">Opens in a new tab. Takes less than 3 minutes. Your data is confidential and encrypted.</p>
   </div>
 </section>
 
@@ -171,7 +171,6 @@
   <p style="margin-top: 16px; font-size: 11px; color: rgba(255,255,255,0.3);">© 2026 ALS Consulting Services. All rights reserved.</p>
 </footer>
 
-<script src="//embed.typeform.com/next/embed.js"></script>
 <script>
   function toggleNav() {
     const nav = document.getElementById('nav-links');
@@ -188,5 +187,6 @@
     }
   });
 </script>
+
 </body>
 </html>
