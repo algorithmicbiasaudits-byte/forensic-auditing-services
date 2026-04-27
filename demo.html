@@ -6,597 +6,101 @@
   <title>F.A.S. Live Demo — See Forensic Auditing in Action</title>
   <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Playfair+Display:wght@600;700&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
   <style>
-    :root {
-      --navy: #193278;
-      --navy-dark: #111d45;
-      --gold: #C9A84C;
-      --gold-light: #e0bc5a;
-      --blue: #1E90FF;
-      --white: #ffffff;
-      --red: #e53e3e;
-      --yellow: #d69e2e;
-      --green: #38a169;
-      --gray: #f7f7f7;
-    }
-
+    :root { --navy: #193278; --navy-dark: #111d45; --gold: #C9A84C; --gold-light: #e0bc5a; --blue: #1E90FF; --white: #ffffff; --red: #e53e3e; --yellow: #d69e2e; --green: #38a169; --gray: #f7f7f7; }
     * { margin: 0; padding: 0; box-sizing: border-box; }
-
-    body {
-      font-family: 'DM Sans', sans-serif;
-      background: var(--navy-dark);
-      color: var(--white);
-      min-height: 100vh;
-    }
-
-    /* Header */
-    header {
-      background: var(--navy);
-      padding: 18px 40px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      border-bottom: 2px solid var(--gold);
-      position: sticky;
-      top: 0;
-      z-index: 100;
-    }
-
-    .logo {
-      font-family: 'Playfair Display', serif;
-      font-size: 18px;
-      color: var(--white);
-      text-decoration: none;
-    }
-
+    body { font-family: 'DM Sans', sans-serif; background: var(--navy-dark); color: var(--white); min-height: 100vh; }
+    header { background: var(--navy); padding: 18px 40px; display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid var(--gold); position: sticky; top: 0; z-index: 100; }
+    .logo { font-family: 'Playfair Display', serif; font-size: 18px; color: var(--white); text-decoration: none; }
     .logo span { color: var(--gold); }
-
-    header nav a {
-      color: rgba(255,255,255,0.7);
-      text-decoration: none;
-      font-size: 13px;
-      margin-left: 24px;
-    }
-
-    header nav a.cta {
-      background: var(--gold);
-      color: var(--navy);
-      padding: 8px 20px;
-      font-weight: 500;
-      border-radius: 3px;
-    }
-
-    /* Hero */
-    .demo-hero {
-      text-align: center;
-      padding: 60px 40px 40px;
-      background: var(--navy);
-      border-bottom: 1px solid rgba(201,168,76,0.2);
-    }
-
-    .demo-badge {
-      display: inline-block;
-      border: 1px solid var(--gold);
-      color: var(--gold);
-      font-size: 11px;
-      letter-spacing: 2px;
-      padding: 5px 16px;
-      border-radius: 20px;
-      margin-bottom: 20px;
-      font-family: 'DM Mono', monospace;
-    }
-
-    .demo-hero h1 {
-      font-family: 'Playfair Display', serif;
-      font-size: 40px;
-      line-height: 1.2;
-      margin-bottom: 16px;
-    }
-
+    header nav a { color: rgba(255,255,255,0.7); text-decoration: none; font-size: 13px; margin-left: 24px; }
+    header nav a.cta { background: var(--gold); color: var(--navy); padding: 8px 20px; font-weight: 500; border-radius: 3px; }
+    .demo-hero { text-align: center; padding: 60px 40px 40px; background: var(--navy); border-bottom: 1px solid rgba(201,168,76,0.2); }
+    .demo-badge { display: inline-block; border: 1px solid var(--gold); color: var(--gold); font-size: 11px; letter-spacing: 2px; padding: 5px 16px; border-radius: 20px; margin-bottom: 20px; font-family: 'DM Mono', monospace; }
+    .demo-hero h1 { font-family: 'Playfair Display', serif; font-size: 40px; line-height: 1.2; margin-bottom: 16px; }
     .demo-hero h1 span { color: var(--gold); }
-
-    .demo-hero p {
-      color: rgba(255,255,255,0.65);
-      font-size: 16px;
-      max-width: 560px;
-      margin: 0 auto;
-      line-height: 1.8;
-    }
-
-    /* Steps Nav */
-    .steps-nav {
-      display: flex;
-      justify-content: center;
-      gap: 0;
-      padding: 0 40px;
-      background: var(--navy-dark);
-      border-bottom: 1px solid rgba(255,255,255,0.08);
-    }
-
-    .step-tab {
-      padding: 18px 32px;
-      font-size: 13px;
-      font-weight: 500;
-      color: rgba(255,255,255,0.4);
-      cursor: pointer;
-      border-bottom: 2px solid transparent;
-      transition: all 0.3s;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      font-family: 'DM Mono', monospace;
-      letter-spacing: 0.5px;
-    }
-
-    .step-tab.active {
-      color: var(--gold);
-      border-bottom-color: var(--gold);
-    }
-
-    .step-tab .step-num {
-      width: 22px;
-      height: 22px;
-      border-radius: 50%;
-      background: rgba(201,168,76,0.15);
-      border: 1px solid rgba(201,168,76,0.3);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 11px;
-      color: var(--gold);
-    }
-
-    .step-tab.active .step-num {
-      background: var(--gold);
-      color: var(--navy);
-    }
-
-    .step-tab.completed .step-num {
-      background: var(--green);
-      border-color: var(--green);
-      color: white;
-    }
-
-    .step-tab.completed {
-      color: rgba(255,255,255,0.5);
-    }
-
-    /* Demo Area */
-    .demo-area {
-      max-width: 900px;
-      margin: 0 auto;
-      padding: 48px 40px;
-    }
-
-    /* Screen panels */
+    .demo-hero p { color: rgba(255,255,255,0.65); font-size: 16px; max-width: 560px; margin: 0 auto; line-height: 1.8; }
+    .steps-nav { display: flex; justify-content: center; gap: 0; padding: 0 40px; background: var(--navy-dark); border-bottom: 1px solid rgba(255,255,255,0.08); overflow-x: auto; }
+    .step-tab { padding: 18px 32px; font-size: 13px; font-weight: 500; color: rgba(255,255,255,0.4); cursor: pointer; border-bottom: 2px solid transparent; transition: all 0.3s; display: flex; align-items: center; gap: 8px; font-family: 'DM Mono', monospace; letter-spacing: 0.5px; white-space: nowrap; }
+    .step-tab.active { color: var(--gold); border-bottom-color: var(--gold); }
+    .step-tab .step-num { width: 22px; height: 22px; border-radius: 50%; background: rgba(201,168,76,0.15); border: 1px solid rgba(201,168,76,0.3); display: flex; align-items: center; justify-content: center; font-size: 11px; color: var(--gold); }
+    .step-tab.active .step-num { background: var(--gold); color: var(--navy); }
+    .step-tab.completed .step-num { background: var(--green); border-color: var(--green); color: white; }
+    .step-tab.completed { color: rgba(255,255,255,0.5); }
+    .demo-area { max-width: 900px; margin: 0 auto; padding: 48px 40px; }
     .screen { display: none; }
     .screen.active { display: block; animation: fadeIn 0.4s ease; }
-
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(10px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-
-    /* Card */
-    .card {
-      background: var(--navy);
-      border: 1px solid rgba(255,255,255,0.1);
-      border-radius: 8px;
-      padding: 28px;
-      margin-bottom: 20px;
-    }
-
-    .card-label {
-      font-family: 'DM Mono', monospace;
-      font-size: 11px;
-      letter-spacing: 2px;
-      color: var(--gold);
-      margin-bottom: 16px;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-
-    .card-label::after {
-      content: '';
-      flex: 1;
-      height: 1px;
-      background: rgba(201,168,76,0.2);
-    }
-
-    /* Rejection data grid */
-    .data-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 14px;
-      margin-bottom: 20px;
-    }
-
-    .data-field {
-      background: rgba(255,255,255,0.04);
-      border: 1px solid rgba(255,255,255,0.08);
-      border-radius: 6px;
-      padding: 14px 16px;
-    }
-
-    .data-field label {
-      font-size: 11px;
-      color: rgba(255,255,255,0.4);
-      font-family: 'DM Mono', monospace;
-      letter-spacing: 1px;
-      display: block;
-      margin-bottom: 6px;
-    }
-
-    .data-field span {
-      font-size: 14px;
-      color: var(--white);
-      font-weight: 400;
-    }
-
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    .card { background: var(--navy); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; padding: 28px; margin-bottom: 20px; }
+    .card-label { font-family: 'DM Mono', monospace; font-size: 11px; letter-spacing: 2px; color: var(--gold); margin-bottom: 16px; display: flex; align-items: center; gap: 8px; }
+    .card-label::after { content: ''; flex: 1; height: 1px; background: rgba(201,168,76,0.2); }
+    .data-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 20px; }
+    .data-field { background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); border-radius: 6px; padding: 14px 16px; }
+    .data-field label { font-size: 11px; color: rgba(255,255,255,0.4); font-family: 'DM Mono', monospace; letter-spacing: 1px; display: block; margin-bottom: 6px; }
+    .data-field span { font-size: 14px; color: var(--white); }
     .data-field.full { grid-column: 1 / -1; }
-
-    .rejection-reason {
-      background: rgba(229,62,62,0.08);
-      border: 1px solid rgba(229,62,62,0.2);
-      border-radius: 6px;
-      padding: 14px 16px;
-      margin-bottom: 20px;
-    }
-
-    .rejection-reason label {
-      font-size: 11px;
-      color: rgba(229,62,62,0.7);
-      font-family: 'DM Mono', monospace;
-      letter-spacing: 1px;
-      display: block;
-      margin-bottom: 6px;
-    }
-
-    .rejection-reason span {
-      font-size: 14px;
-      color: #fc8181;
-    }
-
-    /* Audit animation */
-    .audit-running {
-      background: rgba(25,50,120,0.5);
-      border: 1px solid rgba(30,144,255,0.3);
-      border-radius: 8px;
-      padding: 28px;
-      margin-bottom: 20px;
-    }
-
-    .audit-header {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      margin-bottom: 24px;
-    }
-
-    .pulse {
-      width: 10px;
-      height: 10px;
-      border-radius: 50%;
-      background: var(--blue);
-      animation: pulse 1.2s infinite;
-    }
-
-    @keyframes pulse {
-      0%, 100% { opacity: 1; transform: scale(1); }
-      50% { opacity: 0.4; transform: scale(0.8); }
-    }
-
-    .audit-title {
-      font-family: 'DM Mono', monospace;
-      font-size: 13px;
-      color: var(--blue);
-      letter-spacing: 1px;
-    }
-
-    /* Analysis lanes */
-    .analysis-lane {
-      display: flex;
-      align-items: flex-start;
-      gap: 14px;
-      margin-bottom: 16px;
-      opacity: 0;
-      transform: translateX(-10px);
-      transition: all 0.5s ease;
-    }
-
-    .analysis-lane.visible {
-      opacity: 1;
-      transform: translateX(0);
-    }
-
-    .lane-icon {
-      width: 28px;
-      height: 28px;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 12px;
-      flex-shrink: 0;
-      margin-top: 2px;
-    }
-
+    .rejection-reason { background: rgba(229,62,62,0.08); border: 1px solid rgba(229,62,62,0.2); border-radius: 6px; padding: 14px 16px; margin-bottom: 20px; }
+    .rejection-reason label { font-size: 11px; color: rgba(229,62,62,0.7); font-family: 'DM Mono', monospace; letter-spacing: 1px; display: block; margin-bottom: 6px; }
+    .rejection-reason span { font-size: 14px; color: #fc8181; }
+    .audit-running { background: rgba(25,50,120,0.5); border: 1px solid rgba(30,144,255,0.3); border-radius: 8px; padding: 28px; margin-bottom: 20px; }
+    .audit-header { display: flex; align-items: center; gap: 12px; margin-bottom: 24px; }
+    .pulse { width: 10px; height: 10px; border-radius: 50%; background: var(--blue); animation: pulse 1.2s infinite; }
+    @keyframes pulse { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.4; transform: scale(0.8); } }
+    .audit-title { font-family: 'DM Mono', monospace; font-size: 13px; color: var(--blue); letter-spacing: 1px; }
+    .analysis-lane { display: flex; align-items: flex-start; gap: 14px; margin-bottom: 16px; opacity: 0; transform: translateX(-10px); transition: all 0.5s ease; }
+    .analysis-lane.visible { opacity: 1; transform: translateX(0); }
+    .lane-icon { width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; flex-shrink: 0; margin-top: 2px; }
     .lane-icon.red { background: rgba(229,62,62,0.2); color: #fc8181; border: 1px solid rgba(229,62,62,0.3); }
     .lane-icon.yellow { background: rgba(214,158,46,0.2); color: #f6e05e; border: 1px solid rgba(214,158,46,0.3); }
     .lane-icon.green { background: rgba(56,161,105,0.2); color: #68d391; border: 1px solid rgba(56,161,105,0.3); }
-
-    .lane-content {}
     .lane-title { font-size: 13px; font-weight: 500; margin-bottom: 4px; }
     .lane-detail { font-size: 12px; color: rgba(255,255,255,0.55); line-height: 1.6; }
-
-    /* Risk Badge */
-    .risk-badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      padding: 10px 20px;
-      border-radius: 4px;
-      font-family: 'DM Mono', monospace;
-      font-size: 13px;
-      font-weight: 500;
-      letter-spacing: 1px;
-      margin-bottom: 20px;
-    }
-
-    .risk-badge.red {
-      background: rgba(229,62,62,0.15);
-      border: 1px solid rgba(229,62,62,0.4);
-      color: #fc8181;
-    }
-
-    .risk-dot {
-      width: 8px;
-      height: 8px;
-      border-radius: 50%;
-      background: #fc8181;
-      animation: pulse 1s infinite;
-    }
-
-    /* Claude output */
-    .fas-output {
-      background: rgba(0,0,0,0.3);
-      border: 1px solid rgba(30,144,255,0.2);
-      border-radius: 6px;
-      padding: 20px;
-      font-family: 'DM Mono', monospace;
-      font-size: 12px;
-      line-height: 1.8;
-      color: rgba(255,255,255,0.75);
-      margin-bottom: 20px;
-      white-space: pre-wrap;
-    }
-
-    .claude-output .highlight-red { color: #fc8181; }
-    .claude-output .highlight-yellow { color: #f6e05e; }
-    .claude-output .highlight-green { color: #68d391; }
-    .claude-output .highlight-blue { color: #90cdf4; }
-
-    /* Human Review */
-    .review-form {}
-
+    .risk-badge { display: inline-flex; align-items: center; gap: 8px; padding: 10px 20px; border-radius: 4px; font-family: 'DM Mono', monospace; font-size: 13px; font-weight: 500; letter-spacing: 1px; margin-bottom: 20px; }
+    .risk-badge.red { background: rgba(229,62,62,0.15); border: 1px solid rgba(229,62,62,0.4); color: #fc8181; }
+    .risk-dot { width: 8px; height: 8px; border-radius: 50%; background: #fc8181; animation: pulse 1s infinite; }
+    .fas-output { background: rgba(0,0,0,0.3); border: 1px solid rgba(30,144,255,0.2); border-radius: 6px; padding: 20px; font-family: 'DM Mono', monospace; font-size: 12px; line-height: 1.8; color: rgba(255,255,255,0.75); margin-bottom: 20px; white-space: pre-wrap; }
+    .fas-output .highlight-red { color: #fc8181; }
+    .fas-output .highlight-yellow { color: #f6e05e; }
+    .fas-output .highlight-green { color: #68d391; }
+    .fas-output .highlight-blue { color: #90cdf4; }
     .form-group { margin-bottom: 18px; }
-
-    .form-group label {
-      display: block;
-      font-size: 12px;
-      font-family: 'DM Mono', monospace;
-      letter-spacing: 1px;
-      color: rgba(255,255,255,0.5);
-      margin-bottom: 8px;
-    }
-
-    .form-group textarea, .form-group select {
-      width: 100%;
-      background: rgba(255,255,255,0.05);
-      border: 1px solid rgba(255,255,255,0.12);
-      border-radius: 6px;
-      padding: 12px 14px;
-      color: var(--white);
-      font-size: 13px;
-      font-family: 'DM Sans', sans-serif;
-      resize: vertical;
-      outline: none;
-      transition: border 0.2s;
-    }
-
-    .form-group textarea:focus, .form-group select:focus {
-      border-color: var(--gold);
-    }
-
+    .form-group label { display: block; font-size: 12px; font-family: 'DM Mono', monospace; letter-spacing: 1px; color: rgba(255,255,255,0.5); margin-bottom: 8px; }
+    .form-group textarea, .form-group select { width: 100%; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.12); border-radius: 6px; padding: 12px 14px; color: var(--white); font-size: 13px; font-family: 'DM Sans', sans-serif; resize: vertical; outline: none; transition: border 0.2s; }
+    .form-group textarea:focus, .form-group select:focus { border-color: var(--gold); }
     .form-group select option { background: var(--navy); }
-
-    .decision-buttons {
-      display: flex;
-      gap: 12px;
-      margin-top: 24px;
-    }
-
-    .btn-approve {
-      flex: 1;
-      padding: 14px;
-      background: rgba(56,161,105,0.15);
-      border: 1px solid rgba(56,161,105,0.4);
-      color: #68d391;
-      border-radius: 6px;
-      font-size: 13px;
-      font-weight: 500;
-      cursor: pointer;
-      font-family: 'DM Mono', monospace;
-      letter-spacing: 1px;
-      transition: all 0.2s;
-    }
-
+    .decision-buttons { display: flex; gap: 12px; margin-top: 24px; }
+    .btn-approve { flex: 1; padding: 14px; background: rgba(56,161,105,0.15); border: 1px solid rgba(56,161,105,0.4); color: #68d391; border-radius: 6px; font-size: 13px; font-weight: 500; cursor: pointer; font-family: 'DM Mono', monospace; letter-spacing: 1px; transition: all 0.2s; }
     .btn-approve:hover { background: rgba(56,161,105,0.25); }
-
-    .btn-escalate {
-      flex: 1;
-      padding: 14px;
-      background: rgba(229,62,62,0.15);
-      border: 1px solid rgba(229,62,62,0.4);
-      color: #fc8181;
-      border-radius: 6px;
-      font-size: 13px;
-      font-weight: 500;
-      cursor: pointer;
-      font-family: 'DM Mono', monospace;
-      letter-spacing: 1px;
-      transition: all 0.2s;
-    }
-
+    .btn-escalate { flex: 1; padding: 14px; background: rgba(229,62,62,0.15); border: 1px solid rgba(229,62,62,0.4); color: #fc8181; border-radius: 6px; font-size: 13px; font-weight: 500; cursor: pointer; font-family: 'DM Mono', monospace; letter-spacing: 1px; transition: all 0.2s; }
     .btn-escalate:hover { background: rgba(229,62,62,0.25); }
-
-    /* Success screen */
-    .success-screen {
-      text-align: center;
-      padding: 60px 40px;
-    }
-
-    .success-icon {
-      width: 70px;
-      height: 70px;
-      border-radius: 50%;
-      background: rgba(56,161,105,0.15);
-      border: 2px solid rgba(56,161,105,0.4);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      margin: 0 auto 24px;
-      font-size: 28px;
-    }
-
-    .success-screen h2 {
-      font-family: 'Playfair Display', serif;
-      font-size: 28px;
-      margin-bottom: 12px;
-    }
-
-    .success-screen p {
-      color: rgba(255,255,255,0.6);
-      font-size: 15px;
-      max-width: 480px;
-      margin: 0 auto 32px;
-      line-height: 1.8;
-    }
-
-    .audit-summary {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 14px;
-      margin: 32px 0;
-      text-align: left;
-    }
-
-    .summary-card {
-      background: rgba(255,255,255,0.04);
-      border: 1px solid rgba(255,255,255,0.08);
-      border-radius: 6px;
-      padding: 16px;
-    }
-
-    .summary-card .s-label {
-      font-size: 11px;
-      font-family: 'DM Mono', monospace;
-      color: rgba(255,255,255,0.4);
-      letter-spacing: 1px;
-      margin-bottom: 8px;
-    }
-
-    .summary-card .s-value {
-      font-size: 15px;
-      font-weight: 500;
-    }
-
+    .success-screen { text-align: center; padding: 60px 40px; }
+    .success-icon { width: 70px; height: 70px; border-radius: 50%; background: rgba(56,161,105,0.15); border: 2px solid rgba(56,161,105,0.4); display: flex; align-items: center; justify-content: center; margin: 0 auto 24px; font-size: 28px; }
+    .success-screen h2 { font-family: 'Playfair Display', serif; font-size: 28px; margin-bottom: 12px; }
+    .success-screen p { color: rgba(255,255,255,0.6); font-size: 15px; max-width: 480px; margin: 0 auto 32px; line-height: 1.8; }
+    .audit-summary { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin: 32px 0; text-align: left; }
+    .summary-card { background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); border-radius: 6px; padding: 16px; }
+    .summary-card .s-label { font-size: 11px; font-family: 'DM Mono', monospace; color: rgba(255,255,255,0.4); letter-spacing: 1px; margin-bottom: 8px; }
+    .summary-card .s-value { font-size: 15px; font-weight: 500; }
     .summary-card .s-value.red { color: #fc8181; }
     .summary-card .s-value.green { color: #68d391; }
     .summary-card .s-value.gold { color: var(--gold); }
-
-    /* Nav buttons */
-    .nav-buttons {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-top: 28px;
-    }
-
-    .btn-next {
-      background: var(--gold);
-      color: var(--navy);
-      border: none;
-      padding: 13px 32px;
-      border-radius: 4px;
-      font-size: 14px;
-      font-weight: 600;
-      cursor: pointer;
-      font-family: 'DM Sans', sans-serif;
-      transition: background 0.2s;
-    }
-
+    .nav-buttons { display: flex; justify-content: space-between; align-items: center; margin-top: 28px; }
+    .btn-next { background: var(--gold); color: var(--navy); border: none; padding: 13px 32px; border-radius: 4px; font-size: 14px; font-weight: 600; cursor: pointer; font-family: 'DM Sans', sans-serif; transition: background 0.2s; }
     .btn-next:hover { background: var(--gold-light); }
-
-    .btn-back {
-      background: transparent;
-      color: rgba(255,255,255,0.5);
-      border: 1px solid rgba(255,255,255,0.15);
-      padding: 13px 24px;
-      border-radius: 4px;
-      font-size: 14px;
-      cursor: pointer;
-      font-family: 'DM Sans', sans-serif;
-      transition: all 0.2s;
-    }
-
+    .btn-back { background: transparent; color: rgba(255,255,255,0.5); border: 1px solid rgba(255,255,255,0.15); padding: 13px 24px; border-radius: 4px; font-size: 14px; cursor: pointer; font-family: 'DM Sans', sans-serif; transition: all 0.2s; }
     .btn-back:hover { color: white; border-color: rgba(255,255,255,0.3); }
-
-    .btn-cta {
-      display: inline-block;
-      background: var(--gold);
-      color: var(--navy);
-      padding: 15px 40px;
-      border-radius: 4px;
-      font-size: 15px;
-      font-weight: 600;
-      text-decoration: none;
-      margin-top: 8px;
-    }
-
+    .btn-cta { display: inline-block; background: var(--gold); color: var(--navy); padding: 15px 40px; border-radius: 4px; font-size: 15px; font-weight: 600; text-decoration: none; margin-top: 8px; }
     .btn-cta:hover { background: var(--gold-light); }
-
-    /* Context banner */
-    .context-banner {
-      background: rgba(201,168,76,0.08);
-      border: 1px solid rgba(201,168,76,0.2);
-      border-radius: 6px;
-      padding: 14px 18px;
-      font-size: 13px;
-      color: rgba(255,255,255,0.65);
-      margin-bottom: 24px;
-      line-height: 1.7;
-    }
-
+    .context-banner { background: rgba(201,168,76,0.08); border: 1px solid rgba(201,168,76,0.2); border-radius: 6px; padding: 14px 18px; font-size: 13px; color: rgba(255,255,255,0.65); margin-bottom: 24px; line-height: 1.7; }
     .context-banner strong { color: var(--gold); }
-
-    /* Footer */
-    footer {
-      background: var(--navy-dark);
-      border-top: 2px solid var(--gold);
-      padding: 32px 40px;
-      text-align: center;
-    }
-
+    footer { background: var(--navy-dark); border-top: 2px solid var(--gold); padding: 32px 40px; text-align: center; }
     footer p { color: rgba(255,255,255,0.4); font-size: 13px; margin: 4px 0; }
     footer a { color: var(--gold); text-decoration: none; }
-
     @media (max-width: 640px) {
       .data-grid { grid-template-columns: 1fr; }
       .audit-summary { grid-template-columns: 1fr; }
       .decision-buttons { flex-direction: column; }
       .demo-hero h1 { font-size: 26px; }
-      .steps-nav { overflow-x: auto; }
+      .demo-area { padding: 24px 16px; }
       .step-tab { padding: 14px 16px; font-size: 11px; }
     }
   </style>
@@ -607,7 +111,7 @@
   <a href="index.html" class="logo">Forensic Auditing Services <span>(F.A.S.)</span></a>
   <nav>
     <a href="index.html">Home</a>
-    <a href="index.html#apply" class="cta">Apply for Beta</a>
+    <a href="index.html#waitlist" class="cta">Apply for Beta</a>
   </nav>
 </header>
 
@@ -618,77 +122,45 @@
 </div>
 
 <div class="steps-nav">
-  <div class="step-tab active" id="tab-1" onclick="goToStep(1)">
-    <div class="step-num">1</div> ATS Rejection
-  </div>
-  <div class="step-tab" id="tab-2" onclick="goToStep(2)">
-    <div class="step-num">2</div> Forensic Audit
-  </div>
-  <div class="step-tab" id="tab-3" onclick="goToStep(3)">
-    <div class="step-num">3</div> Human Review
-  </div>
-  <div class="step-tab" id="tab-4" onclick="goToStep(4)">
-    <div class="step-num">4</div> Outcome
-  </div>
+  <div class="step-tab active" id="tab-1" onclick="goToStep(1)"><div class="step-num">1</div> ATS Rejection</div>
+  <div class="step-tab" id="tab-2" onclick="goToStep(2)"><div class="step-num">2</div> Forensic Audit</div>
+  <div class="step-tab" id="tab-3" onclick="goToStep(3)"><div class="step-num">3</div> Human Review</div>
+  <div class="step-tab" id="tab-4" onclick="goToStep(4)"><div class="step-num">4</div> Outcome</div>
 </div>
 
 <div class="demo-area">
 
-  <!-- STEP 1: ATS Rejection -->
+  <!-- STEP 1 -->
   <div class="screen active" id="screen-1">
-    <div class="context-banner">
-      <strong>Scenario:</strong> Your ATS (Workday) has auto-rejected a candidate for a Senior Operations Manager role. F.A.S. intercepts the rejection before it's sent and begins forensic analysis.
-    </div>
-
+    <div class="context-banner"><strong>Scenario:</strong> Your ATS (Workday) has auto-rejected a candidate for a Senior Operations Manager role. F.A.S. intercepts the rejection before it's sent and begins forensic analysis.</div>
     <div class="card">
       <div class="card-label">INCOMING REJECTION — WORKDAY ATS</div>
       <div class="data-grid">
-        <div class="data-field">
-          <label>CANDIDATE ID</label>
-          <span>CAND-2026-04817</span>
-        </div>
-        <div class="data-field">
-          <label>JOB TITLE</label>
-          <span>Senior Operations Manager</span>
-        </div>
-        <div class="data-field">
-          <label>YEARS EXPERIENCE</label>
-          <span>7 years</span>
-        </div>
-        <div class="data-field">
-          <label>EDUCATION</label>
-          <span>Bachelor's Degree</span>
-        </div>
-        <div class="data-field full">
-          <label>SKILLS</label>
-          <span>Supply Chain, Cross-functional Leadership, Process Improvement, SAP, Six Sigma</span>
-        </div>
+        <div class="data-field"><label>CANDIDATE ID</label><span>CAND-2026-04817</span></div>
+        <div class="data-field"><label>JOB TITLE</label><span>Senior Operations Manager</span></div>
+        <div class="data-field"><label>YEARS EXPERIENCE</label><span>7 years</span></div>
+        <div class="data-field"><label>EDUCATION</label><span>Bachelor's Degree</span></div>
+        <div class="data-field full"><label>SKILLS</label><span>Supply Chain, Cross-functional Leadership, Process Improvement, SAP, Six Sigma</span></div>
       </div>
-
       <div class="rejection-reason">
         <label>ATS REJECTION REASON</label>
         <span>"Candidate does not meet minimum qualifications. Employment history shows gaps inconsistent with role requirements."</span>
       </div>
     </div>
-
     <div class="nav-buttons">
       <div></div>
       <button class="btn-next" onclick="goToStep(2)">Run Forensic Audit →</button>
     </div>
   </div>
 
-  <!-- STEP 2: Forensic Audit -->
+  <!-- STEP 2 -->
   <div class="screen" id="screen-2">
-    <div class="context-banner">
-      <strong>F.A.S. is running a forensic audit</strong> — analyzing this rejection across 6 compliance lanes in real time. The rejection is <strong>blocked</strong> until audit is complete.
-    </div>
-
+    <div class="context-banner"><strong>F.A.S. is running a forensic audit</strong> — analyzing this rejection across 6 compliance lanes in real time. The rejection is <strong>blocked</strong> until audit is complete.</div>
     <div class="audit-running">
       <div class="audit-header">
         <div class="pulse"></div>
         <div class="audit-title">F.A.S. FORENSIC AUDIT ENGINE — RUNNING</div>
       </div>
-
       <div class="analysis-lane" id="lane-0">
         <div class="lane-icon red">!</div>
         <div class="lane-content">
@@ -696,7 +168,6 @@
           <div class="lane-detail">Rejection language contains age proxy signals: "overqualified," excessive experience framing, and "culture fit" language are documented proxies for age discrimination under the Age Discrimination in Employment Act (ADEA). Candidates with 7+ years experience are disproportionately flagged by ATS systems trained on junior role data. High litigation risk.</div>
         </div>
       </div>
-
       <div class="analysis-lane" id="lane-1">
         <div class="lane-icon red">!</div>
         <div class="lane-content">
@@ -704,7 +175,6 @@
           <div class="lane-detail">Employment gap language ("inconsistent history") is a documented proxy for caregiving leave, medical leave, and military service — all protected under FMLA and ADA. High correlation with disproportionate impact on women and disabled candidates.</div>
         </div>
       </div>
-
       <div class="analysis-lane" id="lane-2">
         <div class="lane-icon red">!</div>
         <div class="lane-content">
@@ -712,7 +182,6 @@
           <div class="lane-detail">Rejection based on employment gaps without individualized assessment fails the 4/5ths rule analysis. EEOC enforcement precedent: gap-based screening disproportionately excludes protected groups at a rate exceeding the adverse impact threshold.</div>
         </div>
       </div>
-
       <div class="analysis-lane" id="lane-3">
         <div class="lane-icon yellow">~</div>
         <div class="lane-content">
@@ -720,7 +189,6 @@
           <div class="lane-detail">Candidate skills (Supply Chain, Six Sigma, SAP) are directly relevant to the posted role requirements. ATS rejection reason does not reference a specific skill or qualification gap — suggesting algorithmic over-rejection.</div>
         </div>
       </div>
-
       <div class="analysis-lane" id="lane-4">
         <div class="lane-icon red">!</div>
         <div class="lane-content">
@@ -728,7 +196,6 @@
           <div class="lane-detail">NYC LL144: Automated employment decision tool used without bias audit disclosure. Colorado SB205: Gap-based rejection without human review violates individualized assessment requirement effective June 30, 2026. EU AI Act: High-risk AI system decision without human oversight.</div>
         </div>
       </div>
-
       <div class="analysis-lane" id="lane-5">
         <div class="lane-icon yellow">~</div>
         <div class="lane-content">
@@ -736,7 +203,6 @@
           <div class="lane-detail">7 years total experience with unspecified gap detected. Gap duration and reason unknown — ATS did not capture context. Penalizing candidates for undocumented gaps without inquiry violates EEOC best practice guidance (2022).</div>
         </div>
       </div>
-
       <div class="analysis-lane" id="lane-6">
         <div class="lane-icon green">✓</div>
         <div class="lane-content">
@@ -748,10 +214,7 @@
 
     <div class="card" id="risk-result" style="display:none;">
       <div class="card-label">AUDIT RESULT</div>
-      <div class="risk-badge red">
-        <div class="risk-dot"></div>
-        HIGH RISK — HUMAN REVIEW REQUIRED
-      </div>
+      <div class="risk-badge red"><div class="risk-dot"></div>HIGH RISK — HUMAN REVIEW REQUIRED</div>
       <div class="fas-output">FORENSIC AUDIT SUMMARY
 ─────────────────────────────────────────
 Candidate:      CAND-2026-04817
@@ -759,7 +222,7 @@ Role:           Senior Operations Manager
 Risk Level:     <span class="highlight-red">RED — HIGH</span>
 
 FINDINGS:
-<span class="highlight-red">✗ Age proxy discrimination</span> — overqualified + culture fit signals
+<span class="highlight-red">✗ Age proxy discrimination</span> — overqualified + experience ceiling signals
 <span class="highlight-red">✗ Proxy discrimination detected</span> — employment gap language
 <span class="highlight-red">✗ Disparate impact risk</span> — 4/5ths rule threshold exceeded
 <span class="highlight-red">✗ Legal triggers</span> — NYC LL144, Colorado SB205, EU AI Act
@@ -775,7 +238,7 @@ Compliance Officer notification sent.
 ─────────────────────────────────────────</div>
     </div>
 
-    <!-- JD Analysis Add-on Teaser -->
+    <!-- JD Analysis Teaser -->
     <div style="position:relative; margin-bottom:20px;" id="jd-teaser" style="display:none;">
       <div class="card" style="filter:blur(3px); pointer-events:none; user-select:none; opacity:0.5;">
         <div class="card-label">JD ANALYSIS — CROSS-REFERENCE AUDIT</div>
@@ -790,12 +253,12 @@ Compliance Officer notification sent.
       <div style="position:absolute; top:0; left:0; right:0; bottom:0; display:flex; flex-direction:column; align-items:center; justify-content:center; background:rgba(17,29,69,0.7); border-radius:8px; border:1px solid rgba(201,168,76,0.3);">
         <div style="font-size:20px; margin-bottom:10px;">🔒</div>
         <div style="font-family:'DM Mono',monospace; font-size:12px; color:var(--gold); letter-spacing:1px; margin-bottom:6px;">JD ANALYSIS — ADD-ON</div>
-        <div style="font-size:13px; color:rgba(255,255,255,0.6); text-align:center; max-width:320px; line-height:1.7;">Cross-reference rejections against the actual job description. Available on Growth & Enterprise plans.</div>
-        <a href="index.html#apply" style="margin-top:16px; background:var(--gold); color:var(--navy); padding:8px 22px; border-radius:4px; font-size:13px; font-weight:600; text-decoration:none;">Unlock with Beta Access</a>
+        <div style="font-size:13px; color:rgba(255,255,255,0.6); text-align:center; max-width:320px; line-height:1.7;">Cross-reference rejections against the actual job description. Available on Growth &amp; Enterprise plans.</div>
+        <a href="index.html#waitlist" style="margin-top:16px; background:var(--gold); color:var(--navy); padding:8px 22px; border-radius:4px; font-size:13px; font-weight:600; text-decoration:none;">Unlock with Beta Access</a>
       </div>
     </div>
 
-    <!-- Multi-ATS Add-on Teaser -->
+    <!-- Multi-ATS Teaser -->
     <div style="position:relative; margin-bottom:20px;" id="multi-ats-teaser" style="display:none;">
       <div class="card" style="filter:blur(3px); pointer-events:none; user-select:none; opacity:0.5;">
         <div class="card-label">MULTI-ATS ANALYSIS</div>
@@ -809,8 +272,8 @@ Compliance Officer notification sent.
       <div style="position:absolute; top:0; left:0; right:0; bottom:0; display:flex; flex-direction:column; align-items:center; justify-content:center; background:rgba(17,29,69,0.7); border-radius:8px; border:1px solid rgba(201,168,76,0.3);">
         <div style="font-size:20px; margin-bottom:10px;">🔒</div>
         <div style="font-family:'DM Mono',monospace; font-size:12px; color:var(--gold); letter-spacing:1px; margin-bottom:6px;">MULTI-ATS ANALYSIS — ADD-ON</div>
-        <div style="font-size:13px; color:rgba(255,255,255,0.6); text-align:center; max-width:320px; line-height:1.7;">Running multiple ATS systems? F.A.S. audits all of them and cross-references rejection patterns across platforms. Available on Growth & Enterprise plans.</div>
-        <a href="index.html#apply" style="margin-top:16px; background:var(--gold); color:var(--navy); padding:8px 22px; border-radius:4px; font-size:13px; font-weight:600; text-decoration:none;">Unlock with Beta Access</a>
+        <div style="font-size:13px; color:rgba(255,255,255,0.6); text-align:center; max-width:320px; line-height:1.7;">Running multiple ATS systems? F.A.S. audits all of them and cross-references rejection patterns across platforms. Available on Growth &amp; Enterprise plans.</div>
+        <a href="index.html#waitlist" style="margin-top:16px; background:var(--gold); color:var(--navy); padding:8px 22px; border-radius:4px; font-size:13px; font-weight:600; text-decoration:none;">Unlock with Beta Access</a>
       </div>
     </div>
 
@@ -820,15 +283,11 @@ Compliance Officer notification sent.
     </div>
   </div>
 
-  <!-- STEP 3: Human Review -->
+  <!-- STEP 3 -->
   <div class="screen" id="screen-3">
-    <div class="context-banner">
-      <strong>Rejection is blocked.</strong> Your Compliance Officer has been notified. A hiring manager must now provide documented justification before this decision is finalized.
-    </div>
-
+    <div class="context-banner"><strong>Rejection is blocked.</strong> Your Compliance Officer has been notified. A hiring manager must now provide documented justification before this decision is finalized.</div>
     <div class="card">
       <div class="card-label">HUMAN REVIEW — COMPLIANCE OFFICER PORTAL</div>
-
       <div style="display:flex; align-items:center; gap:12px; margin-bottom:20px; padding:14px 16px; background:rgba(229,62,62,0.06); border:1px solid rgba(229,62,62,0.15); border-radius:6px;">
         <div style="width:36px;height:36px;border-radius:50%;background:rgba(229,62,62,0.15);display:flex;align-items:center;justify-content:center;font-size:14px;color:#fc8181;flex-shrink:0;">⚠</div>
         <div>
@@ -836,85 +295,56 @@ Compliance Officer notification sent.
           <div style="font-size:12px;color:rgba(255,255,255,0.5);">CAND-2026-04817 · Senior Operations Manager · Flagged 2 min ago</div>
         </div>
       </div>
-
-      <div class="review-form">
-        <div class="form-group">
-          <label>DECISION</label>
-          <select id="decision-select">
-            <option value="">Select a decision...</option>
-            <option value="override">Override Rejection — Advance Candidate</option>
-            <option value="approve">Approve Rejection — With Justification</option>
-            <option value="escalate">Escalate to Compliance Officer</option>
-          </select>
-        </div>
-
-        <div class="form-group">
-          <label>JOB-RELATED JUSTIFICATION (REQUIRED)</label>
-          <textarea rows="4" placeholder="Explain the specific job-related reason this candidate does not qualify. Must reference actual role requirements, not ATS output..."></textarea>
-        </div>
-
-        <div class="form-group">
-          <label>COMPARATIVE ASSESSMENT</label>
-          <textarea rows="3" placeholder="Describe how the selected candidate was more qualified on the same job-related criteria..."></textarea>
-        </div>
-
-        <div class="form-group">
-          <label>EMPLOYMENT GAP CONTEXT</label>
-          <textarea rows="2" placeholder="Was the candidate contacted to clarify the employment gap? What was determined?"></textarea>
-        </div>
-
-        <div class="decision-buttons">
-          <button class="btn-approve" onclick="goToStep(4, 'override')">✓ Override — Advance Candidate</button>
-          <button class="btn-escalate" onclick="goToStep(4, 'escalate')">↑ Escalate to Compliance</button>
-        </div>
+      <div class="form-group">
+        <label>DECISION</label>
+        <select id="decision-select">
+          <option value="">Select a decision...</option>
+          <option value="override">Override Rejection — Advance Candidate</option>
+          <option value="approve">Approve Rejection — With Justification</option>
+          <option value="escalate">Escalate to Compliance Officer</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>JOB-RELATED JUSTIFICATION (REQUIRED)</label>
+        <textarea rows="4" placeholder="Explain the specific job-related reason this candidate does not qualify. Must reference actual role requirements, not ATS output..."></textarea>
+      </div>
+      <div class="form-group">
+        <label>COMPARATIVE ASSESSMENT</label>
+        <textarea rows="3" placeholder="Describe how the selected candidate was more qualified on the same job-related criteria..."></textarea>
+      </div>
+      <div class="form-group">
+        <label>EMPLOYMENT GAP CONTEXT</label>
+        <textarea rows="2" placeholder="Was the candidate contacted to clarify the employment gap? What was determined?"></textarea>
+      </div>
+      <div class="decision-buttons">
+        <button class="btn-approve" onclick="goToStep(4, 'override')">✓ Override — Advance Candidate</button>
+        <button class="btn-escalate" onclick="goToStep(4, 'escalate')">↑ Escalate to Compliance</button>
       </div>
     </div>
-
     <div class="nav-buttons">
       <button class="btn-back" onclick="goToStep(2)">← Back</button>
       <div></div>
     </div>
   </div>
 
-  <!-- STEP 4: Outcome -->
+  <!-- STEP 4 -->
   <div class="screen" id="screen-4">
     <div class="card success-screen">
       <div class="success-icon">✓</div>
-      <h2>Decision Recorded & Logged</h2>
+      <h2>Decision Recorded &amp; Logged</h2>
       <p>The human review decision has been documented, timestamped, and stored in your compliance audit trail. This record is court-ready and regulatory-defensible.</p>
-
       <div class="audit-summary">
-        <div class="summary-card">
-          <div class="s-label">RISK LEVEL</div>
-          <div class="s-value red">HIGH — RED</div>
-        </div>
-        <div class="summary-card">
-          <div class="s-label">DECISION</div>
-          <div class="s-value gold" id="outcome-decision">Escalated</div>
-        </div>
-        <div class="summary-card">
-          <div class="s-label">AUDIT TRAIL</div>
-          <div class="s-value green">Logged ✓</div>
-        </div>
-        <div class="summary-card">
-          <div class="s-label">LEGAL FRAMEWORKS</div>
-          <div class="s-value" style="color:rgba(255,255,255,0.8); font-size:13px;">NYC LL144 · CO SB205 · EU AI Act</div>
-        </div>
-        <div class="summary-card">
-          <div class="s-label">REVIEW TIME</div>
-          <div class="s-value green">4 min 32 sec</div>
-        </div>
-        <div class="summary-card">
-          <div class="s-label">COMPLIANCE STATUS</div>
-          <div class="s-value green">Protected ✓</div>
-        </div>
+        <div class="summary-card"><div class="s-label">RISK LEVEL</div><div class="s-value red">HIGH — RED</div></div>
+        <div class="summary-card"><div class="s-label">DECISION</div><div class="s-value gold" id="outcome-decision">Escalated</div></div>
+        <div class="summary-card"><div class="s-label">AUDIT TRAIL</div><div class="s-value green">Logged ✓</div></div>
+        <div class="summary-card"><div class="s-label">LEGAL FRAMEWORKS</div><div class="s-value" style="color:rgba(255,255,255,0.8); font-size:13px;">NYC LL144 · CO SB205 · EU AI Act</div></div>
+        <div class="summary-card"><div class="s-label">REVIEW TIME</div><div class="s-value green">4 min 32 sec</div></div>
+        <div class="summary-card"><div class="s-label">COMPLIANCE STATUS</div><div class="s-value green">Protected ✓</div></div>
       </div>
-
       <p style="margin-bottom:8px;">This is F.A.S. Every rejection. Every time. Before it becomes liability.</p>
-      <a href="index.html#apply" class="btn-cta">Apply for Beta Access →</a>
+      <a href="index.html#waitlist" class="btn-cta">Apply for Beta Access →</a>
       <div style="margin-top:16px; font-size:12px; color:rgba(255,255,255,0.35);">Only 4 spots · Applications close May 9, 2026 at 11:59 PM ET</div>
     </div>
-
     <div class="nav-buttons">
       <button class="btn-back" onclick="goToStep(1)" style="border-color:rgba(201,168,76,0.3); color:var(--gold);">↺ Run Demo Again</button>
       <div></div>
@@ -925,41 +355,29 @@ Compliance Officer notification sent.
 
 <footer>
   <p><strong style="color:var(--gold);">Forensic Auditing Services (F.A.S.)</strong> — A brand of ALS Consulting Services</p>
-  <p style="margin-top:8px;"><a href="index.html">Home</a> &nbsp;|&nbsp; <a href="index.html#apply">Apply for Beta</a> &nbsp;|&nbsp; <a href="terms.html">Terms</a> &nbsp;|&nbsp; <a href="https://calendly.com/astargill-ih3e/30min">Book a Call</a></p>
+  <p style="margin-top:8px;"><a href="index.html">Home</a> &nbsp;|&nbsp; <a href="index.html#waitlist">Apply for Beta</a> &nbsp;|&nbsp; <a href="terms.html">Terms</a> &nbsp;|&nbsp; <a href="https://calendly.com/astargill-ih3e/30min">Book a Call</a></p>
   <p style="margin-top:12px; font-size:11px;">© 2026 ALS Consulting Services. This demo uses simulated data for illustration purposes only.</p>
 </footer>
 
 <script>
-  let currentStep = 1;
   let auditAnimated = false;
 
   function goToStep(step, decision) {
     document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-    document.querySelectorAll('.step-tab').forEach(t => t.classList.remove('active'));
-
+    document.querySelectorAll('.step-tab').forEach(t => { t.classList.remove('active'); t.classList.remove('completed'); });
     document.getElementById('screen-' + step).classList.add('active');
     document.getElementById('tab-' + step).classList.add('active');
-
     for (let i = 1; i < step; i++) {
       document.getElementById('tab-' + i).classList.add('completed');
-      document.getElementById('tab-' + i).classList.remove('active');
     }
-
     if (step === 2 && !auditAnimated) {
       runAuditAnimation();
       auditAnimated = true;
     }
-
     if (step === 4 && decision) {
-      const labels = {
-        override: 'Overridden',
-        approve: 'Approved',
-        escalate: 'Escalated'
-      };
+      const labels = { override: 'Overridden', approve: 'Approved', escalate: 'Escalated' };
       document.getElementById('outcome-decision').textContent = labels[decision] || 'Recorded';
     }
-
-    currentStep = step;
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
@@ -980,6 +398,5 @@ Compliance Officer notification sent.
     });
   }
 </script>
-
 </body>
 </html>

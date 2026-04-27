@@ -3,295 +3,124 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>F.A.S. — Forensic Auditing Services | Real-Time AI Hiring Compliance</title>
-  <meta name="description" content="Forensic Auditing Services: Real-time bias detection and compliance audits for AI hiring decisions. Prevent discrimination before rejections happen.">
-  <meta property="og:title" content="F.A.S. — Forensic Auditing Services">
-  <meta property="og:description" content="Real-time compliance audits for AI hiring. Detect bias before it becomes liability.">
+  <title>Forensic Auditing Services (F.A.S.) | Real-Time AI Hiring Compliance</title>
+  <meta name="description" content="Forensic Auditing Services: Real-time bias detection and compliance audits for AI hiring decisions. The only compliance tool that acts before the rejection — not after.">
+  <meta property="og:title" content="Forensic Auditing Services (F.A.S.)">
+  <meta property="og:description" content="The only compliance tool that acts before the rejection — not after.">
   <meta property="og:image" content="https://forensicauditingservices.com/og-image.jpg">
   <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
-
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-      background: #193278;
-      color: #2d2d2d;
-      line-height: 1.6;
-    }
-
-    /* Header */
-    header {
-      background: #193278;
-      padding: 20px 40px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      border-bottom: 3px solid #C9A84C;
-    }
-
-    .logo {
-      font-size: 24px;
-      font-weight: bold;
-      color: white;
-      letter-spacing: 2px;
-    }
-
-    .brand-subtitle {
-      font-size: 12px;
-      color: #C9A84C;
-      margin-top: 4px;
-    }
-
-    nav a {
-      color: white;
-      text-decoration: none;
-      margin: 0 20px;
-      font-size: 14px;
-    }
-
-    nav a:hover {
-      color: #C9A84C;
-    }
-
-    /* Hero Section */
-    .hero {
-      background: #193278;
-      padding: 80px 40px;
-      text-align: center;
-      color: white;
-    }
-
-    .hero h1 {
-      font-size: 48px;
-      margin-bottom: 20px;
-      font-weight: 700;
-      line-height: 1.2;
-    }
-
-    .hero h1 .accent {
-      color: #C9A84C;
-    }
-
-    .hero p {
-      font-size: 20px;
-      color: white;
-      margin-bottom: 40px;
-      max-width: 700px;
-      margin-left: auto;
-      margin-right: auto;
-      font-weight: 300;
-    }
-
-    /* Problem Section */
-    .problem {
-      background: white;
-      padding: 60px 40px;
-      text-align: center;
-    }
-
-    .problem h2 {
-      font-size: 32px;
-      color: #193278;
-      margin-bottom: 30px;
-    }
-
-    .problem p {
-      font-size: 16px;
-      color: #555;
-      max-width: 800px;
-      margin-left: auto;
-      margin-right: auto;
-      line-height: 1.8;
-    }
-
-    /* Solution Section */
-    .solution {
-      background: #f5f5f5;
-      padding: 60px 40px;
-      text-align: center;
-    }
-
-    .solution h2 {
-      font-size: 32px;
-      color: #193278;
-      margin-bottom: 30px;
-    }
-
-    .solution p {
-      font-size: 16px;
-      color: #555;
-      max-width: 800px;
-      margin-left: auto;
-      margin-right: auto;
-      margin-bottom: 20px;
-      line-height: 1.8;
-    }
-
-    .features {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-      gap: 30px;
-      margin-top: 40px;
-      max-width: 1000px;
-      margin-left: auto;
-      margin-right: auto;
-    }
-
-    .feature {
-      padding: 30px;
-      background: white;
-      border-left: 4px solid #1E90FF;
-      text-align: left;
-    }
-
-    .feature h3 {
-      color: #193278;
-      margin-bottom: 10px;
-      font-size: 18px;
-    }
-
-    .feature p {
-      color: #666;
-      font-size: 14px;
-      text-align: left;
-    }
-
-    /* Typeform Section */
-    .waitlist-section {
-      background: white;
-      padding: 60px 40px;
-    }
-
-    .waitlist-container {
-      max-width: 900px;
-      margin: 0 auto;
-    }
-
-    .waitlist-section h2 {
-      font-size: 32px;
-      color: #193278;
-      margin-bottom: 40px;
-      text-align: center;
-    }
-
-    /* Privacy & Disclaimer */
-    .privacy-disclaimer {
-      background: #f5f5f5;
-      padding: 30px 40px;
-      text-align: center;
-      font-size: 13px;
-      color: #666;
-      line-height: 1.6;
-    }
-
-    .privacy-disclaimer p {
-      margin-bottom: 10px;
-    }
-
-    .privacy-disclaimer a {
-      color: #1E90FF;
-      text-decoration: none;
-    }
-
-    .privacy-disclaimer a:hover {
-      text-decoration: underline;
-    }
-
-    /* Footer */
-    footer {
-      background: #193278;
-      padding: 40px;
-      text-align: center;
-      color: white;
-      border-top: 3px solid #C9A84C;
-    }
-
-    footer p {
-      margin: 10px 0;
-      font-size: 14px;
-    }
-
-    footer .brand {
-      font-size: 16px;
-      font-weight: bold;
-      color: #C9A84C;
-      margin-bottom: 10px;
-    }
-
-    footer a {
-      color: #C9A84C;
-      text-decoration: none;
-    }
-
-    footer a:hover {
-      text-decoration: underline;
-    }
-
-    /* Responsive */
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; background: #193278; color: #2d2d2d; line-height: 1.6; }
+    header { background: #193278; padding: 18px 40px; display: flex; justify-content: space-between; align-items: center; border-bottom: 3px solid #C9A84C; position: sticky; top: 0; z-index: 1000; }
+    .logo { font-size: 20px; font-weight: bold; color: white; letter-spacing: 1px; }
+    .brand-subtitle { font-size: 11px; color: #C9A84C; margin-top: 3px; }
+    .nav-links { display: flex; align-items: center; gap: 24px; }
+    .nav-links a { color: white; text-decoration: none; font-size: 14px; transition: color 0.2s; }
+    .nav-links a:hover { color: #C9A84C; }
+    .nav-links a.nav-cta { background: #C9A84C; color: #193278; padding: 8px 20px; font-weight: 600; border-radius: 3px; font-size: 13px; }
+    .nav-links a.nav-cta:hover { background: #e0bc5a; color: #193278; }
+    .hamburger { display: none; flex-direction: column; gap: 5px; cursor: pointer; background: none; border: none; padding: 4px; }
+    .hamburger span { display: block; width: 24px; height: 2px; background: white; border-radius: 2px; transition: all 0.3s; }
+    .hamburger.open span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+    .hamburger.open span:nth-child(2) { opacity: 0; }
+    .hamburger.open span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+    .deadline-banner { background: #C9A84C; padding: 10px 40px; text-align: center; font-size: 13px; font-weight: 500; color: #193278; }
+    .hero { background: #193278; padding: 80px 40px; text-align: center; color: white; }
+    .introducing { display: inline-block; background: rgba(201,168,76,0.15); border: 1px solid #C9A84C; color: #C9A84C; font-size: 11px; padding: 5px 16px; border-radius: 20px; margin-bottom: 24px; letter-spacing: 1px; }
+    .hero h1 { font-size: 48px; margin-bottom: 20px; font-weight: 700; line-height: 1.2; }
+    .hero h1 .accent { color: #C9A84C; }
+    .hero p { font-size: 18px; color: rgba(255,255,255,0.85); margin-bottom: 16px; max-width: 680px; margin-left: auto; margin-right: auto; font-weight: 300; }
+    .hero .tagline { font-size: 14px; color: #C9A84C; font-style: italic; margin-bottom: 40px; }
+    .cta-group { display: flex; flex-direction: column; align-items: center; gap: 14px; }
+    .btn-primary { display: inline-block; background: #C9A84C; color: #193278; font-size: 15px; font-weight: 600; padding: 14px 36px; border-radius: 4px; text-decoration: none; }
+    .btn-primary:hover { background: #e0bc5a; }
+    .btn-secondary { display: inline-block; background: transparent; color: white; font-size: 14px; padding: 12px 28px; border-radius: 4px; text-decoration: none; border: 1px solid rgba(255,255,255,0.3); }
+    .btn-secondary:hover { border-color: #C9A84C; color: #C9A84C; }
+    .spots-note { color: rgba(255,255,255,0.5); font-size: 13px; }
+    .spots-note span { color: #C9A84C; }
+    .problem { background: white; padding: 70px 40px; text-align: center; }
+    .problem h2 { font-size: 32px; color: #193278; margin-bottom: 24px; }
+    .problem p { font-size: 16px; color: #555; max-width: 800px; margin: 0 auto; line-height: 1.9; }
+    .solution { background: #f5f5f5; padding: 70px 40px; text-align: center; }
+    .solution h2 { font-size: 32px; color: #193278; margin-bottom: 16px; }
+    .solution > p { font-size: 16px; color: #555; max-width: 800px; margin: 0 auto 40px; line-height: 1.9; }
+    .features { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 24px; max-width: 1000px; margin: 0 auto; }
+    .feature { padding: 28px; background: white; border-left: 4px solid #1E90FF; text-align: left; }
+    .feature h3 { color: #193278; margin-bottom: 10px; font-size: 17px; }
+    .feature p { color: #666; font-size: 14px; line-height: 1.7; }
+    .waitlist-section { background: white; padding: 70px 40px; }
+    .waitlist-container { max-width: 900px; margin: 0 auto; }
+    .waitlist-section h2 { font-size: 32px; color: #193278; margin-bottom: 12px; text-align: center; }
+    .waitlist-section .deadline { text-align: center; font-size: 13px; color: #C9A84C; margin-bottom: 36px; font-weight: 500; }
+    .privacy-disclaimer { background: #f5f5f5; padding: 30px 40px; text-align: center; font-size: 13px; color: #666; line-height: 1.7; }
+    .privacy-disclaimer p { margin-bottom: 8px; }
+    .privacy-disclaimer a { color: #1E90FF; text-decoration: none; }
+    .privacy-disclaimer a:hover { text-decoration: underline; }
+    footer { background: #193278; padding: 40px; text-align: center; color: white; border-top: 3px solid #C9A84C; }
+    footer p { margin: 8px 0; font-size: 14px; }
+    footer .brand { font-size: 16px; font-weight: bold; color: #C9A84C; margin-bottom: 8px; }
+    footer a { color: #C9A84C; text-decoration: none; }
+    footer a:hover { text-decoration: underline; }
     @media (max-width: 768px) {
-      .hero h1 {
-        font-size: 32px;
-      }
-
-      .hero p {
-        font-size: 16px;
-      }
-
-      header {
-        flex-direction: column;
-        padding: 20px;
-      }
-
-      nav {
-        margin-top: 20px;
-      }
-
-      nav a {
-        display: block;
-        margin: 10px 0;
-      }
-
-      .typeform-embed {
-        height: 800px;
-      }
+      header { padding: 16px 20px; position: relative; }
+      .hamburger { display: flex; }
+      .nav-links { display: none; flex-direction: column; position: absolute; top: 100%; left: 0; right: 0; background: #193278; border-top: 1px solid rgba(201,168,76,0.3); border-bottom: 3px solid #C9A84C; padding: 20px; gap: 16px; z-index: 999; }
+      .nav-links.open { display: flex; }
+      .nav-links a { font-size: 15px; padding: 8px 0; border-bottom: 1px solid rgba(255,255,255,0.08); }
+      .nav-links a.nav-cta { text-align: center; border-bottom: none; margin-top: 4px; }
+      .hero { padding: 50px 20px; }
+      .hero h1 { font-size: 28px; }
+      .hero p { font-size: 15px; }
+      .deadline-banner { padding: 10px 20px; font-size: 12px; }
+      .problem, .solution, .waitlist-section { padding: 50px 20px; }
+      .problem h2, .solution h2, .waitlist-section h2 { font-size: 24px; }
+      footer { padding: 30px 20px; }
+      .btn-primary, .btn-secondary { width: 100%; text-align: center; }
     }
   </style>
 </head>
 <body>
 
-<!-- Header -->
 <header>
   <div>
     <div class="logo">Forensic Auditing Services (F.A.S.)</div>
     <div class="brand-subtitle">A brand of ALS Consulting Services</div>
   </div>
-  <nav>
+  <button class="hamburger" id="hamburger" onclick="toggleNav()" aria-label="Menu">
+    <span></span><span></span><span></span>
+  </button>
+  <div class="nav-links" id="nav-links">
     <a href="demo.html">See Demo</a>
     <a href="#waitlist">Early Access</a>
     <a href="terms.html">Terms</a>
-  </nav>
+    <a href="https://calendly.com/astargill-ih3e/30min" target="_blank" class="nav-cta">Book a Call</a>
+  </div>
 </header>
 
-<!-- Hero -->
+<div class="deadline-banner">
+  ⚡ Beta applications close 11:59 PM ET on May 9, 2026 — Only 4 spots available
+</div>
+
 <section class="hero">
+  <div class="introducing">INTRODUCING F.A.S.</div>
   <h1>AI Hiring <span class="accent">Compliance</span><br>Before It Becomes Liability</h1>
   <p>Real-time forensic auditing of AI-driven rejections. Detect bias, prevent discrimination, stay compliant.</p>
+  <p class="tagline">The only compliance tool that acts before the rejection — not after.</p>
+  <div class="cta-group">
+    <a href="demo.html" class="btn-secondary">See It In Action →</a>
+    <a href="#waitlist" class="btn-primary">Apply for Beta Access</a>
+    <div class="spots-note">Only <span>4 beta spots</span> — selections announced May 12</div>
+  </div>
 </section>
 
-<!-- Problem -->
 <section class="problem">
   <h2>The Problem</h2>
-  <p>Companies using AI to screen candidates face a critical gap: AI systems make rejection decisions in seconds, but compliance reviews happen weeks or months later—if at all. By then, the damage is done. Regulators under NYC LL144, Colorado SB205, the EU AI Act, and EEOC guidelines are already investigating. Your organization needs to audit *before* rejections go out, not after they've created liability.</p>
+  <p>Companies using AI to screen candidates face a critical compliance gap: AI systems reject candidates in seconds, but compliance reviews happen weeks or months later — if at all. By then, the liability is done. Regulators under NYC LL144, Colorado SB205, the EU AI Act, and EEOC guidelines are already investigating. Your organization needs to audit <em>before</em> rejections go out, not after they've created liability.</p>
 </section>
 
-<!-- Solution -->
 <section class="solution">
   <h2>The Solution</h2>
   <p>F.A.S. analyzes every AI-driven rejection in real-time using forensic auditing. Our system flags high-risk decisions, forces human review before rejections are finalized, and documents the entire decision trail for regulatory defense.</p>
-  
   <div class="features">
     <div class="feature">
       <h3>Real-Time Detection</h3>
@@ -299,56 +128,61 @@
     </div>
     <div class="feature">
       <h3>Human-in-the-Loop</h3>
-      <p>No rejection goes through without human review and documented justification. Compliance officers approve or escalate high-risk decisions.</p>
+      <p>No rejection goes through without human review and documented justification. Compliance officers approve or escalate.</p>
     </div>
     <div class="feature">
       <h3>Audit Trail</h3>
-      <p>Complete record of every decision—AI analysis, human review, justification provided. Court-ready documentation.</p>
+      <p>Complete record of every decision — AI analysis, human review, justification provided. Court-ready documentation.</p>
     </div>
     <div class="feature">
       <h3>Multi-Framework</h3>
-      <p>Audits for NYC LL144, Colorado SB205, Illinois AIVIA, EU AI Act, and EEOC standards. One system, all jurisdictions.</p>
+      <p>NYC LL144, Colorado SB205, Illinois AIVIA, EU AI Act, and EEOC standards. One system, all jurisdictions.</p>
     </div>
   </div>
 </section>
 
-<!-- Waitlist / Typeform -->
 <section class="waitlist-section" id="waitlist">
   <div class="waitlist-container">
-    <h2>Join the Beta</h2>
+    <h2>Apply for Beta Access</h2>
+    <div class="deadline">Application deadline: 11:59 PM ET, May 9, 2026</div>
     <div data-tf-widget="k2gAoSQw" data-tf-opacity="100" data-tf-iframe-props="title=F.A.S. Beta Application" data-tf-transitive-search-params data-tf-auto-focus style="width:100%;height:500px;"></div>
   </div>
 </section>
 
-<!-- Privacy Disclaimer -->
 <section class="privacy-disclaimer">
   <p><strong>Your Privacy:</strong> We never sell your information. Your data is confidential and encrypted.</p>
-  <p>By submitting this form, you agree to our <a href="terms.html">Terms & Conditions</a> and <a href="#">Privacy Policy</a>.</p>
-  <p><strong>Beta Program:</strong> Early access participants receive complimentary Phase 1 access (May-June 2026). Production pricing applies upon transition. <a href="terms.html">Learn more</a>.</p>
+  <p>By submitting this form, you agree to our <a href="terms.html">Terms &amp; Conditions</a>.</p>
+  <p><strong>Beta Program:</strong> Complimentary access during Phase 1 (May–June 2026). Production pricing discussed at onboarding. <a href="terms.html">Terms apply.</a></p>
 </section>
 
-<!-- Footer -->
 <footer>
-  <div class="brand">F.A.S. — Forensic Auditing Services</div>
-  <p>A brand of <strong>ALS Consulting Services</strong></p>
-  <p>AI Governance & HR Compliance Consulting</p>
-  <p style="margin-top: 20px;">
-    <a href="https://alsconsulting.services">alsconsulting.services</a> | 
-    <a href="https://calendly.com/astargill-ih3e/30min">Book a Call</a> | 
+  <div class="brand">Forensic Auditing Services (F.A.S.)</div>
+  <p>A brand of ALS Consulting Services</p>
+  <p style="margin-top: 16px;">
+    <a href="https://alsconsulting.services">alsconsulting.services</a> &nbsp;|&nbsp;
+    <a href="demo.html">See Demo</a> &nbsp;|&nbsp;
+    <a href="https://calendly.com/astargill-ih3e/30min" target="_blank">Book a Call</a> &nbsp;|&nbsp;
     <a href="terms.html">Terms</a>
   </p>
-  <p style="margin-top: 20px; font-size: 12px; color: #999;">© 2026 ALS Consulting Services. All rights reserved.</p>
+  <p style="margin-top: 16px; font-size: 11px; color: rgba(255,255,255,0.3);">© 2026 ALS Consulting Services. All rights reserved.</p>
 </footer>
 
 <script src="//embed.typeform.com/next/embed.js"></script>
-
 <script>
-  // Update the Typeform src with your actual form ID
-  // Replace "your-form-id" with your real Typeform ID
-  document.addEventListener('DOMContentLoaded', function() {
-    // Typeform embed will auto-load if src is correct
+  function toggleNav() {
+    const nav = document.getElementById('nav-links');
+    const hamburger = document.getElementById('hamburger');
+    nav.classList.toggle('open');
+    hamburger.classList.toggle('open');
+  }
+  document.addEventListener('click', function(e) {
+    const nav = document.getElementById('nav-links');
+    const hamburger = document.getElementById('hamburger');
+    if (!nav.contains(e.target) && !hamburger.contains(e.target)) {
+      nav.classList.remove('open');
+      hamburger.classList.remove('open');
+    }
   });
 </script>
-
 </body>
 </html>
