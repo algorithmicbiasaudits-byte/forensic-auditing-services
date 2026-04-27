@@ -689,6 +689,14 @@
         <div class="audit-title">F.A.S. FORENSIC AUDIT ENGINE — RUNNING</div>
       </div>
 
+      <div class="analysis-lane" id="lane-0">
+        <div class="lane-icon red">!</div>
+        <div class="lane-content">
+          <div class="lane-title" style="color:#fc8181;">Age Proxy Discrimination Detected</div>
+          <div class="lane-detail">Rejection language contains age proxy signals: "overqualified," excessive experience framing, and "culture fit" language are documented proxies for age discrimination under the Age Discrimination in Employment Act (ADEA). Candidates with 7+ years experience are disproportionately flagged by ATS systems trained on junior role data. High litigation risk.</div>
+        </div>
+      </div>
+
       <div class="analysis-lane" id="lane-1">
         <div class="lane-icon red">!</div>
         <div class="lane-content">
@@ -751,6 +759,7 @@ Role:           Senior Operations Manager
 Risk Level:     <span class="highlight-red">RED — HIGH</span>
 
 FINDINGS:
+<span class="highlight-red">✗ Age proxy discrimination</span> — overqualified + culture fit signals
 <span class="highlight-red">✗ Proxy discrimination detected</span> — employment gap language
 <span class="highlight-red">✗ Disparate impact risk</span> — 4/5ths rule threshold exceeded
 <span class="highlight-red">✗ Legal triggers</span> — NYC LL144, Colorado SB205, EU AI Act
