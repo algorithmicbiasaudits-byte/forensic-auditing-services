@@ -890,11 +890,14 @@
   }
 
   function getTimePending(createdAt) {
-    const diff = (Date.now() - new Date(createdAt)) / 1000 / 60 / 60;
-    if (diff >= 3.5) return { text: `${diff.toFixed(1)}h`, urgent: true };
-    if (diff >= 3) return { text: `${diff.toFixed(1)}h`, warning: true };
-    if (diff < 1) return { text: `${Math.round(diff * 60)}m`, urgent: false };
-    return { text: `${diff.toFixed(1)}h`, urgent: false };
+    const created = new Date(createdAt);
+    const now = new Date();
+    const diffMs = now - created;
+    const diffMins = Math.floor(diffMs / 1000 / 60);
+    const diffHours = diffMins / 60;
+    if (diffMins < 0) return { text: 'Just now', urgent: false, warning: false };
+    if (diffMins < 60) return { text: diffMins + 'm', urgent: diffMins >= 210, warning: diffMins >= 180 };
+    return { text: diffHours.toFixed(1) + 'h', urgent: diffHours >= 3.5, warning: diffHours >= 3 };
   }
 
   function formatTime(timestamp) {
