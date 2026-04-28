@@ -890,13 +890,13 @@
   }
 
   function getTimePending(createdAt) {
-    const created = new Date(createdAt);
+    const created = new Date(createdAt + 'Z');
     const now = new Date();
-    const diffMs = now - created;
+    const diffMs = now.getTime() - created.getTime();
     const diffMins = Math.floor(diffMs / 1000 / 60);
     const diffHours = diffMins / 60;
-    if (diffMins < 0) return { text: 'Just now', urgent: false, warning: false };
-    if (diffMins < 60) return { text: diffMins + 'm', urgent: diffMins >= 45, warning: diffMins >= 30 };
+    if (diffMins <= 0) return { text: 'Just now', urgent: false, warning: false };
+    if (diffMins < 60) return { text: diffMins + 'm', urgent: diffMins >= 210, warning: diffMins >= 180 };
     return { text: diffHours.toFixed(1) + 'h', urgent: diffHours >= 3.5, warning: diffHours >= 3 };
   }
 
