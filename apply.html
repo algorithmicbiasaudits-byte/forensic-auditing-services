@@ -131,8 +131,33 @@
       </div>
 
       <div class="field-group">
-        <label for="ats">ATS / Hiring Platform <span class="required">*</span></label>
-        <input type="text" id="ats" name="ats" placeholder="e.g. Workday, Greenhouse, Lever, Taleo" required>
+        <label>Which ATS do you currently use? <span class="required">*</span></label>
+        <div class="radio-group">
+          <label class="radio-option"><input type="radio" name="ats_system" value="Workday" required><span>Workday</span></label>
+          <label class="radio-option"><input type="radio" name="ats_system" value="Greenhouse"><span>Greenhouse</span></label>
+          <label class="radio-option"><input type="radio" name="ats_system" value="Lever"><span>Lever</span></label>
+          <label class="radio-option"><input type="radio" name="ats_system" value="Taleo (Oracle)"><span>Taleo (Oracle)</span></label>
+          <label class="radio-option"><input type="radio" name="ats_system" value="iCIMS"><span>iCIMS</span></label>
+          <label class="radio-option"><input type="radio" name="ats_system" value="ADP Workforce Now"><span>ADP Workforce Now</span></label>
+          <label class="radio-option"><input type="radio" name="ats_system" value="PeopleSoft (Oracle)"><span>PeopleSoft (Oracle)</span></label>
+          <label class="radio-option"><input type="radio" name="ats_system" value="Kenexa (IBM)"><span>Kenexa (IBM)</span></label>
+          <label class="radio-option"><input type="radio" name="ats_system" value="Jobvite"><span>Jobvite</span></label>
+          <label class="radio-option"><input type="radio" name="ats_system" value="Other"><span>Other</span></label>
+          <label class="radio-option"><input type="radio" name="ats_system" value="None"><span>None</span></label>
+        </div>
+      </div>
+
+      <div class="field-group">
+        <label>ATS Version or Year Implemented</label>
+        <input type="text" name="ats_version" placeholder="e.g. Workday 2019, Taleo Enterprise 15, ADP v6...">
+      </div>
+
+      <div class="field-group">
+        <label>Do you run more than one ATS system?</label>
+        <div class="radio-group">
+          <label class="radio-option"><input type="radio" name="multi_ats" value="Yes"><span>Yes — we use multiple ATS platforms</span></label>
+          <label class="radio-option"><input type="radio" name="multi_ats" value="No"><span>No — single ATS</span></label>
+        </div>
       </div>
 
       <div class="field-group">
