@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FAQ — Forensic Auditing Services (F.A.S.)</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #111d45; color: white; line-height: 1.6; }
+
+    header { background: #193278; padding: 18px 40px; display: flex; justify-content: space-between; align-items: center; border-bottom: 3px solid #C9A84C; position: sticky; top: 0; z-index: 100; }
+    .logo { font-size: 18px; font-weight: bold; color: white; text-decoration: none; }
+    .brand-sub { font-size: 11px; color: #C9A84C; margin-top: 3px; }
+    nav a { color: white; text-decoration: none; font-size: 13px; margin-left: 20px; }
+    nav a:hover { color: #C9A84C; }
+    nav a.cta { background: #C9A84C; color: #193278; padding: 8px 18px; border-radius: 3px; font-weight: 600; }
+
+    .hero { background: #193278; padding: 60px 40px; text-align: center; border-bottom: 1px solid rgba(201,168,76,0.2); }
+    .badge { display: inline-block; border: 1px solid #C9A84C; color: #C9A84C; font-size: 10px; padding: 5px 16px; border-radius: 20px; letter-spacing: 2px; margin-bottom: 20px; font-family: monospace; }
+    .hero h1 { font-size: 40px; font-weight: 700; margin-bottom: 16px; }
+    .hero h1 span { color: #C9A84C; }
+    .hero p { font-size: 16px; color: rgba(255,255,255,0.6); max-width: 520px; margin: 0 auto; line-height: 1.8; }
+
+    .faq-section { padding: 80px 40px; max-width: 1200px; margin: 0 auto; }
+
+    .category-label { font-family: monospace; font-size: 10px; letter-spacing: 3px; color: #C9A84C; margin-bottom: 24px; margin-top: 48px; display: flex; align-items: center; gap: 12px; }
+    .category-label::after { content: ''; flex: 1; height: 1px; background: rgba(201,168,76,0.2); }
+    .category-label:first-child { margin-top: 0; }
+
+    .cards-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 20px; }
+
+    .flip-card { height: 220px; perspective: 1000px; cursor: pointer; }
+
+    .flip-card-inner {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+      transform-style: preserve-3d;
+    }
+
+    .flip-card.flipped .flip-card-inner { transform: rotateY(180deg); }
+
+    .flip-card-front, .flip-card-back {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      backface-visibility: hidden;
+      border-radius: 6px;
+      padding: 28px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    .flip-card-front {
+      background: #193278;
+      border: 1px solid rgba(255,255,255,0.08);
+      border-left: 3px solid #C9A84C;
+    }
+
+    .flip-card-front:hover { border-color: rgba(201,168,76,0.5); background: #1a2d5a; }
+
+    .flip-card-back {
+      background: #C9A84C;
+      transform: rotateY(180deg);
+      border: none;
+    }
+
+    .card-num { font-family: monospace; font-size: 10px; color: rgba(201,168,76,0.5); letter-spacing: 2px; margin-bottom: 12px; }
+    .card-question { font-size: 16px; font-weight: 600; color: white; line-height: 1.4; flex: 1; }
+    .card-hint { font-size: 11px; color: rgba(255,255,255,0.3); margin-top: 16px; display: flex; align-items: center; gap: 6px; }
+    .card-hint::before { content: '↻'; font-size: 14px; }
+
+    .card-back-label { font-family: monospace; font-size: 9px; letter-spacing: 2px; color: rgba(25,50,120,0.6); margin-bottom: 10px; }
+    .card-answer { font-size: 13px; color: #193278; line-height: 1.65; font-weight: 400; flex: 1; }
+    .card-back-hint { font-size: 11px; color: rgba(25,50,120,0.5); margin-top: 12px; display: flex; align-items: center; gap: 6px; }
+    .card-back-hint::before { content: '↻'; font-size: 14px; }
+
+    .cta-section { background: #193278; padding: 70px 40px; text-align: center; border-top: 3px solid #C9A84C; margin-top: 60px; }
+    .cta-section h2 { font-size: 32px; font-weight: 700; margin-bottom: 16px; }
+    .cta-section h2 span { color: #C9A84C; }
+    .cta-section p { font-size: 16px; color: rgba(255,255,255,0.6); margin-bottom: 32px; max-width: 480px; margin-left: auto; margin-right: auto; line-height: 1.8; }
+    .cta-buttons { display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; }
+    .btn-gold { display: inline-block; background: #C9A84C; color: #193278; font-size: 14px; font-weight: 600; padding: 13px 28px; border-radius: 4px; text-decoration: none; }
+    .btn-gold:hover { background: #e0bc5a; }
+    .btn-outline { display: inline-block; background: transparent; color: white; font-size: 14px; padding: 13px 28px; border-radius: 4px; text-decoration: none; border: 1px solid rgba(255,255,255,0.2); }
+    .btn-outline:hover { border-color: #C9A84C; color: #C9A84C; }
+
+    footer { background: #0e1e4a; padding: 32px 40px; text-align: center; border-top: 1px solid rgba(201,168,76,0.15); }
+    footer p { color: rgba(255,255,255,0.3); font-size: 13px; margin: 4px 0; }
+    footer a { color: #C9A84C; text-decoration: none; }
+
+    @media (max-width: 768px) {
+      header { padding: 16px 20px; flex-direction: column; gap: 12px; }
+      .hero { padding: 50px 20px; }
+      .hero h1 { font-size: 28px; }
+      .faq-section { padding: 50px 20px; }
+      .cards-grid { grid-template-columns: 1fr; }
+      .flip-card { height: 200px; }
+      footer { padding: 24px 20px; }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div>
+    <a href="index.html" class="logo">Forensic Auditing Services (F.A.S.)</a>
+    <div class="brand-sub">A brand of ALS Consulting Services</div>
+  </div>
+  <nav>
+    <a href="demo.html">Demo</a>
+    <a href="overview.html">Overview</a>
+    <a href="apply.html" class="cta">Apply for Beta</a>
+  </nav>
+</header>
+
+<div class="hero">
+  <div class="badge">FREQUENTLY ASKED QUESTIONS</div>
+  <h1>Questions About <span>F.A.S.?</span></h1>
+  <p>Click any card to see the answer. Still have questions? Book a discovery call.</p>
+</div>
+
+<div class="faq-section">
+
+  <!-- PRODUCT -->
+  <div class="category-label">PRODUCT</div>
+  <div class="cards-grid">
+
+    <div class="flip-card" onclick="this.classList.toggle('flipped')">
+      <div class="flip-card-inner">
+        <div class="flip-card-front">
+          <div>
+            <div class="card-num">01</div>
+            <div class="card-question">How is F.A.S. different from other compliance tools?</div>
+          </div>
+          <div class="card-hint">Click to see answer</div>
+        </div>
+        <div class="flip-card-back">
+          <div class="card-back-label">ANSWER</div>
+          <div class="card-answer">Every other tool audits what already happened. F.A.S. stops what is about to happen. We intercept the rejection before it goes out, run a forensic audit in real time, and block high-risk decisions until a human reviews and documents them. That's execution-bound compliance — not post-hoc analysis.</div>
+          <div class="card-back-hint">Click to flip back</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="flip-card" onclick="this.classList.toggle('flipped')">
+      <div class="flip-card-inner">
+        <div class="flip-card-front">
+          <div>
+            <div class="card-num">02</div>
+            <div class="card-question">How long does it take to get audit results?</div>
+          </div>
+          <div class="card-hint">Click to see answer</div>
+        </div>
+        <div class="flip-card-back">
+          <div class="card-back-label">ANSWER</div>
+          <div class="card-answer">Under 3 seconds. The forensic audit runs the moment your ATS generates a rejection. Results are returned before the rejection is finalized — fast enough to block the decision without disrupting your hiring workflow.</div>
+          <div class="card-back-hint">Click to flip back</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="flip-card" onclick="this.classList.toggle('flipped')">
+      <div class="flip-card-inner">
+        <div class="flip-card-front">
+          <div>
+            <div class="card-num">03</div>
+            <div class="card-question">Can we run a job description through F.A.S. to check compliance?</div>
+          </div>
+          <div class="card-hint">Click to see answer</div>
+        </div>
+        <div class="flip-card-back">
+          <div class="card-back-label">ANSWER</div>
+          <div class="card-answer">Yes — JD Analysis is available as an add-on. It cross-references each rejection against the actual job description to identify qualification mismatches, keyword errors, and ATS over-rejection. Available on Growth and Enterprise plans.</div>
+          <div class="card-back-hint">Click to flip back</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="flip-card" onclick="this.classList.toggle('flipped')">
+      <div class="flip-card-inner">
+        <div class="flip-card-front">
+          <div>
+            <div class="card-num">04</div>
+            <div class="card-question">What regulations does F.A.S. cover?</div>
+          </div>
+          <div class="card-hint">Click to see answer</div>
+        </div>
+        <div class="flip-card-back">
+          <div class="card-back-label">ANSWER</div>
+          <div class="card-answer">NYC Local Law 144, Colorado SB205, Illinois AIVIA, California AB 2930, EU AI Act, Title VII, and EEOC adverse impact standards including the 4/5ths rule. One system, all jurisdictions.</div>
+          <div class="card-back-hint">Click to flip back</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="flip-card" onclick="this.classList.toggle('flipped')">
+      <div class="flip-card-inner">
+        <div class="flip-card-front">
+          <div>
+            <div class="card-num">05</div>
+            <div class="card-question">Are the audit results legally defensible?</div>
+          </div>
+          <div class="card-hint">Click to see answer</div>
+        </div>
+        <div class="flip-card-back">
+          <div class="card-back-label">ANSWER</div>
+          <div class="card-answer">F.A.S. produces a court-ready audit trail for every decision — AI analysis, human review, justification provided, reviewer identity, and timestamp. We recommend consulting employment counsel on high-risk decisions. F.A.S. results are analytical and provide decision support, not legal advice.</div>
+          <div class="card-back-hint">Click to flip back</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="flip-card" onclick="this.classList.toggle('flipped')">
+      <div class="flip-card-inner">
+        <div class="flip-card-front">
+          <div>
+            <div class="card-num">06</div>
+            <div class="card-question">What if our team disagrees with a F.A.S. flag?</div>
+          </div>
+          <div class="card-hint">Click to see answer</div>
+        </div>
+        <div class="flip-card-back">
+          <div class="card-back-label">ANSWER</div>
+          <div class="card-answer">Your team has full override authority. F.A.S. flags and blocks — it does not make the final decision. Your Compliance Officer can approve, override, or escalate any flagged rejection. The key requirement is that the decision is documented with a job-related justification.</div>
+          <div class="card-back-hint">Click to flip back</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- SECURITY -->
+  <div class="category-label">SECURITY & DATA</div>
+  <div class="cards-grid">
+
+    <div class="flip-card" onclick="this.classList.toggle('flipped')">
+      <div class="flip-card-inner">
+        <div class="flip-card-front">
+          <div>
+            <div class="card-num">07</div>
+            <div class="card-question">Is our candidate data secure? Who can see it?</div>
+          </div>
+          <div class="card-hint">Click to see answer</div>
+        </div>
+        <div class="flip-card-back">
+          <div class="card-back-label">ANSWER</div>
+          <div class="card-answer">All candidate data is encrypted at rest and in transit. Candidate identifiers are anonymized in our audit database — we never store names or personal details without consent. Only authorized ALS Consulting staff can access your data. We never sell your data.</div>
+          <div class="card-back-hint">Click to flip back</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="flip-card" onclick="this.classList.toggle('flipped')">
+      <div class="flip-card-inner">
+        <div class="flip-card-front">
+          <div>
+            <div class="card-num">08</div>
+            <div class="card-question">What data does F.A.S. send and store?</div>
+          </div>
+          <div class="card-hint">Click to see answer</div>
+        </div>
+        <div class="flip-card-back">
+          <div class="card-back-label">ANSWER</div>
+          <div class="card-answer">F.A.S. receives anonymized rejection data from your ATS — job title, rejection reason, years of experience, education level, and skills. No names, addresses, or demographic data are transmitted. All data is stored encrypted and retained for audit compliance purposes only.</div>
+          <div class="card-back-hint">Click to flip back</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- INTEGRATION -->
+  <div class="category-label">INTEGRATION & SETUP</div>
+  <div class="cards-grid">
+
+    <div class="flip-card" onclick="this.classList.toggle('flipped')">
+      <div class="flip-card-inner">
+        <div class="flip-card-front">
+          <div>
+            <div class="card-num">09</div>
+            <div class="card-question">Which ATS systems do you integrate with?</div>
+          </div>
+          <div class="card-hint">Click to see answer</div>
+        </div>
+        <div class="flip-card-back">
+          <div class="card-back-label">ANSWER</div>
+          <div class="card-answer">F.A.S. integrates with any ATS that supports outbound webhooks — including Workday, Greenhouse, and Lever. If your ATS supports webhooks, F.A.S. can connect to it. Multi-ATS support (running more than one system) is available as an add-on on Growth and Enterprise plans.</div>
+          <div class="card-back-hint">Click to flip back</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="flip-card" onclick="this.classList.toggle('flipped')">
+      <div class="flip-card-inner">
+        <div class="flip-card-front">
+          <div>
+            <div class="card-num">10</div>
+            <div class="card-question">How long does setup take?</div>
+          </div>
+          <div class="card-hint">Click to see answer</div>
+        </div>
+        <div class="flip-card-back">
+          <div class="card-back-label">ANSWER</div>
+          <div class="card-answer">Most organizations are live within 1-2 days. Setup involves configuring a webhook in your ATS and adding your F.A.S. API key. Your IT team will receive a step-by-step setup guide during onboarding. No code changes to your ATS are required.</div>
+          <div class="card-back-hint">Click to flip back</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="flip-card" onclick="this.classList.toggle('flipped')">
+      <div class="flip-card-inner">
+        <div class="flip-card-front">
+          <div>
+            <div class="card-num">11</div>
+            <div class="card-question">Is there an API we can test before going live?</div>
+          </div>
+          <div class="card-hint">Click to see answer</div>
+        </div>
+        <div class="flip-card-back">
+          <div class="card-back-label">ANSWER</div>
+          <div class="card-answer">Yes — beta participants receive a sandbox API key during onboarding to test the webhook integration before connecting to your live ATS pipeline. We recommend running at least 5 test rejections before going live.</div>
+          <div class="card-back-hint">Click to flip back</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- BETA -->
+  <div class="category-label">BETA PROGRAM</div>
+  <div class="cards-grid">
+
+    <div class="flip-card" onclick="this.classList.toggle('flipped')">
+      <div class="flip-card-inner">
+        <div class="flip-card-front">
+          <div>
+            <div class="card-num">12</div>
+            <div class="card-question">What happens after the beta period ends?</div>
+          </div>
+          <div class="card-hint">Click to see answer</div>
+        </div>
+        <div class="flip-card-back">
+          <div class="card-back-label">ANSWER</div>
+          <div class="card-answer">Beta access runs May–June 2026 at a discounted rate. After Phase 1, production pricing applies based on your selected tier. Beta participants receive preferred pricing as a courtesy for early adoption. Pricing is discussed during your onboarding discovery call. Some restrictions apply.</div>
+          <div class="card-back-hint">Click to flip back</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="flip-card" onclick="this.classList.toggle('flipped')">
+      <div class="flip-card-inner">
+        <div class="flip-card-front">
+          <div>
+            <div class="card-num">13</div>
+            <div class="card-question">How are beta participants selected?</div>
+          </div>
+          <div class="card-hint">Click to see answer</div>
+        </div>
+        <div class="flip-card-back">
+          <div class="card-back-label">ANSWER</div>
+          <div class="card-answer">Applications are reviewed based on compliance risk exposure, ATS usage, organizational readiness, and availability for feedback calls. We're selecting 4 organizations for Phase 1. Selections are announced May 12, 2026.</div>
+          <div class="card-back-hint">Click to flip back</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+</div>
+
+<!-- CTA -->
+<div class="cta-section">
+  <h2>Still Have <span>Questions?</span></h2>
+  <p>Book a 30-minute discovery call. We'll walk you through how F.A.S. works and whether it's the right fit for your organization.</p>
+  <div class="cta-buttons">
+    <a href="https://calendly.com/astargill-ih3e/30min" target="_blank" class="btn-gold">Book a Discovery Call →</a>
+    <a href="demo.html" class="btn-outline">See the Demo First</a>
+  </div>
+</div>
+
+<footer>
+  <p><strong style="color:#C9A84C;">Forensic Auditing Services (F.A.S.)</strong> — A brand of ALS Consulting Services</p>
+  <p style="margin-top:8px;"><a href="index.html">Home</a> &nbsp;|&nbsp; <a href="demo.html">Demo</a> &nbsp;|&nbsp; <a href="overview.html">Overview</a> &nbsp;|&nbsp; <a href="apply.html">Apply</a> &nbsp;|&nbsp; <a href="terms.html">Terms</a></p>
+  <p style="margin-top:12px; font-size:11px;">© 2026 ALS Consulting Services. All rights reserved.</p>
+</footer>
+
+</body>
+</html>
