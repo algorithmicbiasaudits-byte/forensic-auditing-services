@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>F.A.S. Overview — Forensic Auditing Services</title>
+  <meta name="description" content="F.A.S. is the only Human-in-the-Loop compliance tool that stops AI hiring rejections before they go out. See how it works.">
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400&family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --navy: #193278;
+      --navy-dark: #0e1e4a;
+      --navy-mid: #1a2d5a;
+      --gold: #C9A84C;
+      --gold-light: #e0bc5a;
+      --gold-dim: rgba(201,168,76,0.15);
+      --blue: #1E90FF;
+      --white: #ffffff;
+      --off-white: #f0ede8;
+      --text: #2a2a2a;
+      --text-mid: #555;
+      --text-light: #888;
+      --red: #e53e3e;
+      --green: #38a169;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body { font-family: 'DM Sans', sans-serif; background: var(--navy-dark); color: var(--white); overflow-x: hidden; }
+
+    header {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 100;
+      background: rgba(14,30,74,0.92);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid rgba(201,168,76,0.2);
+      padding: 16px 48px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .logo-block a { font-family: 'Cormorant Garamond', serif; font-size: 20px; font-weight: 600; color: var(--white); text-decoration: none; letter-spacing: 1px; }
+    .logo-block .sub { font-family: 'DM Mono', monospace; font-size: 9px; color: var(--gold); letter-spacing: 2px; margin-top: 2px; }
+    nav { display: flex; align-items: center; gap: 32px; }
+    nav a { color: rgba(255,255,255,0.6); text-decoration: none; font-size: 13px; transition: color 0.2s; }
+    nav a:hover { color: var(--gold); }
+    nav a.cta { background: var(--gold); color: var(--navy-dark); padding: 9px 22px; font-weight: 500; font-size: 13px; border-radius: 2px; }
+    nav a.cta:hover { background: var(--gold-light); color: var(--navy-dark); }
+
+    .hero {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 120px 48px 80px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .hero-bg {
+      position: absolute;
+      inset: 0;
+      background:
+        radial-gradient(ellipse 60% 50% at 50% 40%, rgba(25,50,120,0.6) 0%, transparent 70%),
+        radial-gradient(ellipse 40% 30% at 20% 80%, rgba(201,168,76,0.08) 0%, transparent 60%),
+        radial-gradient(ellipse 40% 30% at 80% 20%, rgba(30,144,255,0.06) 0%, transparent 60%);
+    }
+
+    .hero-grid {
+      position: absolute;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(201,168,76,0.04) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(201,168,76,0.04) 1px, transparent 1px);
+      background-size: 60px 60px;
+    }
+
+    .hero-content { position: relative; max-width: 820px; }
+
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      border: 1px solid rgba(201,168,76,0.3);
+      background: rgba(201,168,76,0.06);
+      color: var(--gold);
+      font-family: 'DM Mono', monospace;
+      font-size: 10px;
+      letter-spacing: 2px;
+      padding: 7px 18px;
+      border-radius: 2px;
+      margin-bottom: 32px;
+    }
+
+    .hero-badge::before { content: ''; width: 6px; height: 6px; border-radius: 50%; background: var(--gold); animation: blink 2s infinite; }
+
+    @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
+
+    .hero h1 { font-family: 'Cormorant Garamond', serif; font-size: clamp(48px, 7vw, 80px); font-weight: 700; line-height: 1.05; margin-bottom: 24px; letter-spacing: -1px; }
+    .hero h1 em { font-style: italic; color: var(--gold); }
+    .hero .tagline { font-size: 18px; color: rgba(255,255,255,0.6); line-height: 1.7; max-width: 580px; margin: 0 auto 48px; font-weight: 300; }
+
+    .hero-ctas { display: flex; gap: 16px; justify-content: center; flex-wrap: wrap; }
+
+    .btn-gold { display: inline-block; background: var(--gold); color: var(--navy-dark); font-size: 14px; font-weight: 600; padding: 14px 32px; border-radius: 2px; text-decoration: none; transition: background 0.2s; }
+    .btn-gold:hover { background: var(--gold-light); }
+
+    .btn-outline { display: inline-block; background: transparent; color: var(--white); font-size: 14px; padding: 14px 32px; border-radius: 2px; text-decoration: none; border: 1px solid rgba(255,255,255,0.2); transition: all 0.2s; }
+    .btn-outline:hover { border-color: var(--gold); color: var(--gold); }
+
+    section { padding: 96px 48px; }
+
+    .section-label { font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 3px; color: var(--gold); margin-bottom: 16px; display: flex; align-items: center; gap: 12px; }
+    .section-label::after { content: ''; flex: 1; max-width: 60px; height: 1px; background: rgba(201,168,76,0.3); }
+
+    .section-title { font-family: 'Cormorant Garamond', serif; font-size: clamp(32px, 4vw, 48px); font-weight: 600; line-height: 1.15; margin-bottom: 20px; }
+    .section-body { font-size: 16px; color: rgba(255,255,255,0.65); line-height: 1.85; max-width: 640px; }
+
+    .problem-section { background: var(--navy); border-top: 1px solid rgba(201,168,76,0.15); border-bottom: 1px solid rgba(201,168,76,0.15); }
+
+    .problem-inner { max-width: 1100px; margin: 0 auto; display: grid; grid-template-columns: 1fr 1fr; gap: 80px; align-items: center; }
+
+    .problem-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 2px; }
+
+    .stat-card { background: var(--navy-dark); padding: 28px 24px; position: relative; }
+    .stat-card::before { content: ''; position: absolute; top: 0; left: 0; width: 3px; height: 100%; background: var(--gold); }
+    .stat-num { font-family: 'Cormorant Garamond', serif; font-size: 42px; font-weight: 700; color: var(--gold); line-height: 1; margin-bottom: 8px; }
+    .stat-label { font-size: 12px; color: rgba(255,255,255,0.5); line-height: 1.5; }
+
+    .how-section { background: var(--navy-dark); max-width: none; }
+    .how-inner { max-width: 1100px; margin: 0 auto; }
+
+    .lanes-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 2px; margin-top: 48px; }
+
+    .lane-card { background: var(--navy); padding: 32px 28px; position: relative; overflow: hidden; transition: background 0.3s; }
+    .lane-card:hover { background: var(--navy-mid); }
+    .lane-card::after { content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 2px; background: var(--gold); transform: scaleX(0); transition: transform 0.3s; }
+    .lane-card:hover::after { transform: scaleX(1); }
+
+    .lane-num { font-family: 'DM Mono', monospace; font-size: 11px; color: var(--gold); letter-spacing: 2px; margin-bottom: 16px; }
+    .lane-title { font-size: 15px; font-weight: 500; margin-bottom: 10px; color: var(--white); }
+    .lane-body { font-size: 13px; color: rgba(255,255,255,0.5); line-height: 1.7; }
+
+    .lane-risk { display: inline-block; margin-top: 16px; font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 1px; padding: 4px 10px; border-radius: 2px; }
+    .lane-risk.red { background: rgba(229,62,62,0.15); color: #fc8181; border: 1px solid rgba(229,62,62,0.2); }
+    .lane-risk.yellow { background: rgba(214,158,46,0.15); color: #f6e05e; border: 1px solid rgba(214,158,46,0.2); }
+
+    .diff-section { background: var(--navy); border-top: 1px solid rgba(201,168,76,0.15); }
+    .diff-inner { max-width: 1100px; margin: 0 auto; }
+
+    .diff-table { width: 100%; border-collapse: collapse; margin-top: 48px; }
+    .diff-table th { padding: 16px 20px; text-align: left; font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 2px; color: rgba(255,255,255,0.4); border-bottom: 1px solid rgba(255,255,255,0.08); }
+    .diff-table th:nth-child(2) { color: var(--gold); }
+    .diff-table td { padding: 14px 20px; font-size: 14px; color: rgba(255,255,255,0.65); border-bottom: 1px solid rgba(255,255,255,0.05); }
+    .diff-table td:first-child { color: rgba(255,255,255,0.8); }
+    .diff-table td:nth-child(2) { background: rgba(201,168,76,0.05); color: var(--gold); font-weight: 500; }
+
+    .check { color: #68d391; font-size: 16px; }
+    .cross { color: rgba(255,255,255,0.25); font-size: 16px; }
+    .partial { color: #f6e05e; font-size: 14px; }
+
+    .market-section { background: var(--navy-dark); }
+    .market-inner { max-width: 1100px; margin: 0 auto; }
+
+    .market-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 2px; margin-top: 48px; }
+
+    .market-card { background: var(--navy); padding: 40px 32px; text-align: center; position: relative; }
+    .market-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; background: var(--gold); }
+
+    .market-num { font-family: 'Cormorant Garamond', serif; font-size: 52px; font-weight: 700; color: var(--white); line-height: 1; margin-bottom: 10px; }
+    .market-num span { color: var(--gold); }
+    .market-label { font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 2px; color: rgba(255,255,255,0.4); margin-bottom: 8px; }
+    .market-sub { font-size: 12px; color: rgba(255,255,255,0.65); line-height: 1.6; }
+    .market-citation { text-align: right; font-size: 11px; color: rgba(255,255,255,0.25); font-style: italic; margin-top: 12px; }
+
+    .cta-section { background: var(--navy); border-top: 3px solid var(--gold); text-align: center; padding: 96px 48px; }
+    .cta-inner { max-width: 640px; margin: 0 auto; }
+
+    .cta-section h2 { font-family: 'Cormorant Garamond', serif; font-size: clamp(36px, 5vw, 56px); font-weight: 600; line-height: 1.1; margin-bottom: 20px; }
+    .cta-section h2 em { font-style: italic; color: var(--gold); }
+    .cta-section p { font-size: 16px; color: rgba(255,255,255,0.55); line-height: 1.8; margin-bottom: 40px; }
+    .cta-buttons { display: flex; gap: 16px; justify-content: center; flex-wrap: wrap; }
+
+    .deadline-note { margin-top: 24px; font-family: 'DM Mono', monospace; font-size: 11px; color: rgba(255,255,255,0.3); letter-spacing: 1px; }
+    .deadline-note span { color: var(--gold); }
+
+    footer { background: var(--navy-dark); border-top: 1px solid rgba(201,168,76,0.15); padding: 40px 48px; display: flex; justify-content: space-between; align-items: center; }
+    .footer-left .brand { font-family: 'Cormorant Garamond', serif; font-size: 16px; color: var(--gold); margin-bottom: 4px; }
+    .footer-left .sub { font-size: 12px; color: rgba(255,255,255,0.3); }
+    .footer-links { display: flex; gap: 24px; }
+    .footer-links a { color: rgba(255,255,255,0.35); text-decoration: none; font-size: 13px; transition: color 0.2s; }
+    .footer-links a:hover { color: var(--gold); }
+
+    @media (max-width: 900px) {
+      header { padding: 16px 24px; }
+      section { padding: 64px 24px; }
+      .problem-inner { grid-template-columns: 1fr; gap: 40px; }
+      .lanes-grid { grid-template-columns: 1fr; }
+      .market-grid { grid-template-columns: 1fr; }
+      .hero { padding: 100px 24px 60px; }
+      footer { flex-direction: column; gap: 24px; text-align: center; padding: 32px 24px; }
+      .footer-links { flex-wrap: wrap; justify-content: center; }
+      nav { gap: 16px; }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="logo-block">
+    <a href="index.html">Forensic Auditing Services (F.A.S.)</a>
+    <div class="sub">A BRAND OF ALS CONSULTING SERVICES</div>
+  </div>
+  <nav>
+    <a href="demo.html">See Demo</a>
+    <a href="faq.html">FAQ</a>
+    <a href="index.html">Home</a>
+    <a href="apply.html" class="cta">Apply for Beta</a>
+  </nav>
+</header>
+
+<section class="hero">
+  <div class="hero-bg"></div>
+  <div class="hero-grid"></div>
+  <div class="hero-content">
+    <div class="hero-badge">PRODUCT OVERVIEW</div>
+    <h1>The Decision Is the<br><em>Moment of Liability</em></h1>
+    <p class="tagline">F.A.S. is the only Human-in-the-Loop compliance platform that intercepts AI-driven hiring rejections before they are finalized — not after the damage is done.</p>
+    <div class="hero-ctas">
+      <a href="demo.html" class="btn-gold">See It In Action →</a>
+      <a href="apply.html" class="btn-outline">Apply for Beta Access</a>
+    </div>
+  </div>
+</section>
+
+<section class="problem-section">
+  <div class="problem-inner">
+    <div>
+      <div class="section-label">THE PROBLEM</div>
+      <h2 class="section-title">AI Rejects in Seconds.<br>Regulators Wait for No One.</h2>
+      <p class="section-body">Organizations deploying AI hiring tools face overlapping regulatory exposure across NYC LL144, EEOC Title VII, OFCCP federal contractor requirements, and emerging state and international frameworks — with no mechanism to intercept, audit, or document automated rejection decisions before they create liability.</p>
+      <p class="section-body" style="margin-top:16px;">The pipeline wasn't dry. It was blocked.</p>
+    </div>
+    <div class="problem-stats">
+      <div class="stat-card">
+        <div class="stat-num">2023</div>
+        <div class="stat-label">NYC LL144 active — most employers still non-compliant</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-num">$20K</div>
+        <div class="stat-label">Per violation fine under Colorado SB205</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-num">0</div>
+        <div class="stat-label">Existing tools that block rejections before they go out</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-num">€35M</div>
+        <div class="stat-label">Maximum EU AI Act fine for non-compliant high-risk AI systems</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="how-section">
+  <div class="how-inner">
+    <div class="section-label">HOW IT WORKS</div>
+    <h2 class="section-title">Six Forensic Lanes.<br>One Decision Gate.</h2>
+    <p class="section-body">F.A.S. integrates with your ATS via webhook. When a rejection is generated, F.A.S. intercepts it — runs a forensic audit across six compliance lanes — and blocks high-risk decisions until a compliance officer provides documented justification.</p>
+
+    <div class="lanes-grid">
+      <div class="lane-card">
+        <div class="lane-num">LANE 01</div>
+        <div class="lane-title">Age Proxy Detection</div>
+        <div class="lane-body">Identifies screening criteria functioning as proxies for age discrimination under the ADEA — including experience ceilings, overqualified flags, and culture fit language.</div>
+        <div class="lane-risk red">HIGH RISK TRIGGER</div>
+      </div>
+      <div class="lane-card">
+        <div class="lane-num">LANE 02</div>
+        <div class="lane-title">Proxy Discrimination Analysis</div>
+        <div class="lane-body">Detects neutral screening factors — employment gaps, credential requirements — with documented correlation to protected class membership under Title VII and ADA.</div>
+        <div class="lane-risk red">HIGH RISK TRIGGER</div>
+      </div>
+      <div class="lane-card">
+        <div class="lane-num">LANE 03</div>
+        <div class="lane-title">Disparate Impact Assessment</div>
+        <div class="lane-body">Applies the EEOC 4/5ths rule to flag rejection patterns that disproportionately exclude protected groups beyond the adverse impact threshold.</div>
+        <div class="lane-risk red">HIGH RISK TRIGGER</div>
+      </div>
+      <div class="lane-card">
+        <div class="lane-num">LANE 04</div>
+        <div class="lane-title">Employment Gap Analysis</div>
+        <div class="lane-body">Evaluates whether gap-based rejections are individualized and job-related, or systematic — flagging decisions that penalize protected leave without inquiry.</div>
+        <div class="lane-risk yellow">MODERATE RISK</div>
+      </div>
+      <div class="lane-card">
+        <div class="lane-num">LANE 05</div>
+        <div class="lane-title">Keyword Mismatch Detection</div>
+        <div class="lane-body">Identifies cases where ATS rejection reasons are inconsistent with actual job requirements — surfacing algorithmic over-rejection before it becomes a pattern.</div>
+        <div class="lane-risk yellow">MODERATE RISK</div>
+      </div>
+      <div class="lane-card">
+        <div class="lane-num">LANE 06</div>
+        <div class="lane-title">Legal Framework Triggers</div>
+        <div class="lane-body">Flags which regulatory frameworks apply to each decision — NYC LL144, CO SB205, AIVIA, AB 2930, EU AI Act — and what documentation is required for compliance.</div>
+        <div class="lane-risk red">HIGH RISK TRIGGER</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="diff-section">
+  <div class="diff-inner">
+    <div class="section-label">DIFFERENTIATION</div>
+    <h2 class="section-title">Execution-Bound.<br>Not Post-Hoc.</h2>
+    <p class="section-body">Every other compliance tool in this market analyzes what already happened. F.A.S. stops what is about to happen. That distinction is the entire product.</p>
+
+    <table class="diff-table">
+      <thead>
+        <tr>
+          <th>CAPABILITY</th>
+          <th>F.A.S.</th>
+          <th>POST-HOC AUDIT TOOLS</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Acts before rejection is finalized</td>
+          <td><span class="check">✓ Yes</span></td>
+          <td><span class="cross">✗ No</span></td>
+        </tr>
+        <tr>
+          <td>Blocks high-risk decisions in real time</td>
+          <td><span class="check">✓ Yes</span></td>
+          <td><span class="cross">✗ No</span></td>
+        </tr>
+        <tr>
+          <td>Forensic audit at point of decision</td>
+          <td><span class="check">✓ Yes</span></td>
+          <td><span class="cross">✗ No</span></td>
+        </tr>
+        <tr>
+          <td>Human-in-the-Loop enforcement</td>
+          <td><span class="check">✓ Yes</span></td>
+          <td><span class="cross">✗ No</span></td>
+        </tr>
+        <tr>
+          <td>Court-ready audit trail per decision</td>
+          <td><span class="check">✓ Yes</span></td>
+          <td><span class="partial">~ Partial</span></td>
+        </tr>
+        <tr>
+          <td>Multi-framework compliance coverage</td>
+          <td><span class="check">✓ Yes</span></td>
+          <td><span class="partial">~ Partial</span></td>
+        </tr>
+        <tr>
+          <td>Individual reviewer accountability logging</td>
+          <td><span class="check">✓ Yes</span></td>
+          <td><span class="cross">✗ No</span></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<section class="market-section">
+  <div class="market-inner">
+    <div class="section-label">MARKET OPPORTUNITY</div>
+    <h2 class="section-title">A $11.8 Billion Market.<br>No Execution-Bound Player.</h2>
+    <p class="section-body">The HITL AI market is one of the fastest-growing segments in enterprise software. F.A.S. occupies the compliance-specific, hiring-focused niche — with active regulatory enforcement already underway across multiple jurisdictions.</p>
+
+    <div class="market-grid">
+      <div class="market-card">
+        <div class="market-label">HITL MARKET 2025</div>
+        <div class="market-num"><span>$</span>2.4<span>B</span></div>
+        <div class="market-sub">Current global market valuation for Human-in-the-Loop AI platforms and services</div>
+      </div>
+      <div class="market-card">
+        <div class="market-label">PROJECTED 2034</div>
+        <div class="market-num"><span>$</span>11.8<span>B</span></div>
+        <div class="market-sub">Projected market size — nearly 5x growth over the forecast period</div>
+      </div>
+      <div class="market-card">
+        <div class="market-label">ANNUAL GROWTH RATE</div>
+        <div class="market-num">19.3<span>%</span></div>
+        <div class="market-sub">Compound annual growth rate — nearly twice the historical average of the S&P 500</div>
+      </div>
+    </div>
+    <div class="market-citation">Source: Dataintelo, Human-in-the-Loop AI Market Research Report, September 2025</div>
+  </div>
+</section>
+
+<section class="cta-section">
+  <div class="cta-inner">
+    <h2>Ready to See It<br><em>Before the Rejection?</em></h2>
+    <p>F.A.S. Phase 1 beta is open to 4 organizations. Applications are reviewed based on compliance risk, ATS usage, and organizational readiness. Selections announced May 12, 2026.</p>
+    <div class="cta-buttons">
+      <a href="demo.html" class="btn-gold">See the Live Demo →</a>
+      <a href="apply.html" class="btn-outline">Submit Application</a>
+    </div>
+    <div class="deadline-note">Applications close <span>11:59 PM ET · May 9, 2026</span> · Only 4 spots available</div>
+  </div>
+</section>
+
+<footer>
+  <div class="footer-left">
+    <div class="brand">Forensic Auditing Services (F.A.S.)</div>
+    <div class="sub">A brand of ALS Consulting Services · © 2026 All rights reserved</div>
+  </div>
+  <div class="footer-links">
+    <a href="index.html">Home</a>
+    <a href="demo.html">Demo</a>
+    <a href="faq.html">FAQ</a>
+    <a href="apply.html">Apply</a>
+    <a href="terms.html">Terms</a>
+    <a href="https://calendly.com/astargill-ih3e/30min" target="_blank">Book a Call</a>
+    <a href="https://alsconsulting.services">ALS Consulting</a>
+  </div>
+</footer>
+
+</body>
+</html>
