@@ -896,7 +896,7 @@
     const diffMins = Math.floor(diffMs / 1000 / 60);
     const diffHours = diffMins / 60;
     if (diffMins < 0) return { text: 'Just now', urgent: false, warning: false };
-    if (diffMins < 60) return { text: diffMins + 'm', urgent: diffMins >= 210, warning: diffMins >= 180 };
+    if (diffMins < 60) return { text: diffMins + 'm', urgent: diffMins >= 45, warning: diffMins >= 30 };
     return { text: diffHours.toFixed(1) + 'h', urgent: diffHours >= 3.5, warning: diffHours >= 3 };
   }
 
