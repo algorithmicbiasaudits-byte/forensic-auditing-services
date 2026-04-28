@@ -1,0 +1,940 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>F.A.S. Dashboard — Main</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #f0f2f5;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ── TOP NAV ── */
+    .topnav {
+      background: #193278;
+      padding: 0 32px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      height: 56px;
+      border-bottom: 3px solid #C9A84C;
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 100;
+    }
+
+    .topnav-left { display: flex; align-items: center; gap: 24px; }
+
+    .nav-logo { font-size: 16px; font-weight: 700; color: white; letter-spacing: 2px; }
+    .nav-logo span { color: #C9A84C; }
+
+    .nav-divider { width: 1px; height: 20px; background: rgba(255,255,255,0.15); }
+
+    .nav-org { font-size: 12px; color: rgba(255,255,255,0.6); font-family: monospace; letter-spacing: 1px; }
+
+    .topnav-right { display: flex; align-items: center; gap: 20px; }
+
+    .nav-user { font-size: 12px; color: rgba(255,255,255,0.6); }
+    .nav-user span { color: white; font-weight: 500; }
+
+    .nav-role {
+      font-family: monospace;
+      font-size: 10px;
+      letter-spacing: 1px;
+      padding: 4px 10px;
+      border-radius: 2px;
+      background: rgba(201,168,76,0.15);
+      color: #C9A84C;
+      border: 1px solid rgba(201,168,76,0.3);
+    }
+
+    .nav-logout {
+      font-size: 12px;
+      color: rgba(255,255,255,0.4);
+      cursor: pointer;
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+
+    .nav-logout:hover { color: white; }
+
+    /* ── SIDEBAR ── */
+    .sidebar {
+      position: fixed;
+      top: 56px;
+      left: 0;
+      bottom: 0;
+      width: 220px;
+      background: white;
+      border-right: 1px solid #e8e8e8;
+      padding: 24px 0;
+      overflow-y: auto;
+      z-index: 90;
+    }
+
+    .sidebar-section {
+      padding: 0 16px;
+      margin-bottom: 8px;
+    }
+
+    .sidebar-label {
+      font-family: monospace;
+      font-size: 9px;
+      letter-spacing: 2px;
+      color: #bbb;
+      text-transform: uppercase;
+      padding: 8px 12px 6px;
+    }
+
+    .sidebar-link {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 12px;
+      border-radius: 4px;
+      font-size: 13px;
+      color: #555;
+      text-decoration: none;
+      cursor: pointer;
+      transition: all 0.15s;
+      margin-bottom: 2px;
+    }
+
+    .sidebar-link:hover { background: #f5f8ff; color: #193278; }
+    .sidebar-link.active { background: #f0f4ff; color: #193278; font-weight: 600; border-left: 3px solid #193278; }
+
+    .sidebar-link .icon { font-size: 15px; width: 20px; text-align: center; }
+
+    .sidebar-badge {
+      margin-left: auto;
+      background: #e53e3e;
+      color: white;
+      font-size: 10px;
+      font-weight: 700;
+      padding: 2px 7px;
+      border-radius: 10px;
+      min-width: 20px;
+      text-align: center;
+    }
+
+    .sidebar-badge.gold {
+      background: #C9A84C;
+      color: #193278;
+    }
+
+    /* ── MAIN CONTENT ── */
+    .main-content {
+      margin-left: 220px;
+      margin-top: 56px;
+      padding: 32px;
+      flex: 1;
+    }
+
+    /* ── PAGE HEADER ── */
+    .page-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 28px;
+    }
+
+    .page-title { font-size: 22px; font-weight: 700; color: #193278; margin-bottom: 4px; }
+    .page-subtitle { font-size: 13px; color: #888; }
+
+    .header-actions { display: flex; gap: 12px; align-items: center; }
+
+    .btn-primary {
+      background: #193278;
+      color: white;
+      font-size: 13px;
+      font-weight: 500;
+      padding: 9px 18px;
+      border: none;
+      border-radius: 3px;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .btn-primary:hover { background: #1a3a8f; }
+
+    .btn-outline {
+      background: white;
+      color: #193278;
+      font-size: 13px;
+      font-weight: 500;
+      padding: 9px 18px;
+      border: 1px solid #193278;
+      border-radius: 3px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .btn-outline:hover { background: #f0f4ff; }
+
+    /* ── STATS GRID ── */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+      margin-bottom: 28px;
+    }
+
+    .stat-card {
+      background: white;
+      border-radius: 4px;
+      padding: 20px 24px;
+      border: 1px solid #e8e8e8;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .stat-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0;
+      width: 3px;
+      height: 100%;
+    }
+
+    .stat-card.navy::before { background: #193278; }
+    .stat-card.red::before { background: #e53e3e; }
+    .stat-card.gold::before { background: #C9A84C; }
+    .stat-card.green::before { background: #38a169; }
+
+    .stat-label {
+      font-family: monospace;
+      font-size: 10px;
+      letter-spacing: 2px;
+      color: #888;
+      text-transform: uppercase;
+      margin-bottom: 10px;
+    }
+
+    .stat-num {
+      font-size: 36px;
+      font-weight: 700;
+      color: #193278;
+      line-height: 1;
+      margin-bottom: 6px;
+    }
+
+    .stat-card.red .stat-num { color: #e53e3e; }
+    .stat-card.gold .stat-num { color: #C9A84C; }
+    .stat-card.green .stat-num { color: #38a169; }
+
+    .stat-sub { font-size: 12px; color: #888; }
+
+    /* ── SYSTEM STATUS ── */
+    .system-status {
+      background: white;
+      border: 1px solid #e8e8e8;
+      border-radius: 4px;
+      padding: 14px 20px;
+      margin-bottom: 28px;
+      display: flex;
+      align-items: center;
+      gap: 24px;
+      flex-wrap: wrap;
+    }
+
+    .status-label {
+      font-family: monospace;
+      font-size: 10px;
+      letter-spacing: 2px;
+      color: #888;
+    }
+
+    .status-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 12px;
+      color: #555;
+    }
+
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+    }
+
+    .status-dot.green { background: #38a169; }
+    .status-dot.yellow { background: #d69e2e; animation: pulse 2s infinite; }
+    .status-dot.red { background: #e53e3e; animation: pulse 1s infinite; }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.4; }
+    }
+
+    /* ── REJECTION FEED ── */
+    .section-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+    }
+
+    .section-title {
+      font-size: 15px;
+      font-weight: 600;
+      color: #193278;
+    }
+
+    .section-meta { font-size: 12px; color: #888; }
+
+    .rejection-feed {
+      background: white;
+      border: 1px solid #e8e8e8;
+      border-radius: 4px;
+      overflow: hidden;
+      margin-bottom: 28px;
+    }
+
+    .feed-header {
+      display: grid;
+      grid-template-columns: 120px 1fr 140px 100px 120px 100px;
+      gap: 16px;
+      padding: 10px 20px;
+      background: #f8f9fa;
+      border-bottom: 1px solid #e8e8e8;
+    }
+
+    .feed-header-cell {
+      font-family: monospace;
+      font-size: 9px;
+      letter-spacing: 2px;
+      color: #888;
+      text-transform: uppercase;
+    }
+
+    .feed-row {
+      display: grid;
+      grid-template-columns: 120px 1fr 140px 100px 120px 100px;
+      gap: 16px;
+      padding: 14px 20px;
+      border-bottom: 1px solid #f0f0f0;
+      align-items: center;
+      transition: background 0.15s;
+      cursor: pointer;
+    }
+
+    .feed-row:hover { background: #f5f8ff; }
+    .feed-row:last-child { border-bottom: none; }
+
+    .feed-row.red-row { border-left: 3px solid #e53e3e; }
+    .feed-row.yellow-row { border-left: 3px solid #d69e2e; }
+    .feed-row.green-row { border-left: 3px solid #38a169; }
+
+    .candidate-id {
+      font-family: monospace;
+      font-size: 12px;
+      color: #193278;
+      font-weight: 500;
+    }
+
+    .job-title {
+      font-size: 13px;
+      color: #2d2d2d;
+      font-weight: 500;
+    }
+
+    .ats-reason {
+      font-size: 12px;
+      color: #888;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .risk-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      font-family: monospace;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 1px;
+      padding: 4px 10px;
+      border-radius: 2px;
+    }
+
+    .risk-badge.red { background: rgba(229,62,62,0.1); color: #c53030; border: 1px solid rgba(229,62,62,0.2); }
+    .risk-badge.yellow { background: rgba(214,158,46,0.1); color: #975a16; border: 1px solid rgba(214,158,46,0.2); }
+    .risk-badge.green { background: rgba(56,161,105,0.1); color: #276749; border: 1px solid rgba(56,161,105,0.2); }
+
+    .risk-dot { width: 6px; height: 6px; border-radius: 50%; }
+    .risk-badge.red .risk-dot { background: #e53e3e; }
+    .risk-badge.yellow .risk-dot { background: #d69e2e; }
+    .risk-badge.green .risk-dot { background: #38a169; }
+
+    .time-pending {
+      font-size: 12px;
+      color: #888;
+      font-family: monospace;
+    }
+
+    .time-pending.urgent { color: #e53e3e; font-weight: 600; }
+    .time-pending.warning { color: #d69e2e; font-weight: 600; }
+
+    .review-status {
+      font-size: 11px;
+      font-family: monospace;
+      letter-spacing: 1px;
+    }
+
+    .review-status.pending { color: #e53e3e; }
+    .review-status.reviewed { color: #38a169; }
+    .review-status.escalated { color: #d69e2e; }
+
+    /* ── EMPTY STATE ── */
+    .empty-state {
+      text-align: center;
+      padding: 60px 20px;
+    }
+
+    .empty-icon { font-size: 40px; margin-bottom: 16px; }
+    .empty-title { font-size: 16px; font-weight: 600; color: #193278; margin-bottom: 8px; }
+    .empty-sub { font-size: 13px; color: #888; line-height: 1.7; max-width: 400px; margin: 0 auto; }
+
+    /* ── ACTIVITY FEED ── */
+    .activity-grid {
+      display: grid;
+      grid-template-columns: 1fr 320px;
+      gap: 20px;
+    }
+
+    .activity-panel {
+      background: white;
+      border: 1px solid #e8e8e8;
+      border-radius: 4px;
+      overflow: hidden;
+    }
+
+    .activity-header {
+      padding: 14px 20px;
+      border-bottom: 1px solid #e8e8e8;
+      font-size: 13px;
+      font-weight: 600;
+      color: #193278;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .activity-item {
+      padding: 14px 20px;
+      border-bottom: 1px solid #f0f0f0;
+      display: flex;
+      gap: 12px;
+      align-items: flex-start;
+    }
+
+    .activity-item:last-child { border-bottom: none; }
+
+    .activity-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      flex-shrink: 0;
+      margin-top: 5px;
+    }
+
+    .activity-text { font-size: 13px; color: #555; line-height: 1.5; flex: 1; }
+    .activity-text strong { color: #2d2d2d; }
+    .activity-time { font-size: 11px; color: #bbb; font-family: monospace; white-space: nowrap; }
+
+    /* ── REVIEWER STATUS ── */
+    .reviewer-item {
+      padding: 12px 20px;
+      border-bottom: 1px solid #f0f0f0;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .reviewer-item:last-child { border-bottom: none; }
+
+    .reviewer-avatar {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: #193278;
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      font-weight: 700;
+      flex-shrink: 0;
+    }
+
+    .reviewer-info { flex: 1; }
+    .reviewer-name { font-size: 13px; font-weight: 500; color: #2d2d2d; }
+    .reviewer-role { font-size: 11px; color: #888; font-family: monospace; letter-spacing: 0.5px; }
+
+    .reviewer-status {
+      font-size: 11px;
+      font-family: monospace;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    /* ── LOADING ── */
+    .loading {
+      text-align: center;
+      padding: 40px;
+      color: #888;
+      font-size: 13px;
+    }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 1200px) {
+      .stats-grid { grid-template-columns: repeat(2, 1fr); }
+      .activity-grid { grid-template-columns: 1fr; }
+    }
+
+    @media (max-width: 900px) {
+      .sidebar { display: none; }
+      .main-content { margin-left: 0; }
+      .feed-header, .feed-row { grid-template-columns: 100px 1fr 80px 80px; }
+      .feed-header-cell:nth-child(3),
+      .feed-row > *:nth-child(3),
+      .feed-header-cell:nth-child(6),
+      .feed-row > *:nth-child(6) { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- TOP NAV -->
+<nav class="topnav">
+  <div class="topnav-left">
+    <div class="nav-logo">F<span>.</span>A<span>.</span>S<span>.</span></div>
+    <div class="nav-divider"></div>
+    <div class="nav-org" id="org-name">Loading...</div>
+  </div>
+  <div class="topnav-right">
+    <div class="nav-user">Signed in as <span id="user-email">—</span></div>
+    <div class="nav-role" id="user-role">—</div>
+    <a class="nav-logout" onclick="handleLogout()">Sign Out</a>
+  </div>
+</nav>
+
+<!-- SIDEBAR -->
+<aside class="sidebar">
+  <div class="sidebar-label">Main</div>
+  <div class="sidebar-section">
+    <a class="sidebar-link active" onclick="showView('dashboard')">
+      <span class="icon">📊</span> Dashboard
+    </a>
+    <a class="sidebar-link" onclick="showView('rejections')">
+      <span class="icon">🚨</span> Rejections
+      <span class="sidebar-badge" id="pending-badge">0</span>
+    </a>
+    <a class="sidebar-link" onclick="showView('reports')">
+      <span class="icon">📋</span> Reports
+    </a>
+  </div>
+
+  <div class="sidebar-label" style="margin-top:16px;">Compliance</div>
+  <div class="sidebar-section">
+    <a class="sidebar-link" onclick="showView('audit-trail')">
+      <span class="icon">🔒</span> Audit Trail
+    </a>
+    <a class="sidebar-link" onclick="showView('reviewers')">
+      <span class="icon">👥</span> Reviewers
+    </a>
+  </div>
+
+  <div class="sidebar-label" style="margin-top:16px;">System</div>
+  <div class="sidebar-section">
+    <a class="sidebar-link" onclick="showView('settings')">
+      <span class="icon">⚙️</span> Settings
+    </a>
+    <a class="sidebar-link" onclick="showView('docs')">
+      <span class="icon">📖</span> IT Setup Docs
+    </a>
+  </div>
+</aside>
+
+<!-- MAIN CONTENT -->
+<div class="main-content">
+
+  <!-- PAGE HEADER -->
+  <div class="page-header">
+    <div>
+      <div class="page-title">Compliance Dashboard</div>
+      <div class="page-subtitle" id="last-updated">Last updated: —</div>
+    </div>
+    <div class="header-actions">
+      <button class="btn-outline" onclick="refreshData()">↺ Refresh</button>
+      <button class="btn-primary" onclick="showView('rejections')">Review Pending →</button>
+    </div>
+  </div>
+
+  <!-- SYSTEM STATUS -->
+  <div class="system-status">
+    <div class="status-label">SYSTEM STATUS</div>
+    <div class="status-item">
+      <div class="status-dot green"></div>
+      Webhook Active
+    </div>
+    <div class="status-item">
+      <div class="status-dot green"></div>
+      Audit Engine Online
+    </div>
+    <div class="status-item">
+      <div class="status-dot green"></div>
+      Database Connected
+    </div>
+    <div class="status-item">
+      <div class="status-dot green" id="ats-status-dot"></div>
+      <span id="ats-status-text">ATS Connected</span>
+    </div>
+    <div style="margin-left:auto; font-family:monospace; font-size:11px; color:#bbb;" id="baseline-info">
+      Baseline v1.0 · Active
+    </div>
+  </div>
+
+  <!-- STATS GRID -->
+  <div class="stats-grid">
+    <div class="stat-card navy">
+      <div class="stat-label">Rejections Today</div>
+      <div class="stat-num" id="stat-today">—</div>
+      <div class="stat-sub">Intercepted by F.A.S.</div>
+    </div>
+    <div class="stat-card red">
+      <div class="stat-label">Red Flags</div>
+      <div class="stat-num" id="stat-red">—</div>
+      <div class="stat-sub">Requiring human review</div>
+    </div>
+    <div class="stat-card gold">
+      <div class="stat-label">Pending Review</div>
+      <div class="stat-num" id="stat-pending">—</div>
+      <div class="stat-sub">Awaiting decision</div>
+    </div>
+    <div class="stat-card green">
+      <div class="stat-label">Overrides Made</div>
+      <div class="stat-num" id="stat-overrides">—</div>
+      <div class="stat-sub">Documented decisions</div>
+    </div>
+  </div>
+
+  <!-- REJECTION FEED -->
+  <div class="section-header">
+    <div class="section-title">Live Rejection Feed</div>
+    <div class="section-meta" id="feed-meta">Loading...</div>
+  </div>
+
+  <div class="rejection-feed">
+    <div class="feed-header">
+      <div class="feed-header-cell">Candidate ID</div>
+      <div class="feed-header-cell">Job Title</div>
+      <div class="feed-header-cell">ATS Reason</div>
+      <div class="feed-header-cell">Risk Level</div>
+      <div class="feed-header-cell">Time Pending</div>
+      <div class="feed-header-cell">Status</div>
+    </div>
+    <div id="rejection-feed-body">
+      <div class="loading">Loading rejections...</div>
+    </div>
+  </div>
+
+  <!-- ACTIVITY GRID -->
+  <div class="activity-grid">
+
+    <!-- Recent Activity -->
+    <div class="activity-panel">
+      <div class="activity-header">
+        Recent Activity
+        <span style="font-size:11px; color:#888; font-weight:400;">Last 24 hours</span>
+      </div>
+      <div id="activity-feed">
+        <div class="loading">Loading activity...</div>
+      </div>
+    </div>
+
+    <!-- Reviewer Pool -->
+    <div class="activity-panel">
+      <div class="activity-header">Reviewer Pool</div>
+      <div id="reviewer-pool">
+        <div class="loading">Loading reviewers...</div>
+      </div>
+    </div>
+
+  </div>
+
+</div>
+
+<script>
+  const { createClient } = supabase;
+  const supabaseClient = createClient(
+    'https://znjvjofsfvxccmidfpgy.supabase.co',
+    'sb_publishable_bW7kwK1-EwAVUMYErbfEZA_R_h_Mnbq'
+  );
+
+  let currentUser = null;
+  let currentCustomer = null;
+
+  async function init() {
+    const { data: { session } } = await supabaseClient.auth.getSession();
+    if (!session) {
+      window.location.href = '/dashboard/login.html';
+      return;
+    }
+
+    currentUser = session.user;
+    document.getElementById('user-email').textContent = currentUser.email;
+
+    await loadCustomerData();
+    await loadDashboardData();
+
+    document.getElementById('last-updated').textContent =
+      'Last updated: ' + new Date().toLocaleTimeString();
+
+    setInterval(loadDashboardData, 30000);
+  }
+
+  async function loadCustomerData() {
+    const { data, error } = await supabaseClient
+      .from('customers')
+      .select('*')
+      .eq('contact_email', currentUser.email)
+      .single();
+
+    if (data) {
+      currentCustomer = data;
+      document.getElementById('org-name').textContent = data.company_name;
+      document.getElementById('user-role').textContent = 'COMPLIANCE OFFICER';
+    } else {
+      document.getElementById('org-name').textContent = 'F.A.S. Dashboard';
+      document.getElementById('user-role').textContent = 'ADMIN';
+    }
+  }
+
+  async function loadDashboardData() {
+    await Promise.all([
+      loadStats(),
+      loadRejectionFeed(),
+      loadActivity(),
+      loadReviewerPool(),
+    ]);
+  }
+
+  async function loadStats() {
+    const today = new Date().toISOString().split('T')[0];
+
+    const { data: todayRejections } = await supabaseClient
+      .from('rejections')
+      .select('rejection_id', { count: 'exact' })
+      .gte('created_at', today);
+
+    const { data: redFlags } = await supabaseClient
+      .from('audits')
+      .select('audit_id', { count: 'exact' })
+      .eq('risk_level', 'red');
+
+    const { data: allRejections } = await supabaseClient
+      .from('rejections')
+      .select('rejection_id');
+
+    const { data: allOverrides } = await supabaseClient
+      .from('overrides')
+      .select('rejection_id');
+
+    const overrideIds = new Set((allOverrides || []).map(o => o.rejection_id));
+    const pending = (allRejections || []).filter(r => !overrideIds.has(r.rejection_id)).length;
+
+    const { data: overrides } = await supabaseClient
+      .from('overrides')
+      .select('override_id', { count: 'exact' });
+
+    document.getElementById('stat-today').textContent = todayRejections?.length || 0;
+    document.getElementById('stat-red').textContent = redFlags?.length || 0;
+    document.getElementById('stat-pending').textContent = pending || 0;
+    document.getElementById('stat-overrides').textContent = overrides?.length || 0;
+    document.getElementById('pending-badge').textContent = pending || 0;
+  }
+
+  async function loadRejectionFeed() {
+    const { data: rejections, error } = await supabaseClient
+      .from('rejections')
+      .select(`
+        rejection_id,
+        candidate_id,
+        job_title,
+        rejection_reason_from_ats,
+        created_at,
+        audits (risk_level, audit_id),
+        overrides (override_id, decision)
+      `)
+      .order('created_at', { ascending: false })
+      .limit(10);
+
+    const feedBody = document.getElementById('rejection-feed-body');
+
+    if (!rejections || rejections.length === 0) {
+      feedBody.innerHTML = `
+        <div class="empty-state">
+          <div class="empty-icon">✅</div>
+          <div class="empty-title">No Rejections Yet</div>
+          <div class="empty-sub">When your ATS sends rejections, they will appear here in real time. Make sure your webhook is configured correctly.</div>
+        </div>`;
+      document.getElementById('feed-meta').textContent = 'No rejections to display';
+      return;
+    }
+
+    document.getElementById('feed-meta').textContent = `${rejections.length} most recent rejections`;
+
+    feedBody.innerHTML = rejections.map(r => {
+      const audit = r.audits?.[0];
+      const override = r.overrides?.[0];
+      const riskLevel = audit?.risk_level || 'green';
+      const hasOverride = !!override;
+
+      const timePending = getTimePending(r.created_at);
+      const timeClass = timePending.urgent ? 'urgent' : timePending.warning ? 'warning' : '';
+
+      const statusText = hasOverride ? override.decision.toUpperCase() : 'PENDING';
+      const statusClass = hasOverride ? 'reviewed' : 'pending';
+
+      return `
+        <div class="feed-row ${riskLevel}-row" onclick="viewRejection('${r.rejection_id}')">
+          <div class="candidate-id">${r.candidate_id}</div>
+          <div class="job-title">${r.job_title || '—'}</div>
+          <div class="ats-reason">${r.rejection_reason_from_ats || '—'}</div>
+          <div>
+            <span class="risk-badge ${riskLevel}">
+              <span class="risk-dot"></span>
+              ${riskLevel.toUpperCase()}
+            </span>
+          </div>
+          <div class="time-pending ${timeClass}">${timePending.text}</div>
+          <div class="review-status ${statusClass}">${statusText}</div>
+        </div>`;
+    }).join('');
+  }
+
+  async function loadActivity() {
+    const { data: overrides } = await supabaseClient
+      .from('overrides')
+      .select('*, rejections(job_title, candidate_id)')
+      .order('reviewed_timestamp', { ascending: false })
+      .limit(8);
+
+    const activityFeed = document.getElementById('activity-feed');
+
+    if (!overrides || overrides.length === 0) {
+      activityFeed.innerHTML = `<div class="activity-item"><div class="activity-text" style="color:#bbb;">No activity yet. Reviews will appear here.</div></div>`;
+      return;
+    }
+
+    activityFeed.innerHTML = overrides.map(o => {
+      const color = o.decision === 'approved' ? '#38a169' : o.decision === 'escalated' ? '#d69e2e' : '#193278';
+      return `
+        <div class="activity-item">
+          <div class="activity-dot" style="background:${color}"></div>
+          <div class="activity-text">
+            <strong>${o.rejections?.candidate_id || 'Candidate'}</strong> —
+            ${o.rejections?.job_title || 'Unknown role'} rejection
+            <strong style="color:${color}">${o.decision.toUpperCase()}</strong>
+          </div>
+          <div class="activity-time">${formatTime(o.reviewed_timestamp)}</div>
+        </div>`;
+    }).join('');
+  }
+
+  async function loadReviewerPool() {
+    const { data: users } = await supabaseClient
+      .from('users')
+      .select('*')
+      .limit(6);
+
+    const reviewerPool = document.getElementById('reviewer-pool');
+
+    if (!users || users.length === 0) {
+      reviewerPool.innerHTML = `
+        <div class="reviewer-item">
+          <div class="reviewer-info">
+            <div class="reviewer-name" style="color:#bbb;">No reviewers configured</div>
+            <div class="reviewer-role">Add team members in Settings</div>
+          </div>
+        </div>`;
+      return;
+    }
+
+    reviewerPool.innerHTML = users.map(u => {
+      const initials = u.name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
+      return `
+        <div class="reviewer-item">
+          <div class="reviewer-avatar">${initials}</div>
+          <div class="reviewer-info">
+            <div class="reviewer-name">${u.name}</div>
+            <div class="reviewer-role">${u.role.toUpperCase().replace('_', ' ')}</div>
+          </div>
+          <div class="reviewer-status">
+            <div class="status-dot green"></div>
+            Active
+          </div>
+        </div>`;
+    }).join('');
+  }
+
+  function getTimePending(createdAt) {
+    const diff = (Date.now() - new Date(createdAt)) / 1000 / 60 / 60;
+    if (diff >= 3.5) return { text: `${diff.toFixed(1)}h`, urgent: true };
+    if (diff >= 3) return { text: `${diff.toFixed(1)}h`, warning: true };
+    if (diff < 1) return { text: `${Math.round(diff * 60)}m`, urgent: false };
+    return { text: `${diff.toFixed(1)}h`, urgent: false };
+  }
+
+  function formatTime(timestamp) {
+    if (!timestamp) return '—';
+    const d = new Date(timestamp);
+    const now = new Date();
+    const diff = (now - d) / 1000 / 60;
+    if (diff < 60) return `${Math.round(diff)}m ago`;
+    if (diff < 1440) return `${Math.round(diff / 60)}h ago`;
+    return d.toLocaleDateString();
+  }
+
+  function showView(view) {
+    const views = {
+      'rejections': '/dashboard/rejections.html',
+      'reports': '/dashboard/reports.html',
+      'audit-trail': '/dashboard/audit-trail.html',
+      'settings': '/dashboard/settings.html',
+      'docs': '/docs/index.html',
+    };
+    if (views[view]) window.location.href = views[view];
+  }
+
+  function viewRejection(id) {
+    window.location.href = `/dashboard/rejection.html?id=${id}`;
+  }
+
+  function refreshData() {
+    loadDashboardData();
+    document.getElementById('last-updated').textContent =
+      'Last updated: ' + new Date().toLocaleTimeString();
+  }
+
+  async function handleLogout() {
+    await supabaseClient.auth.signOut();
+    window.location.href = '/dashboard/login.html';
+  }
+
+  init();
+</script>
+
+</body>
+</html>
