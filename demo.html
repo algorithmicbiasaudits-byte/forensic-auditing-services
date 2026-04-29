@@ -453,8 +453,8 @@ Compliance Officer notification sent.
 
   function updateRegulatoryCountdowns() {
     const now = new Date().getTime();
-    const coDeadline = new Date('June 30, 2026 00:00:00 MDT').getTime();
-    const euDeadline = new Date('August 2, 2026 00:00:00 CET').getTime();
+    const coDeadline = new Date('2026-06-30T06:00:00Z').getTime(); // midnight MDT = UTC-6
+    const euDeadline = new Date('2026-08-01T22:00:00Z').getTime(); // midnight CEST = UTC+2
     function getUnits(diff) {
       if (diff <= 0) return { days: '00', hours: '00', minutes: '00', seconds: '00' };
       return {
