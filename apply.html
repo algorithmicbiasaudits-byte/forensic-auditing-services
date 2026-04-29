@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Apply for Beta Access — Forensic Auditing Services (F.A.S.)</title>
-  <meta name="description" content="Apply for F.A.S. Beta Access. Only 4 spots available for Phase 1 (May–June 2026).">
+  <meta name="description" content="Apply for F.A.S. Beta Access. Limited to 10 organizations for Phase 1 (May–June 2026).">
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; background: #f5f5f5; color: #2d2d2d; line-height: 1.6; }
@@ -16,7 +16,19 @@
     .page-hero { background: #193278; padding: 50px 40px; text-align: center; color: white; }
     .page-hero h1 { font-size: 36px; font-weight: 700; margin-bottom: 12px; }
     .page-hero h1 .accent { color: #C9A84C; }
-    .page-hero p { font-size: 16px; color: rgba(255,255,255,0.8); max-width: 580px; margin: 0 auto; }
+    .page-hero p { font-size: 16px; color: rgba(255,255,255,0.8); max-width: 580px; margin: 0 auto 28px; }
+    .pricing-summary {
+      display: flex; gap: 20px; justify-content: center; flex-wrap: wrap;
+      max-width: 580px; margin: 0 auto;
+    }
+    .pricing-row {
+      background: rgba(255,255,255,0.08); border: 1px solid rgba(201,168,76,0.35);
+      border-radius: 4px; padding: 10px 18px; font-size: 13px; color: white;
+      display: flex; flex-direction: column; align-items: center; gap: 2px;
+    }
+    .pricing-row .tier-name { font-weight: 700; color: #C9A84C; font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase; }
+    .pricing-row .tier-beta { font-size: 14px; font-weight: 600; }
+    .pricing-row .tier-prod { font-size: 11px; color: rgba(255,255,255,0.55); }
     .form-section { max-width: 720px; margin: 0 auto; padding: 60px 40px; }
     .form-card { background: white; padding: 48px; border-radius: 6px; box-shadow: 0 2px 16px rgba(0,0,0,0.08); }
     .form-card h2 { font-size: 22px; color: #193278; margin-bottom: 28px; padding-bottom: 16px; border-bottom: 2px solid #1E90FF; }
@@ -27,48 +39,24 @@
     input[type="email"],
     select,
     textarea {
-      width: 100%;
-      padding: 11px 14px;
-      font-size: 14px;
-      border: 1px solid #ddd;
-      border-radius: 4px;
-      font-family: inherit;
-      color: #2d2d2d;
-      background: #fafafa;
-      transition: border-color 0.2s;
+      width: 100%; padding: 11px 14px; font-size: 14px;
+      border: 1px solid #ddd; border-radius: 4px; font-family: inherit;
+      color: #2d2d2d; background: #fafafa; transition: border-color 0.2s;
     }
-    input[type="text"]:focus,
-    input[type="email"]:focus,
-    select:focus,
-    textarea:focus {
-      outline: none;
-      border-color: #193278;
-      background: white;
+    input[type="text"]:focus, input[type="email"]:focus, select:focus, textarea:focus {
+      outline: none; border-color: #193278; background: white;
     }
+    input.field-error, select.field-error, textarea.field-error { border-color: #c0392b; }
     textarea { resize: vertical; min-height: 90px; }
-    .radio-group, .checkbox-group { display: flex; flex-direction: column; gap: 10px; margin-top: 4px; }
-    .radio-group label, .checkbox-group label {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      font-weight: 400;
-      color: #444;
-      cursor: pointer;
-      font-size: 14px;
-    }
-    .radio-group input[type="radio"],
-    .checkbox-group input[type="checkbox"] {
-      width: 16px;
-      height: 16px;
-      accent-color: #193278;
-      flex-shrink: 0;
-    }
-    .field-hint { font-size: 12px; color: #888; margin-top: 5px; }
-    .submit-area { margin-top: 32px; text-align: center; }
-    .submit-btn { background: #193278; color: white; font-size: 16px; font-weight: 600; padding: 15px 44px; border: none; border-radius: 4px; cursor: pointer; }
-    .submit-btn:hover { background: #1a3a8f; }
-    .form-note { font-size: 13px; color: #999; margin-top: 12px; }
+    .field-err-msg { font-size: 12px; color: #c0392b; margin-top: 5px; display: none; }
+    .char-counter { font-size: 12px; color: #888; margin-top: 5px; text-align: right; }
+    .char-counter.warn { color: #C9A84C; font-weight: 600; }
+    .char-counter.danger { color: #c0392b; font-weight: 600; }
     .spots-badge { display: inline-block; background: rgba(201,168,76,0.12); border: 1px solid #C9A84C; color: #a07820; font-size: 12px; padding: 4px 14px; border-radius: 20px; margin-bottom: 28px; font-weight: 500; }
+    .submit-area { margin-top: 32px; text-align: center; }
+    .submit-btn { background: #C9A84C; color: #193278; font-size: 16px; font-weight: 700; padding: 15px 44px; border: none; border-radius: 4px; cursor: pointer; width: 100%; max-width: 320px; }
+    .submit-btn:hover { background: #b8963e; }
+    .form-note { font-size: 13px; color: #999; margin-top: 12px; line-height: 1.7; }
     footer { background: #193278; padding: 36px 40px; text-align: center; color: white; border-top: 3px solid #C9A84C; margin-top: 60px; }
     footer p { font-size: 13px; margin: 6px 0; }
     footer a { color: #C9A84C; text-decoration: none; }
@@ -77,8 +65,11 @@
       header { padding: 16px 20px; }
       .page-hero { padding: 36px 20px; }
       .page-hero h1 { font-size: 26px; }
+      .pricing-summary { flex-direction: column; align-items: center; }
+      .pricing-row { width: 100%; max-width: 260px; }
       .form-section { padding: 30px 16px; }
       .form-card { padding: 28px 20px; }
+      .submit-btn { width: 100%; max-width: 100%; }
       footer { padding: 28px 20px; }
     }
   </style>
@@ -97,116 +88,108 @@
 </header>
 
 <div class="deadline-banner">
-  ⚡ Beta applications close 11:59 PM ET on May 9, 2026 — Only 4 spots available
+  ⚡ Applications close May 9, 2026 at 11:59 PM ET · Limited to 10 organizations
 </div>
 
 <div class="page-hero">
   <h1>Apply for <span class="accent">Beta Access</span></h1>
   <p>Phase 1 runs May–June 2026. Discounted access for selected organizations. We'll review applications and notify selections by May 12.</p>
+  <div class="pricing-summary">
+    <div class="pricing-row">
+      <span class="tier-name">Starter</span>
+      <span class="tier-beta">$3,150/mo beta</span>
+      <span class="tier-prod">$3,500 production</span>
+    </div>
+    <div class="pricing-row">
+      <span class="tier-name">Growth</span>
+      <span class="tier-beta">$6,750/mo beta</span>
+      <span class="tier-prod">$7,500 production</span>
+    </div>
+    <div class="pricing-row">
+      <span class="tier-name">Enterprise</span>
+      <span class="tier-beta">Custom −10% beta</span>
+      <span class="tier-prod">&nbsp;</span>
+    </div>
+  </div>
 </div>
 
 <div class="form-section">
   <div class="form-card">
-    <div class="spots-badge">4 spots · Selections announced May 12, 2026</div>
+    <div class="spots-badge">10 organizations · Selections announced May 12, 2026</div>
     <h2>Beta Application</h2>
 
-    <form action="https://formspree.io/f/mojyzrjp" method="POST">
+    <form
+      id="apply-form"
+      name="fas-beta-application"
+      method="POST"
+      data-netlify="true"
+      action="/apply-thank-you"
+    >
+      <input type="hidden" name="form-name" value="fas-beta-application">
 
+      <!-- FIELD 1: Company Name -->
       <div class="field-group">
         <label for="company">Company / Organization Name <span class="required">*</span></label>
-        <input type="text" id="company" name="company" placeholder="Acme Corp" required>
+        <input type="text" id="company" name="company" placeholder="Acme Corporation">
+        <div class="field-err-msg" id="err-company">Please enter your company name.</div>
       </div>
 
+      <!-- FIELD 2: Work Email -->
       <div class="field-group">
         <label for="email">Work Email <span class="required">*</span></label>
-        <input type="email" id="email" name="email" placeholder="your@company.com" required>
+        <input type="email" id="email" name="email" placeholder="you@yourcompany.com">
+        <div class="field-err-msg" id="err-email">Please enter a valid email address.</div>
       </div>
 
+      <!-- FIELD 3: ATS -->
       <div class="field-group">
-        <label for="company_size">Company Size <span class="required">*</span></label>
-        <select id="company_size" name="company_size" required>
-          <option value="" disabled selected>Select size</option>
-          <option value="1-49">1–49 employees</option>
-          <option value="50-199">50–199 employees</option>
-          <option value="200-999">200–999 employees</option>
-          <option value="1000+">1,000+ employees</option>
+        <label for="ats_system">Which ATS do you currently use? <span class="required">*</span></label>
+        <select id="ats_system" name="ats_system">
+          <option value="" disabled selected>Select ATS…</option>
+          <option value="Workday">Workday</option>
+          <option value="Greenhouse">Greenhouse</option>
+          <option value="Lever">Lever</option>
+          <option value="Taleo">Taleo</option>
+          <option value="iCIMS">iCIMS</option>
+          <option value="ADP">ADP</option>
+          <option value="Other">Other</option>
+          <option value="None">None / Not using an ATS</option>
         </select>
+        <div class="field-err-msg" id="err-ats">Please select your ATS.</div>
       </div>
 
+      <!-- FIELD 4: Regulatory Exposure -->
       <div class="field-group">
-        <label>Which ATS do you currently use? <span class="required">*</span></label>
-        <div class="radio-group">
-          <label class="radio-option"><input type="radio" name="ats_system" value="Workday" required><span>Workday</span></label>
-          <label class="radio-option"><input type="radio" name="ats_system" value="Greenhouse"><span>Greenhouse</span></label>
-          <label class="radio-option"><input type="radio" name="ats_system" value="Lever"><span>Lever</span></label>
-          <label class="radio-option"><input type="radio" name="ats_system" value="Taleo (Oracle)"><span>Taleo (Oracle)</span></label>
-          <label class="radio-option"><input type="radio" name="ats_system" value="iCIMS"><span>iCIMS</span></label>
-          <label class="radio-option"><input type="radio" name="ats_system" value="ADP Workforce Now"><span>ADP Workforce Now</span></label>
-          <label class="radio-option"><input type="radio" name="ats_system" value="PeopleSoft (Oracle)"><span>PeopleSoft (Oracle)</span></label>
-          <label class="radio-option"><input type="radio" name="ats_system" value="Kenexa (IBM)"><span>Kenexa (IBM)</span></label>
-          <label class="radio-option"><input type="radio" name="ats_system" value="Jobvite"><span>Jobvite</span></label>
-          <label class="radio-option"><input type="radio" name="ats_system" value="Other"><span>Other</span></label>
-          <label class="radio-option"><input type="radio" name="ats_system" value="None"><span>None</span></label>
-        </div>
+        <label for="regulatory">Primary Regulatory Exposure <span class="required">*</span></label>
+        <select id="regulatory" name="regulatory">
+          <option value="" disabled selected>Select framework…</option>
+          <option value="NYC Local Law 144">NYC Local Law 144</option>
+          <option value="Colorado SB205">Colorado SB205</option>
+          <option value="EU AI Act">EU AI Act</option>
+          <option value="OFCCP">OFCCP</option>
+          <option value="Title VII / EEOC">Title VII / EEOC</option>
+          <option value="Other">Other</option>
+        </select>
+        <div class="field-err-msg" id="err-regulatory">Please select your primary regulatory framework.</div>
       </div>
 
+      <!-- FIELD 5: Why a fit -->
       <div class="field-group">
-        <label>ATS Version or Year Implemented</label>
-        <input type="text" name="ats_version" placeholder="e.g. Workday 2019, Taleo Enterprise 15, ADP v6...">
+        <label for="why_fit">Why is your organization a fit for Phase 1 beta? <span class="required">*</span></label>
+        <textarea id="why_fit" name="why_fit" maxlength="200"
+          placeholder="e.g., 500+ annual rejections, Colorado SB205 deadline, dedicated compliance officer on staff"></textarea>
+        <div class="char-counter" id="char-counter">0 / 200 characters</div>
+        <div class="field-err-msg" id="err-why">Please tell us why your organization is a fit (max 200 characters).</div>
       </div>
-
-      <div class="field-group">
-        <label>Do you run more than one ATS system?</label>
-        <div class="radio-group">
-          <label class="radio-option"><input type="radio" name="multi_ats" value="Yes"><span>Yes — we use multiple ATS platforms</span></label>
-          <label class="radio-option"><input type="radio" name="multi_ats" value="No"><span>No — single ATS</span></label>
-        </div>
-      </div>
-
-      <div class="field-group">
-        <label>Has your organization conducted a prior bias or AI audit?</label>
-        <div class="radio-group">
-          <label><input type="radio" name="prior_audit" value="yes"> Yes</label>
-          <label><input type="radio" name="prior_audit" value="no"> No</label>
-          <label><input type="radio" name="prior_audit" value="in_progress"> In progress / planned</label>
-        </div>
-      </div>
-
-      <div class="field-group">
-        <label for="compliance_challenge">What is your biggest compliance challenge right now? <span class="required">*</span></label>
-        <textarea id="compliance_challenge" name="compliance_challenge" placeholder="Briefly describe the compliance risk or gap you're trying to address..." required></textarea>
-      </div>
-
-      <div class="field-group">
-        <label>Can your team commit to monthly compliance check-ins during Phase 1?</label>
-        <div class="radio-group">
-          <label><input type="radio" name="feedback_availability" value="yes"> Yes, monthly check-ins work</label>
-          <label><input type="radio" name="feedback_availability" value="limited"> Availability is limited — I'd need to discuss</label>
-          <label><input type="radio" name="feedback_availability" value="no"> No, not available for check-ins</label>
-        </div>
-      </div>
-
-      <div class="field-group">
-        <label>Would you be open to being referenced as a case study?</label>
-        <div class="radio-group">
-          <label><input type="radio" name="case_study" value="yes"> Yes (eligible for 10% Year 1 discount)</label>
-          <label><input type="radio" name="case_study" value="anonymous"> Anonymous only</label>
-          <label><input type="radio" name="case_study" value="no"> No</label>
-        </div>
-        <p class="field-hint">Case study participants receive a 10% discount on Year 1 production pricing. See <a href="terms.html" style="color: #1E90FF;">Terms</a> for details.</p>
-      </div>
-
-      <div class="field-group">
-        <label for="anything_else">Anything else we should know?</label>
-        <textarea id="anything_else" name="anything_else" placeholder="Optional — any additional context, questions, or notes"></textarea>
-      </div>
-
-      <input type="hidden" name="_subject" value="F.A.S. Beta Application">
-      <input type="hidden" name="_next" value="https://forensicauditingservices.com/apply-thank-you.html">
 
       <div class="submit-area">
         <button type="submit" class="submit-btn">Submit Application →</button>
-        <p class="form-note">Your data is confidential and encrypted. We never sell your information.<br>By submitting, you agree to our <a href="terms.html" style="color: #1E90FF;">Terms &amp; Conditions</a>.</p>
+        <p class="form-note">
+          Applications reviewed within 48 hours.<br>
+          Selection notifications sent by May 12, 2026.<br>
+          Your data is confidential and encrypted. We never sell your information.<br>
+          By submitting, you agree to our <a href="terms.html" style="color: #1E90FF;">Terms &amp; Conditions</a>.
+        </p>
       </div>
 
     </form>
@@ -225,6 +208,80 @@
   </p>
   <p style="margin-top: 14px; font-size: 11px; color: rgba(255,255,255,0.3);">© 2026 ALS Consulting Services. All rights reserved.</p>
 </footer>
+
+<script>
+  var PERSONAL_DOMAINS = [
+    'gmail.com','yahoo.com','hotmail.com','outlook.com','icloud.com','aol.com',
+    'live.com','msn.com','me.com','protonmail.com','proton.me','mail.com'
+  ];
+  var DISPOSABLE_DOMAINS = [
+    'mailinator.com','guerrillamail.com','tempmail.com','yopmail.com',
+    'trashmail.com','maildrop.cc','getnada.com','fakeinbox.com',
+    'tempr.email','discard.email'
+  ];
+
+  // Character counter
+  var textarea = document.getElementById('why_fit');
+  var counter  = document.getElementById('char-counter');
+  textarea.addEventListener('input', function() {
+    var len = this.value.length;
+    counter.textContent = len + ' / 200 characters';
+    counter.className = 'char-counter' + (len >= 190 ? ' danger' : len >= 150 ? ' warn' : '');
+  });
+
+  // Form validation + submit
+  document.getElementById('apply-form').addEventListener('submit', function(e) {
+    e.preventDefault();
+    var valid = true;
+
+    function showErr(id, msg) {
+      var el = document.getElementById(id);
+      el.textContent = msg;
+      el.style.display = 'block';
+    }
+    function clearErr(id) {
+      document.getElementById(id).style.display = 'none';
+    }
+    function markField(el, bad) {
+      el.classList.toggle('field-error', bad);
+    }
+
+    // Field 1
+    var company = document.getElementById('company');
+    if (!company.value.trim()) { showErr('err-company', 'Please enter your company name.'); markField(company, true); valid = false; }
+    else { clearErr('err-company'); markField(company, false); }
+
+    // Field 2
+    var emailEl = document.getElementById('email');
+    var email   = emailEl.value.trim();
+    var emailOk = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+    if (!email || !emailOk) {
+      showErr('err-email', 'Please enter a valid email address.'); markField(emailEl, true); valid = false;
+    } else {
+      var domain = email.split('@')[1].toLowerCase();
+      if (PERSONAL_DOMAINS.indexOf(domain) !== -1 || DISPOSABLE_DOMAINS.indexOf(domain) !== -1) {
+        showErr('err-email', 'Please use your work email address.'); markField(emailEl, true); valid = false;
+      } else { clearErr('err-email'); markField(emailEl, false); }
+    }
+
+    // Field 3
+    var ats = document.getElementById('ats_system');
+    if (!ats.value) { showErr('err-ats', 'Please select your ATS.'); markField(ats, true); valid = false; }
+    else { clearErr('err-ats'); markField(ats, false); }
+
+    // Field 4
+    var reg = document.getElementById('regulatory');
+    if (!reg.value) { showErr('err-regulatory', 'Please select your primary regulatory framework.'); markField(reg, true); valid = false; }
+    else { clearErr('err-regulatory'); markField(reg, false); }
+
+    // Field 5
+    var why = document.getElementById('why_fit');
+    if (!why.value.trim() || why.value.length > 200) { showErr('err-why', 'Please tell us why your organization is a fit (max 200 characters).'); markField(why, true); valid = false; }
+    else { clearErr('err-why'); markField(why, false); }
+
+    if (valid) { this.submit(); }
+  });
+</script>
 
 </body>
 </html>

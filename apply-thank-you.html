@@ -4,33 +4,52 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Application Received — Forensic Auditing Services (F.A.S.)</title>
+  <meta name="description" content="Your F.A.S. Beta application has been received. Selections announced May 12, 2026.">
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
-    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #193278; color: white; min-height: 100vh; display: flex; flex-direction: column; }
-    header { padding: 18px 40px; border-bottom: 3px solid #C9A84C; display: flex; justify-content: space-between; align-items: center; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; background: #f5f5f5; color: #2d2d2d; line-height: 1.6; display: flex; flex-direction: column; min-height: 100vh; }
+    header { background: #193278; padding: 18px 40px; display: flex; justify-content: space-between; align-items: center; border-bottom: 3px solid #C9A84C; }
     .logo { font-size: 18px; font-weight: bold; color: white; text-decoration: none; }
-    .brand-sub { font-size: 11px; color: #C9A84C; margin-top: 3px; }
-    .main { flex: 1; display: flex; align-items: center; justify-content: center; padding: 60px 40px; text-align: center; }
-    .card { max-width: 600px; }
-    .check-circle { width: 80px; height: 80px; border-radius: 50%; background: rgba(56,161,105,0.15); border: 2px solid rgba(56,161,105,0.4); display: flex; align-items: center; justify-content: center; margin: 0 auto 32px; font-size: 32px; }
-    h1 { font-size: 36px; font-weight: 700; margin-bottom: 16px; line-height: 1.2; }
-    h1 span { color: #C9A84C; }
-    .sub { font-size: 16px; color: rgba(255,255,255,0.65); line-height: 1.8; margin-bottom: 40px; max-width: 480px; margin-left: auto; margin-right: auto; }
-    .timeline { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 6px; padding: 28px; margin-bottom: 40px; text-align: left; }
-    .timeline-title { font-size: 11px; font-family: monospace; letter-spacing: 2px; color: #C9A84C; margin-bottom: 20px; }
-    .timeline-item { display: flex; gap: 16px; margin-bottom: 16px; align-items: flex-start; }
-    .timeline-item:last-child { margin-bottom: 0; }
-    .timeline-dot { width: 8px; height: 8px; border-radius: 50%; background: #C9A84C; flex-shrink: 0; margin-top: 6px; }
-    .timeline-dot.empty { background: transparent; border: 1px solid rgba(201,168,76,0.3); }
-    .timeline-text { font-size: 14px; color: rgba(255,255,255,0.7); line-height: 1.6; }
-    .timeline-text strong { color: white; }
-    .actions { display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; }
-    .btn-gold { display: inline-block; background: #C9A84C; color: #193278; font-size: 14px; font-weight: 600; padding: 13px 28px; border-radius: 4px; text-decoration: none; }
-    .btn-gold:hover { background: #e0bc5a; }
-    .btn-outline { display: inline-block; background: transparent; color: white; font-size: 14px; padding: 13px 28px; border-radius: 4px; text-decoration: none; border: 1px solid rgba(255,255,255,0.2); }
-    .btn-outline:hover { border-color: #C9A84C; color: #C9A84C; }
-    footer { padding: 24px 40px; border-top: 1px solid rgba(201,168,76,0.2); text-align: center; font-size: 12px; color: rgba(255,255,255,0.3); }
+    .logo:hover { color: #C9A84C; }
+    .brand-subtitle { font-size: 11px; color: #C9A84C; margin-top: 2px; }
+    .main { flex: 1; display: flex; align-items: center; justify-content: center; padding: 60px 24px; min-height: 70vh; }
+    .confirmation-card {
+      background: white; border-radius: 8px; box-shadow: 0 2px 20px rgba(0,0,0,0.08);
+      padding: 56px 48px; max-width: 560px; width: 100%; text-align: center;
+    }
+    .check-icon {
+      width: 64px; height: 64px; border-radius: 50%;
+      background: rgba(201,168,76,0.12); border: 2px solid #C9A84C;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 28px; margin: 0 auto 24px; color: #C9A84C; font-weight: 700;
+    }
+    .eyebrow {
+      font-size: 11px; font-weight: 700; letter-spacing: 2.5px;
+      text-transform: uppercase; color: #C9A84C; margin-bottom: 12px;
+    }
+    h1 { font-size: 32px; font-weight: 700; color: #193278; margin-bottom: 18px; }
+    .body-text { font-size: 15px; color: #555; line-height: 1.75; margin-bottom: 10px; }
+    .contact-line { font-size: 13px; color: #888; margin: 20px 0 28px; }
+    .contact-line a { color: #1E90FF; text-decoration: none; }
+    .contact-line a:hover { text-decoration: underline; }
+    .btn-primary {
+      display: inline-block; background: #C9A84C; color: #193278;
+      font-size: 15px; font-weight: 700; padding: 14px 36px;
+      border-radius: 4px; text-decoration: none; margin-bottom: 16px;
+    }
+    .btn-primary:hover { background: #b8963e; }
+    .secondary-link { display: block; font-size: 13px; color: #888; text-decoration: none; }
+    .secondary-link:hover { color: #C9A84C; }
+    footer { background: #193278; padding: 36px 40px; text-align: center; color: white; border-top: 3px solid #C9A84C; }
+    footer p { font-size: 13px; margin: 6px 0; }
     footer a { color: #C9A84C; text-decoration: none; }
+    footer a:hover { text-decoration: underline; }
+    @media (max-width: 768px) {
+      header { padding: 16px 20px; }
+      .confirmation-card { padding: 36px 24px; }
+      h1 { font-size: 26px; }
+      footer { padding: 28px 20px; }
+    }
   </style>
 </head>
 <body>
@@ -38,50 +57,38 @@
 <header>
   <div>
     <a href="index.html" class="logo">Forensic Auditing Services (F.A.S.)</a>
-    <div class="brand-sub">A brand of ALS Consulting Services</div>
+    <div class="brand-subtitle">A brand of ALS Consulting Services</div>
+  </div>
+  <div style="display: flex; align-items: center; gap: 20px;">
+    <a href="/dashboard/login.html" style="color: rgba(255,255,255,0.8); font-size: 13px; text-decoration: none;">Client Login</a>
+    <a href="index.html" style="color: rgba(255,255,255,0.6); font-size: 13px; text-decoration: none;">← Back to home</a>
   </div>
 </header>
 
-<div class="main">
-  <div class="card">
-    <div class="check-circle">✓</div>
-    <h1>Application <span>Received.</span></h1>
-    <p class="sub">Thank you for applying to the F.A.S. Phase 1 Beta Program. Your application is in review. We'll be in touch by May 12, 2026.</p>
-
-    <div class="timeline">
-      <div class="timeline-title">WHAT HAPPENS NEXT</div>
-      <div class="timeline-item">
-        <div class="timeline-dot"></div>
-        <div class="timeline-text"><strong>Now — May 9</strong> · Applications remain open. 4 spots available.</div>
-      </div>
-      <div class="timeline-item">
-        <div class="timeline-dot empty"></div>
-        <div class="timeline-text"><strong>May 9, 11:59 PM ET</strong> · Application window closes.</div>
-      </div>
-      <div class="timeline-item">
-        <div class="timeline-dot empty"></div>
-        <div class="timeline-text"><strong>May 12</strong> · Selection decisions made. All applicants notified.</div>
-      </div>
-      <div class="timeline-item">
-        <div class="timeline-dot empty"></div>
-        <div class="timeline-text"><strong>May 19</strong> · Onboarding week. API keys issued. ATS webhook configured.</div>
-      </div>
-      <div class="timeline-item">
-        <div class="timeline-dot empty"></div>
-        <div class="timeline-text"><strong>June 1</strong> · Phase 1 begins. F.A.S. goes live on your rejection pipeline.</div>
-      </div>
-    </div>
-
-    <div class="actions">
-      <a href="demo.html" class="btn-gold">Watch the Demo →</a>
-      <a href="index.html" class="btn-outline">Back to Home</a>
-    </div>
+<main class="main">
+  <div class="confirmation-card">
+    <div class="check-icon">✓</div>
+    <div class="eyebrow">F.A.S. Phase 1 Beta</div>
+    <h1>Application Received</h1>
+    <p class="body-text">Thank you for applying. We've received your application and will review it within 48 hours.</p>
+    <p class="body-text">Selection notifications will be sent by May 12, 2026.</p>
+    <p class="contact-line">Questions? Email <a href="mailto:algorithmicbiasaudits@gmail.com">algorithmicbiasaudits@gmail.com</a></p>
+    <a href="https://forensicauditingservices.com" class="btn-primary">Back to Home →</a>
+    <a href="https://calendly.com/astargill-ih3e/30min" target="_blank" class="secondary-link">Book a call instead → calendly.com/astargill-ih3e/30min</a>
   </div>
-</div>
+</main>
 
 <footer>
-  <p>Questions? Email <a href="mailto:algorithmicbiasaudits@gmail.com">algorithmicbiasaudits@gmail.com</a> or <a href="https://calendly.com/astargill-ih3e/30min" target="_blank">book a call</a>.</p>
-  <p style="margin-top: 8px;">© 2026 ALS Consulting Services. All rights reserved.</p>
+  <p style="font-size: 15px; font-weight: bold; color: #C9A84C; margin-bottom: 6px;">Forensic Auditing Services (F.A.S.)</p>
+  <p>A brand of ALS Consulting Services</p>
+  <p style="margin-top: 12px;">
+    <a href="index.html">Home</a> &nbsp;|&nbsp;
+    <a href="demo.html">See Demo</a> &nbsp;|&nbsp;
+    <a href="terms.html">Terms</a> &nbsp;|&nbsp;
+    <a href="faq.html">FAQ</a> &nbsp;|&nbsp;
+    <a href="https://calendly.com/astargill-ih3e/30min" target="_blank">Book a Call</a>
+  </p>
+  <p style="margin-top: 14px; font-size: 11px; color: rgba(255,255,255,0.3);">© 2026 ALS Consulting Services. All rights reserved.</p>
 </footer>
 
 </body>
