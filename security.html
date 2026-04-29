@@ -1,0 +1,526 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>HITL Security Overview — ALS Consulting</title>
+  <style>
+    :root {
+      --black: #0a0a0a;
+      --white: #ffffff;
+      --dark-gray: #1a1a1a;
+      --light-gray: #f5f5f5;
+      --gold: #d4a574;
+      --electric-blue: #00d9ff;
+      --accent-red: #ff4444;
+      --success-green: #4caf50;
+      --border: #2a2a2a;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Georgia', serif;
+      background: var(--black);
+      color: #e0e0e0;
+      line-height: 1.7;
+      letter-spacing: 0.3px;
+    }
+
+    header {
+      background: linear-gradient(135deg, var(--dark-gray) 0%, #1a1a2e 100%);
+      border-bottom: 2px solid var(--gold);
+      padding: 4rem 2rem;
+      text-align: center;
+      margin-bottom: 3rem;
+    }
+
+    header h1 {
+      font-size: 2.8rem;
+      font-weight: 300;
+      letter-spacing: 2px;
+      margin-bottom: 0.5rem;
+      color: var(--white);
+    }
+
+    header .subtitle {
+      font-size: 1rem;
+      color: var(--gold);
+      font-weight: normal;
+      letter-spacing: 1px;
+    }
+
+    .container {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 0 2rem;
+    }
+
+    .section {
+      margin-bottom: 4rem;
+      padding: 2.5rem;
+      background: var(--dark-gray);
+      border-left: 4px solid var(--gold);
+      border-radius: 2px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .section::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      right: 0;
+      width: 200px;
+      height: 200px;
+      background: radial-gradient(circle, var(--electric-blue) 0%, transparent 70%);
+      opacity: 0.05;
+      pointer-events: none;
+    }
+
+    .section-number {
+      display: inline-block;
+      font-size: 3rem;
+      font-weight: 300;
+      color: var(--electric-blue);
+      margin-bottom: 1rem;
+      opacity: 0.6;
+    }
+
+    .section h2 {
+      font-size: 2rem;
+      font-weight: 400;
+      margin-bottom: 1.5rem;
+      color: var(--white);
+      letter-spacing: 1px;
+    }
+
+    .section h3 {
+      font-size: 1.1rem;
+      font-weight: 600;
+      margin-top: 1.5rem;
+      margin-bottom: 0.75rem;
+      color: var(--gold);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .section p {
+      margin-bottom: 1rem;
+      line-height: 1.8;
+    }
+
+    .section ul {
+      margin-left: 2rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .section li {
+      margin-bottom: 0.75rem;
+      list-style: none;
+      position: relative;
+      padding-left: 1.5rem;
+    }
+
+    .section li::before {
+      content: '▸';
+      position: absolute;
+      left: 0;
+      color: var(--electric-blue);
+      font-weight: bold;
+    }
+
+    .callout {
+      background: rgba(212, 165, 116, 0.1);
+      border-left: 3px solid var(--gold);
+      padding: 1.5rem;
+      margin: 1.5rem 0;
+      border-radius: 2px;
+      font-style: italic;
+      color: #d0d0d0;
+    }
+
+    .callout strong {
+      color: var(--gold);
+      font-style: normal;
+    }
+
+    .warning {
+      background: rgba(255, 68, 68, 0.1);
+      border-left: 3px solid var(--accent-red);
+      padding: 1.5rem;
+      margin: 1.5rem 0;
+      border-radius: 2px;
+    }
+
+    .warning strong {
+      color: var(--accent-red);
+    }
+
+    .success {
+      background: rgba(76, 175, 80, 0.1);
+      border-left: 3px solid var(--success-green);
+      padding: 1.5rem;
+      margin: 1.5rem 0;
+      border-radius: 2px;
+    }
+
+    .success strong {
+      color: var(--success-green);
+    }
+
+    .tech-stack {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 1.5rem;
+      margin: 1.5rem 0;
+    }
+
+    .tech-item {
+      background: rgba(0, 217, 255, 0.05);
+      padding: 1rem;
+      border-radius: 2px;
+      border: 1px solid rgba(0, 217, 255, 0.2);
+    }
+
+    .tech-item strong {
+      color: var(--electric-blue);
+      display: block;
+      margin-bottom: 0.5rem;
+    }
+
+    footer {
+      border-top: 2px solid var(--gold);
+      padding: 3rem 2rem;
+      text-align: center;
+      margin-top: 4rem;
+      background: var(--dark-gray);
+    }
+
+    footer h3 {
+      margin-bottom: 1rem;
+    }
+
+    footer p {
+      margin-bottom: 0.5rem;
+    }
+
+    .contact-email {
+      color: var(--electric-blue);
+      text-decoration: none;
+      border-bottom: 1px solid var(--electric-blue);
+      transition: all 0.3s ease;
+    }
+
+    .contact-email:hover {
+      color: var(--gold);
+      border-bottom-color: var(--gold);
+    }
+
+    @media (max-width: 768px) {
+      header h1 {
+        font-size: 1.8rem;
+      }
+
+      .section {
+        padding: 1.5rem;
+      }
+
+      .section h2 {
+        font-size: 1.5rem;
+      }
+
+      .tech-stack {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <h1>HITL Security Overview</h1>
+    <p class="subtitle">Human-in-the-Loop Compliance Audit Layer</p>
+    <p style="color: #999; margin-top: 1rem; font-size: 0.9rem;">ALS Consulting | April 2026</p>
+  </header>
+
+  <div class="container">
+
+    <!-- Section 1: Encryption -->
+    <div class="section">
+      <div class="section-number">1</div>
+      <h2>Encryption</h2>
+
+      <h3>Data at Rest</h3>
+      <ul>
+        <li><strong>AES-256 encryption</strong> — All candidate data, audit logs, and compliance records encrypted at rest on Supabase (PostgreSQL)</li>
+        <li><strong>Candidate identifiers hashed</strong> before storage — Names, emails, and SSNs never stored in plaintext</li>
+        <li>Database backups encrypted with same AES-256 standard</li>
+      </ul>
+
+      <h3>Data in Transit</h3>
+      <ul>
+        <li><strong>TLS 1.3</strong> — All API calls, webhook payloads, and client-server communication encrypted in transit</li>
+        <li>Enforced HTTPS across all endpoints (Render API, Netlify CDN, Auth0)</li>
+        <li>No fallback to HTTP; mixed-content requests blocked</li>
+      </ul>
+
+      <div class="callout">
+        <strong>What We Don't Claim:</strong> We do not offer end-to-end encryption or zero-knowledge architecture. HITL operates on a verified trust model where authorized compliance officers review candidate data — this by design requires decryption at the application layer for human analysis.
+      </div>
+    </div>
+
+    <!-- Section 2: Authentication & Access Control -->
+    <div class="section">
+      <div class="section-number">2</div>
+      <h2>Authentication &amp; Access Control</h2>
+
+      <h3>Role-Based Access Control (RBAC)</h3>
+      <ul>
+        <li><strong>Auth0 multi-tenant RBAC</strong> — Each organization isolated; no cross-tenant data leakage</li>
+        <li><strong>3 Roles:</strong>
+          <ul style="margin-top: 0.5rem; margin-left: 2rem;">
+            <li><strong>HR Lead:</strong> Run analyses, view own company's audit results</li>
+            <li><strong>Compliance Officer:</strong> Review all audits, override low/medium risk flags, escalate high-risk</li>
+            <li><strong>Executive Sponsor:</strong> View executive summary + high-risk escalations only (scoped elevation)</li>
+          </ul>
+        </li>
+      </ul>
+
+      <h3>Access Elevation &amp; Dual Authorization</h3>
+      <ul>
+        <li><strong>Scoped elevation:</strong> Executives see candidate details only for HIGH-risk rejections requiring their override</li>
+        <li><strong>Dual authorization required:</strong> Baseline configuration changes (audit rules, thresholds, comment policies) require sign-off from both Compliance Officer + Executive Sponsor</li>
+        <li>All access attempts logged with timestamp, user, and action taken</li>
+      </ul>
+
+      <h3>Multi-Factor Authentication (MFA)</h3>
+      <div class="success">
+        <strong>Status:</strong> Auth0 supports MFA (TOTP, SMS, push notifications). MFA is available for enterprise clients on request; standard deployments use password + session-based authentication.
+      </div>
+    </div>
+
+    <!-- Section 3: Data Handling & Retention -->
+    <div class="section">
+      <div class="section-number">3</div>
+      <h2>Data Handling &amp; Retention</h2>
+
+      <h3>Anonymization &amp; Hashing</h3>
+      <ul>
+        <li><strong>Candidate identifiers hashed before storage</strong> — Internal system uses hashed IDs; plaintext identifiers encrypted and isolated</li>
+        <li>Audit reports display candidate reference numbers, not names (configurable by client preference)</li>
+      </ul>
+
+      <h3>Retention &amp; Deletion</h3>
+      <ul>
+        <li><strong>90-day deletion post-termination:</strong> When a candidate is marked as hired/rejected/withdrawn, audit data auto-deletes after 90 days unless legal hold is requested</li>
+        <li>Legal holds respected indefinitely (e.g., discrimination claims, litigation)</li>
+        <li>Clients can request manual deletion at any time (subject to legal requirements)</li>
+      </ul>
+
+      <h3>GDPR &amp; International Compliance</h3>
+      <ul>
+        <li><strong>GDPR Article 6 (Lawful Basis):</strong> Processing is legitimate interest (bias detection) + contract (HITL service agreement)</li>
+        <li><strong>GDPR Article 21 (Right to Object):</strong> Candidates can request their data be excluded from future audits</li>
+        <li>Data residency: EU candidate data stored on Supabase EU region (if requested)</li>
+        <li>Data Processing Addendum (DPA) available for enterprise customers</li>
+      </ul>
+
+      <h3>Audit Trail &amp; Chain of Custody</h3>
+      <ul>
+        <li>All audit decisions logged with timestamp, user, and reasoning</li>
+        <li>Local encrypted backups maintained for 12 months for regulatory audits</li>
+      </ul>
+    </div>
+
+    <!-- Section 4: Infrastructure Security -->
+    <div class="section">
+      <div class="section-number">4</div>
+      <h2>Infrastructure Security</h2>
+
+      <h3>Architecture Overview</h3>
+      <div class="tech-stack">
+        <div class="tech-item">
+          <strong>API Layer</strong>
+          <p>Render (Node.js) — Stateless, autoscaling</p>
+        </div>
+        <div class="tech-item">
+          <strong>Database</strong>
+          <p>Supabase (PostgreSQL) — Encrypted, daily backups, HA failover</p>
+        </div>
+        <div class="tech-item">
+          <strong>CDN &amp; Hosting</strong>
+          <p>Netlify — Edge caching, SSL/TLS termination</p>
+        </div>
+        <div class="tech-item">
+          <strong>Identity &amp; Auth</strong>
+          <p>Auth0 — Multi-tenant, SSO, RBAC enforcement</p>
+        </div>
+        <div class="tech-item">
+          <strong>Payments</strong>
+          <p>Stripe — PCI-DSS Level 1, tokenization only</p>
+        </div>
+        <div class="tech-item">
+          <strong>Notifications</strong>
+          <p>Resend — SMTP delivery, TLS encryption</p>
+        </div>
+        <div class="tech-item">
+          <strong>Audit Engine</strong>
+          <p>Anthropic (Claude API) — Structured classification for 7-lane forensic analysis</p>
+        </div>
+        <div class="tech-item">
+          <strong>Source Control</strong>
+          <p>GitHub — Code repositories (no candidate data)</p>
+        </div>
+      </div>
+
+      <h3>Database Access &amp; API Security</h3>
+      <ul>
+        <li><strong>No direct public database access</strong> — All queries routed through authenticated Render API with tenant verification</li>
+        <li><strong>Webhook endpoint validation:</strong> All incoming webhooks must include valid API key + tenant signature (HMAC-SHA256)</li>
+        <li><strong>Rate limiting:</strong> API endpoints rate-limited by tenant (burst: 100 req/sec; sustained: 1000 req/hour)</li>
+        <li>SQL injection protection via parameterized queries (ORM enforcement)</li>
+      </ul>
+
+      <h3>Network Security</h3>
+      <ul>
+        <li>All inbound traffic routed through Netlify edge with bot detection</li>
+        <li>Outbound requests from Render use fixed IP ranges (Stripe, Resend, Auth0 whitelists)</li>
+        <li>VPC isolation: Internal services do not expose ports to public internet</li>
+      </ul>
+
+      <h3>Offline Backups &amp; Chain of Custody</h3>
+      <div class="callout">
+        <strong>Offline Backup:</strong> ALS Consulting maintains AES-256 encrypted local backups of immutable audit trails and decision logs at our Winston-Salem, NC facility. This provides physical custody for chain-of-custody requirements and disaster recovery independent of cloud providers. Retrieval requires dual authorization.
+      </div>
+
+      <h3>Anthropic Claude API — Disclosure &amp; Data Handling</h3>
+      <div class="callout">
+        <strong>Anthropic (Claude API) Disclosure:</strong> F.A.S. uses Anthropic's Claude API as a structured classification engine — not a generative decision-maker. The 7 compliance lanes are deterministic rule-based frameworks with fixed thresholds. Claude API parses rejection payloads and maps them to these pre-defined categories. The final risk score, blocking decision, and escalation logic are determined by ALS Consulting's proprietary code. All Claude outputs are advisory; every flagged decision requires human review by a designated compliance officer before it binds. API inputs are processed in real-time and not retained by Anthropic beyond the session. ALS Consulting is actively negotiating a Data Processing Agreement (DPA) with Anthropic.
+      </div>
+    </div>
+
+    <!-- Section 5: Compliance & Audits -->
+    <div class="section">
+      <div class="section-number">5</div>
+      <h2>Compliance &amp; Audits</h2>
+
+      <h3>Third-Party Certifications</h3>
+      <div class="success">
+        <strong>Subprocessor Compliance:</strong> All HITL subprocessors maintain SOC 2 Type II certification:
+        <ul style="margin-top: 0.75rem;">
+          <li><strong>Supabase</strong> — SOC 2 Type II (database, backups, infrastructure)</li>
+          <li><strong>Render</strong> — SOC 2 Type II (application hosting, compute)</li>
+          <li><strong>Netlify</strong> — SOC 2 Type II (CDN, hosting)</li>
+          <li><strong>Auth0</strong> — SOC 2 Type II (identity, authentication)</li>
+          <li><strong>Stripe</strong> — PCI-DSS Level 1 certified (payment processing)</li>
+        </ul>
+      </div>
+
+      <h3>ALS Consulting Security Posture</h3>
+      <div class="callout">
+        <strong>Current Status:</strong> ALS Consulting is preparing for SOC 2 Type I assessment in Q3 2026. We do not yet hold SOC 2 certification, but are building documentation and controls to meet Type I standards by end of Q3.
+      </div>
+
+      <h3>Enterprise Audit Support</h3>
+      <ul>
+        <li><strong>SOC 2 Reports:</strong> Subprocessor SOC 2 Type II reports available upon request (customer confidentiality agreements apply)</li>
+        <li><strong>Data Processing Addendum (DPA):</strong> Available for enterprise contracts; covers GDPR, CCPA, and data residency requirements</li>
+        <li><strong>Security Questionnaires:</strong> Respond to client-provided questionnaires (CAIQ, etc.) within 5 business days</li>
+        <li><strong>Penetration Testing:</strong> HITL infrastructure subject to third-party penetration testing planned for Q3 2026 (results will be shared with enterprise customers)</li>
+      </ul>
+
+      <h3>Regulatory Alignment</h3>
+      <ul>
+        <li><strong>GDPR:</strong> Lawful basis documented; DPA available; right-to-deletion honored</li>
+        <li><strong>CCPA:</strong> Consumer rights (access, deletion, non-sale) enforced at organization level</li>
+        <li><strong>HIPAA:</strong> Not in scope for HITL (no PHI processing); BAA not offered</li>
+        <li><strong>State AI Laws:</strong> Audit output designed to support Illinois HB 3773 (effective January 1, 2026), California's Civil Rights Council employment regulations on automated decision systems (effective October 1, 2025), and Colorado SB 205 compliance</li>
+      </ul>
+    </div>
+
+    <!-- Section 6: Incident Response -->
+    <div class="section">
+      <div class="section-number">6</div>
+      <h2>Incident Response</h2>
+
+      <h3>Detection &amp; Containment</h3>
+      <ul>
+        <li><strong>Continuous monitoring:</strong> Render, Supabase, and Auth0 configured with real-time alerts for unauthorized access, API abuse, or data anomalies</li>
+        <li><strong>Incident classification:</strong> Low (system warning), Medium (potential access anomaly), High (confirmed data exposure)</li>
+        <li>Upon detection of High-severity incident, immediate containment steps:
+          <ul style="margin-top: 0.5rem;">
+            <li>Isolate affected systems</li>
+            <li>Preserve logs for forensic analysis</li>
+            <li>Revoke compromised credentials</li>
+            <li>Block affected API endpoints</li>
+          </ul>
+        </li>
+      </ul>
+
+      <h3>Notification Protocol</h3>
+      <ul>
+        <li><strong>72-hour breach notification:</strong> Affected organizations notified within 72 hours of confirmed data exposure (incident date, scope, remediation steps)</li>
+        <li>Notification sent to designated security contacts via email + phone if available</li>
+        <li><strong>Law enforcement notification:</strong> Coordinated with customers' legal teams; ALS Consulting will cooperate with investigations</li>
+      </ul>
+
+      <h3>Remediation &amp; Recovery</h3>
+      <ul>
+        <li>Post-incident: Full forensic review of logs, access patterns, and system configurations</li>
+        <li>Public incident summary posted within 5 business days (if impact &gt;50 users)</li>
+        <li>Remediation status shared with affected customers bi-weekly until resolved</li>
+      </ul>
+
+      <h3>Reporting &amp; Communication</h3>
+      <ul>
+        <li><strong>Incident contact:</strong> <a href="mailto:algorithmicbiasaudits@gmail.com" class="contact-email">algorithmicbiasaudits@gmail.com</a></li>
+        <li>Subject line: <code style="color: var(--electric-blue);">[SECURITY INCIDENT] Organization Name — Brief Description</code></li>
+        <li>Response time: Initial acknowledgment within 2 hours; full response within 24 hours</li>
+      </ul>
+    </div>
+
+    <!-- Section 7: Questions & Support -->
+    <div class="section">
+      <div class="section-number">7</div>
+      <h2>Questions &amp; Support</h2>
+
+      <h3>Security Inquiries</h3>
+      <p>For questions about HITL security, compliance, or audit procedures:</p>
+      <ul>
+        <li><strong>Email:</strong> <a href="mailto:algorithmicbiasaudits@gmail.com" class="contact-email">algorithmicbiasaudits@gmail.com</a></li>
+        <li><strong>Subject line:</strong> <code style="color: var(--electric-blue);">[SECURITY QUESTION] Topic</code></li>
+        <li><strong>Response time:</strong> 2 business days</li>
+        <li>Responses include relevant documentation, SOC 2 reports, or DPA as applicable</li>
+      </ul>
+
+      <h3>Vulnerability Disclosure</h3>
+      <p>If you discover a security vulnerability in HITL:</p>
+      <ul>
+        <li>Email <a href="mailto:algorithmicbiasaudits@gmail.com" class="contact-email">algorithmicbiasaudits@gmail.com</a> with details</li>
+        <li>Do not publicly disclose the vulnerability; allow 30 days for remediation</li>
+        <li>ALS Consulting commits to acknowledge receipt within 24 hours and provide remediation timeline</li>
+      </ul>
+
+      <h3>Updates &amp; Change Log</h3>
+      <p>Security updates published <strong>quarterly</strong> via email to registered security contacts. Subscribe to receive notifications at deployment.</p>
+    </div>
+
+  </div>
+
+  <footer>
+    <h3>Security &amp; Compliance Statement</h3>
+    <p>HITL is built with enterprise security standards in mind.</p>
+    <p>We prioritize honest communication over inflated claims. This document reflects our current posture, roadmap, and commitments.</p>
+    <p style="margin-top: 1.5rem; font-size: 0.9rem;">
+      ALS Consulting | <a href="mailto:algorithmicbiasaudits@gmail.com" class="contact-email">algorithmicbiasaudits@gmail.com</a>
+    </p>
+    <p style="margin-top: 2rem; color: #666; font-size: 0.85rem;">Last updated: April 2026 | Version 1.0</p>
+  </footer>
+
+</body>
+</html>
