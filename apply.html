@@ -118,14 +118,26 @@
     <div class="spots-badge">10 organizations · Selections announced May 12, 2026</div>
     <h2>Beta Application</h2>
 
+    <div id="fake-success" style="display:none;text-align:center;padding:40px;">
+      <p>Thank you for your submission.</p>
+    </div>
+
     <form
       id="apply-form"
       name="fas-beta-application"
       method="POST"
       data-netlify="true"
+      data-netlify-honeypot="website"
       action="/apply-thank-you"
     >
       <input type="hidden" name="form-name" value="fas-beta-application">
+      <input type="hidden" id="form_loaded_at" name="form_loaded_at" value="">
+
+      <!-- Honeypot — do not remove -->
+      <div style="position:absolute;left:-9999px;top:-9999px;width:0;height:0;overflow:hidden;visibility:hidden;" aria-hidden="true" tabindex="-1">
+        <label for="website">Website</label>
+        <input type="text" id="website" name="website" tabindex="-1" autocomplete="off" value="">
+      </div>
 
       <!-- FIELD 1: Company Name -->
       <div class="field-group">
@@ -210,6 +222,9 @@
 </footer>
 
 <script>
+  // Set timestamp when page loads
+  document.getElementById('form_loaded_at').value = Date.now();
+
   var PERSONAL_DOMAINS = [
     'gmail.com','yahoo.com','hotmail.com','outlook.com','icloud.com','aol.com',
     'live.com','msn.com','me.com','protonmail.com','proton.me','mail.com'
@@ -232,6 +247,24 @@
   // Form validation + submit
   document.getElementById('apply-form').addEventListener('submit', function(e) {
     e.preventDefault();
+    var form = this;
+
+    // Honeypot check
+    var honeypot = document.getElementById('website');
+    if (honeypot && honeypot.value.trim() !== '') {
+      form.style.display = 'none';
+      document.getElementById('fake-success').style.display = 'block';
+      return;
+    }
+
+    // Timestamp check — bots submit in under 3s
+    var loadedAt = parseInt(document.getElementById('form_loaded_at').value);
+    if (Date.now() - loadedAt < 3000) {
+      form.style.display = 'none';
+      document.getElementById('fake-success').style.display = 'block';
+      return;
+    }
+
     var valid = true;
 
     function showErr(id, msg) {
