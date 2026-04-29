@@ -25,14 +25,14 @@
 
     body {
       font-family: 'Georgia', serif;
-      background: var(--black);
+      background: #0a1a4d;
       color: #e0e0e0;
       line-height: 1.7;
       letter-spacing: 0.3px;
     }
 
     header {
-      background: linear-gradient(135deg, var(--dark-gray) 0%, #1a1a2e 100%);
+      background: linear-gradient(135deg, #0a1a4d 0%, #1a2a6d 100%);
       border-bottom: 2px solid var(--gold);
       padding: 4rem 2rem;
       text-align: center;
@@ -63,7 +63,7 @@
     .section {
       margin-bottom: 4rem;
       padding: 2.5rem;
-      background: var(--dark-gray);
+      background: #0f2454;
       border-left: 4px solid var(--gold);
       border-radius: 2px;
       position: relative;
@@ -198,7 +198,7 @@
       padding: 3rem 2rem;
       text-align: center;
       margin-top: 4rem;
-      background: var(--dark-gray);
+      background: #0f2454;
     }
 
     footer h3 {
@@ -286,7 +286,7 @@
     <!-- Section 2: Authentication & Access Control -->
     <div class="section">
       <div class="section-number">2</div>
-      <h2>Authentication &amp; Access Control</h2>
+      <h2>Authentication & Access Control</h2>
 
       <h3>Role-Based Access Control (RBAC)</h3>
       <ul>
@@ -300,7 +300,7 @@
         </li>
       </ul>
 
-      <h3>Access Elevation &amp; Dual Authorization</h3>
+      <h3>Access Elevation & Dual Authorization</h3>
       <ul>
         <li><strong>Scoped elevation:</strong> Executives see candidate details only for HIGH-risk rejections requiring their override</li>
         <li><strong>Dual authorization required:</strong> Baseline configuration changes (audit rules, thresholds, comment policies) require sign-off from both Compliance Officer + Executive Sponsor</li>
@@ -316,22 +316,22 @@
     <!-- Section 3: Data Handling & Retention -->
     <div class="section">
       <div class="section-number">3</div>
-      <h2>Data Handling &amp; Retention</h2>
+      <h2>Data Handling & Retention</h2>
 
-      <h3>Anonymization &amp; Hashing</h3>
+      <h3>Anonymization & Hashing</h3>
       <ul>
         <li><strong>Candidate identifiers hashed before storage</strong> — Internal system uses hashed IDs; plaintext identifiers encrypted and isolated</li>
         <li>Audit reports display candidate reference numbers, not names (configurable by client preference)</li>
       </ul>
 
-      <h3>Retention &amp; Deletion</h3>
+      <h3>Retention & Deletion</h3>
       <ul>
         <li><strong>90-day deletion post-termination:</strong> When a candidate is marked as hired/rejected/withdrawn, audit data auto-deletes after 90 days unless legal hold is requested</li>
         <li>Legal holds respected indefinitely (e.g., discrimination claims, litigation)</li>
         <li>Clients can request manual deletion at any time (subject to legal requirements)</li>
       </ul>
 
-      <h3>GDPR &amp; International Compliance</h3>
+      <h3>GDPR & International Compliance</h3>
       <ul>
         <li><strong>GDPR Article 6 (Lawful Basis):</strong> Processing is legitimate interest (bias detection) + contract (HITL service agreement)</li>
         <li><strong>GDPR Article 21 (Right to Object):</strong> Candidates can request their data be excluded from future audits</li>
@@ -339,7 +339,7 @@
         <li>Data Processing Addendum (DPA) available for enterprise customers</li>
       </ul>
 
-      <h3>Audit Trail &amp; Chain of Custody</h3>
+      <h3>Audit Trail & Chain of Custody</h3>
       <ul>
         <li>All audit decisions logged with timestamp, user, and reasoning</li>
         <li>Local encrypted backups maintained for 12 months for regulatory audits</li>
@@ -362,11 +362,11 @@
           <p>Supabase (PostgreSQL) — Encrypted, daily backups, HA failover</p>
         </div>
         <div class="tech-item">
-          <strong>CDN &amp; Hosting</strong>
+          <strong>CDN & Hosting</strong>
           <p>Netlify — Edge caching, SSL/TLS termination</p>
         </div>
         <div class="tech-item">
-          <strong>Identity &amp; Auth</strong>
+          <strong>Identity & Auth</strong>
           <p>Auth0 — Multi-tenant, SSO, RBAC enforcement</p>
         </div>
         <div class="tech-item">
@@ -387,7 +387,7 @@
         </div>
       </div>
 
-      <h3>Database Access &amp; API Security</h3>
+      <h3>Database Access & API Security</h3>
       <ul>
         <li><strong>No direct public database access</strong> — All queries routed through authenticated Render API with tenant verification</li>
         <li><strong>Webhook endpoint validation:</strong> All incoming webhooks must include valid API key + tenant signature (HMAC-SHA256)</li>
@@ -402,12 +402,12 @@
         <li>VPC isolation: Internal services do not expose ports to public internet</li>
       </ul>
 
-      <h3>Offline Backups &amp; Chain of Custody</h3>
+      <h3>Offline Backups & Chain of Custody</h3>
       <div class="callout">
         <strong>Offline Backup:</strong> ALS Consulting maintains AES-256 encrypted local backups of immutable audit trails and decision logs at our Winston-Salem, NC facility. This provides physical custody for chain-of-custody requirements and disaster recovery independent of cloud providers. Retrieval requires dual authorization.
       </div>
 
-      <h3>Anthropic Claude API — Disclosure &amp; Data Handling</h3>
+      <h3>Anthropic Claude API — Disclosure & Data Handling</h3>
       <div class="callout">
         <strong>Anthropic (Claude API) Disclosure:</strong> F.A.S. uses Anthropic's Claude API as a structured classification engine — not a generative decision-maker. The 7 compliance lanes are deterministic rule-based frameworks with fixed thresholds. Claude API parses rejection payloads and maps them to these pre-defined categories. The final risk score, blocking decision, and escalation logic are determined by ALS Consulting's proprietary code. All Claude outputs are advisory; every flagged decision requires human review by a designated compliance officer before it binds. API inputs are processed in real-time and not retained by Anthropic beyond the session. ALS Consulting is actively negotiating a Data Processing Agreement (DPA) with Anthropic.
       </div>
@@ -416,7 +416,7 @@
     <!-- Section 5: Compliance & Audits -->
     <div class="section">
       <div class="section-number">5</div>
-      <h2>Compliance &amp; Audits</h2>
+      <h2>Compliance & Audits</h2>
 
       <h3>Third-Party Certifications</h3>
       <div class="success">
@@ -427,6 +427,7 @@
           <li><strong>Netlify</strong> — SOC 2 Type II (CDN, hosting)</li>
           <li><strong>Auth0</strong> — SOC 2 Type II (identity, authentication)</li>
           <li><strong>Stripe</strong> — PCI-DSS Level 1 certified (payment processing)</li>
+          <li><strong>Anthropic</strong> — SOC 2 Type II (Claude API, audit classification engine)</li>
         </ul>
       </div>
 
@@ -457,7 +458,7 @@
       <div class="section-number">6</div>
       <h2>Incident Response</h2>
 
-      <h3>Detection &amp; Containment</h3>
+      <h3>Detection & Containment</h3>
       <ul>
         <li><strong>Continuous monitoring:</strong> Render, Supabase, and Auth0 configured with real-time alerts for unauthorized access, API abuse, or data anomalies</li>
         <li><strong>Incident classification:</strong> Low (system warning), Medium (potential access anomaly), High (confirmed data exposure)</li>
@@ -478,14 +479,14 @@
         <li><strong>Law enforcement notification:</strong> Coordinated with customers' legal teams; ALS Consulting will cooperate with investigations</li>
       </ul>
 
-      <h3>Remediation &amp; Recovery</h3>
+      <h3>Remediation & Recovery</h3>
       <ul>
         <li>Post-incident: Full forensic review of logs, access patterns, and system configurations</li>
-        <li>Public incident summary posted within 5 business days (if impact &gt;50 users)</li>
+        <li>Public incident summary posted within 5 business days (if impact >50 users)</li>
         <li>Remediation status shared with affected customers bi-weekly until resolved</li>
       </ul>
 
-      <h3>Reporting &amp; Communication</h3>
+      <h3>Reporting & Communication</h3>
       <ul>
         <li><strong>Incident contact:</strong> <a href="mailto:algorithmicbiasaudits@gmail.com" class="contact-email">algorithmicbiasaudits@gmail.com</a></li>
         <li>Subject line: <code style="color: var(--electric-blue);">[SECURITY INCIDENT] Organization Name — Brief Description</code></li>
@@ -496,7 +497,7 @@
     <!-- Section 7: Questions & Support -->
     <div class="section">
       <div class="section-number">7</div>
-      <h2>Questions &amp; Support</h2>
+      <h2>Questions & Support</h2>
 
       <h3>Security Inquiries</h3>
       <p>For questions about HITL security, compliance, or audit procedures:</p>
@@ -515,14 +516,14 @@
         <li>ALS Consulting commits to acknowledge receipt within 24 hours and provide remediation timeline</li>
       </ul>
 
-      <h3>Updates &amp; Change Log</h3>
+      <h3>Updates & Change Log</h3>
       <p>Security updates published <strong>quarterly</strong> via email to registered security contacts. Subscribe to receive notifications at deployment.</p>
     </div>
 
   </div>
 
   <footer>
-    <h3>Security &amp; Compliance Statement</h3>
+    <h3>Security & Compliance Statement</h3>
     <p>HITL is built with enterprise security standards in mind.</p>
     <p>We prioritize honest communication over inflated claims. This document reflects our current posture, roadmap, and commitments.</p>
     <p style="margin-top: 1.5rem; font-size: 0.9rem;">
