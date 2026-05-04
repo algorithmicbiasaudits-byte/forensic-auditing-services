@@ -1,0 +1,1226 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Rejection Queue — F.A.S. Dashboard</title>
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --navy:         #0a1628;
+      --gold:         #b8872e;
+      --gold-hover:   #d4a040;
+      --white:        #ffffff;
+      --text-primary: #1e293b;
+      --text-secondary:#475569;
+      --text-muted:   #64748b;
+      --text-dim:     #94a3b8;
+      --border:       #e2e8f0;
+      --border-hover: #cbd5e1;
+      --danger:       #dc2626;
+      --success:      #16a34a;
+      --warning:      #d97706;
+    }
+
+    body {
+      background: #f8fafc;
+      color: #1e293b;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ── TOPBAR ── */
+    .topbar {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      height: 56px;
+      background: #ffffff;
+      border-bottom: 1px solid #e2e8f0;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 24px;
+      z-index: 100;
+    }
+
+    .topbar-left  { display: flex; align-items: center; gap: 16px; }
+    .topbar-center { position: absolute; left: 50%; transform: translateX(-50%); }
+    .topbar-right { display: flex; align-items: center; gap: 10px; }
+
+    .topbar-logo {
+      font-size: 15px;
+      font-weight: 800;
+      color: #0a1628;
+      letter-spacing: 0.1em;
+      text-decoration: none;
+    }
+
+    .topbar-divider { width: 1px; height: 18px; background: var(--border); }
+
+    .topbar-page {
+      font-size: 0.78rem;
+      color: #64748b;
+      font-weight: 500;
+      letter-spacing: 0.03em;
+    }
+
+    .topbar-center-label {
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: #64748b;
+      letter-spacing: 0.04em;
+    }
+
+    .reviewer-avatar {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: rgba(184,135,46,0.15);
+      color: var(--gold);
+      font-size: 11px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: 1px solid rgba(184,135,46,0.25);
+    }
+
+    .reviewer-name {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      font-weight: 500;
+    }
+
+    /* ── SIDEBAR ── */
+    .sidebar {
+      position: fixed;
+      top: 56px; left: 0; bottom: 0;
+      width: 220px;
+      background: #0a1628;
+      padding: 20px 0;
+      overflow-y: auto;
+      z-index: 90;
+    }
+
+    .sidebar-label {
+      font-family: monospace;
+      font-size: 9px;
+      letter-spacing: 2px;
+      color: rgba(255,255,255,0.3);
+      text-transform: uppercase;
+      padding: 10px 16px 6px;
+    }
+
+    .sidebar-link {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 9px 16px;
+      font-size: 13px;
+      color: rgba(255,255,255,0.6);
+      text-decoration: none;
+      transition: all 0.15s;
+      margin: 1px 8px;
+      border-radius: 5px;
+    }
+
+    .sidebar-link:hover { background: rgba(255,255,255,0.07); color: rgba(255,255,255,0.9); }
+    .sidebar-link.active { background: rgba(255,255,255,0.1); color: #ffffff; font-weight: 600; }
+    .sidebar-link .icon { font-size: 14px; width: 18px; text-align: center; }
+
+    .sidebar-badge {
+      margin-left: auto;
+      background: var(--danger);
+      color: white;
+      font-size: 10px;
+      font-weight: 700;
+      padding: 2px 7px;
+      border-radius: 10px;
+      min-width: 20px;
+      text-align: center;
+    }
+
+    /* ── MAIN ── */
+    .main-content {
+      margin-left: 220px;
+      margin-top: 56px;
+      padding: 28px 32px 4rem;
+      flex: 1;
+    }
+
+    /* ── PAGE HEADER ── */
+    .page-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 22px;
+    }
+
+    .page-title   { font-size: 20px; font-weight: 700; color: #1e293b; margin-bottom: 4px; }
+    .page-subtitle { font-size: 12px; color: var(--text-muted); }
+
+    /* ── STATS BAR ── */
+    .stats-row {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 1rem;
+      margin-bottom: 1.25rem;
+    }
+
+    .stat-card {
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+      border-radius: 8px;
+      padding: 1rem 1.25rem;
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+    }
+
+    .stat-card-body { flex: 1; }
+
+    .stat-value {
+      font-size: 1.65rem;
+      font-weight: 700;
+      line-height: 1;
+      margin-bottom: 0.3rem;
+    }
+
+    .stat-label { font-size: 0.7rem; color: #64748b; font-weight: 500; }
+
+    /* pulsing red dot */
+    .pulse-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--danger);
+      margin-top: 10px;
+      flex-shrink: 0;
+      animation: pulse 1.6s ease-in-out infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; transform: scale(1); box-shadow: 0 0 0 0 rgba(220,38,38,0.5); }
+      50%       { opacity: 0.7; transform: scale(1.15); box-shadow: 0 0 0 5px rgba(220,38,38,0); }
+    }
+
+    /* ── FILTER BAR ── */
+    .filter-bar {
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      margin-bottom: 1.25rem;
+      overflow: hidden;
+    }
+
+    .filter-tabs {
+      display: flex;
+      border-bottom: 1px solid #e2e8f0;
+      background: #f8fafc;
+    }
+
+    .filter-tab {
+      padding: 10px 18px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      cursor: pointer;
+      border: none;
+      background: transparent;
+      font-family: inherit;
+      transition: all 0.15s;
+      border-bottom: 2px solid transparent;
+      margin-bottom: -1px;
+    }
+
+    .filter-tab:hover { color: #1e293b; }
+    .filter-tab.active { color: var(--gold); border-bottom-color: var(--gold); background: #fff; }
+
+    .filter-tab .tab-count {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      margin-left: 6px;
+      min-width: 18px;
+      height: 18px;
+      padding: 0 5px;
+      border-radius: 100px;
+      font-size: 0.6rem;
+      background: #f1f5f9;
+      color: #64748b;
+    }
+
+    .filter-tab.active .tab-count { background: rgba(184,135,46,0.12); color: var(--gold); }
+
+    .filter-controls {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      padding: 0.875rem 1.25rem;
+      flex-wrap: wrap;
+    }
+
+    .filter-group { display: flex; align-items: center; gap: 0.5rem; }
+
+    .filter-label {
+      font-size: 0.67rem;
+      font-weight: 600;
+      letter-spacing: 0.09em;
+      text-transform: uppercase;
+      color: #94a3b8;
+      white-space: nowrap;
+    }
+
+    .filter-select, .filter-input {
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      color: #1e293b;
+      font-size: 0.78rem;
+      padding: 5px 10px;
+      border-radius: 5px;
+      font-family: inherit;
+      outline: none;
+      transition: border-color 0.15s;
+    }
+
+    .filter-select option { background: #ffffff; color: #1e293b; }
+    .filter-select:focus, .filter-input:focus { border-color: var(--gold); }
+    .filter-input::placeholder { color: var(--text-dim); }
+    .filter-input { width: 210px; }
+
+    .date-range { display: flex; align-items: center; gap: 6px; }
+    .date-sep { font-size: 0.7rem; color: var(--text-dim); }
+
+    .filter-actions { margin-left: auto; }
+
+    /* ── BUTTONS ── */
+    .btn {
+      font-size: 0.72rem;
+      font-weight: 600;
+      padding: 6px 14px;
+      border-radius: 5px;
+      cursor: pointer;
+      font-family: inherit;
+      transition: all 0.15s;
+      border: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      text-decoration: none;
+      white-space: nowrap;
+    }
+
+    .btn-primary   { background: #0a1628; color: #ffffff; }
+    .btn-primary:hover { background: #162440; }
+    .btn-secondary { background: #ffffff; color: #64748b; border: 1px solid #e2e8f0; }
+    .btn-secondary:hover { border-color: var(--border-hover); color: #1e293b; }
+    .btn-ghost     { background: transparent; color: var(--text-muted); border: 1px solid transparent; }
+    .btn-ghost:hover { background: #f1f5f9; border-color: var(--border); color: #1e293b; }
+    .btn-sm { padding: 5px 12px; font-size: 0.68rem; }
+
+    /* ── SECTION LABEL ── */
+    .section-label {
+      font-size: 0.68rem;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--text-dim);
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .section-label::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: #f1f5f9;
+    }
+
+    /* ── REJECTION CARDS ── */
+    .card-list { display: flex; flex-direction: column; gap: 10px; }
+
+    .rejection-card {
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      overflow: hidden;
+      transition: box-shadow 0.15s, border-color 0.15s;
+      cursor: pointer;
+      text-decoration: none;
+      display: block;
+      color: inherit;
+    }
+
+    .rejection-card:hover {
+      box-shadow: 0 4px 12px rgba(0,0,0,0.07);
+      border-color: var(--border-hover);
+    }
+
+    .rejection-card.risk-high    { border-left: 3px solid #dc2626; }
+    .rejection-card.risk-medium  { border-left: 3px solid #d97706; }
+    .rejection-card.risk-low     { border-left: 3px solid #16a34a; }
+    .rejection-card.risk-reviewed{ border-left: 3px solid #e2e8f0; }
+
+    .rejection-card.overdue { border-left-color: #dc2626; }
+
+    .card-inner { padding: 14px 18px; }
+
+    /* Row 1 */
+    .card-row-1 {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 7px;
+      flex-wrap: wrap;
+    }
+
+    .case-id {
+      font-family: monospace;
+      font-size: 0.78rem;
+      font-weight: 800;
+      color: #0a1628;
+      letter-spacing: 0.04em;
+      margin-right: 2px;
+    }
+
+    /* Row 2 */
+    .card-row-2 {
+      display: flex;
+      align-items: baseline;
+      gap: 10px;
+      margin-bottom: 6px;
+      flex-wrap: wrap;
+    }
+
+    .card-role {
+      font-size: 0.88rem;
+      font-weight: 700;
+      color: #1e293b;
+    }
+
+    .card-meta {
+      font-size: 0.72rem;
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .card-meta-sep { color: var(--border); }
+
+    /* Row 3 */
+    .card-row-3 {
+      font-size: 0.75rem;
+      color: #64748b;
+      margin-bottom: 10px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      max-width: 80%;
+    }
+
+    .card-row-3 .reason-prefix {
+      font-weight: 600;
+      color: var(--text-dim);
+      font-size: 0.68rem;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      margin-right: 6px;
+    }
+
+    /* Row 4 */
+    .card-row-4 {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .card-row-4-left {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .card-time {
+      font-size: 0.7rem;
+      color: var(--text-dim);
+      font-family: monospace;
+    }
+
+    .card-reviewer {
+      font-size: 0.7rem;
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .card-reviewer.unassigned { color: var(--danger); font-weight: 600; }
+
+    .card-jurisdiction {
+      font-size: 0.65rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      color: rgba(184,135,46,0.9);
+      background: rgba(184,135,46,0.08);
+      border: 1px solid rgba(184,135,46,0.2);
+      padding: 1px 7px;
+      border-radius: 3px;
+      font-family: monospace;
+    }
+
+    .card-actions {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    /* ── BADGES ── */
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      padding: 2px 8px;
+      border-radius: 100px;
+      font-size: 0.6rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      white-space: nowrap;
+    }
+
+    .badge-high    { background: rgba(220,38,38,0.09);  color: #dc2626; border: 1px solid rgba(220,38,38,0.2); }
+    .badge-medium  { background: rgba(217,119,6,0.09);  color: #d97706; border: 1px solid rgba(217,119,6,0.2); }
+    .badge-low     { background: rgba(22,163,74,0.09);  color: #16a34a; border: 1px solid rgba(22,163,74,0.2); }
+
+    .badge-overdue { background: rgba(220,38,38,0.09); color: #dc2626; border: 1px solid rgba(220,38,38,0.25); animation: badge-pulse 2s ease-in-out infinite; }
+    .badge-timer   { background: rgba(217,119,6,0.09);  color: #d97706; border: 1px solid rgba(217,119,6,0.2); }
+
+    @keyframes badge-pulse {
+      0%, 100% { opacity: 1; }
+      50%       { opacity: 0.65; }
+    }
+
+    .badge-lane {
+      background: rgba(37,99,235,0.05);
+      color: #2563eb;
+      border: 1px solid rgba(37,99,235,0.15);
+      font-size: 0.58rem;
+      padding: 2px 6px;
+      border-radius: 4px;
+    }
+
+    .badge-none {
+      background: #f1f5f9;
+      color: var(--text-dim);
+      border: 1px solid var(--border);
+      font-size: 0.58rem;
+      padding: 2px 6px;
+      border-radius: 4px;
+    }
+
+    .badge-status-reviewed  { background: rgba(22,163,74,0.09);  color: #16a34a; border: 1px solid rgba(22,163,74,0.2); }
+    .badge-status-confirmed { background: rgba(22,163,74,0.09);  color: #16a34a; border: 1px solid rgba(22,163,74,0.2); }
+    .badge-status-overridden{ background: rgba(100,116,139,0.09); color: #64748b; border: 1px solid rgba(100,116,139,0.2); }
+    .badge-status-modified  { background: rgba(217,119,6,0.09);  color: #d97706; border: 1px solid rgba(217,119,6,0.2); }
+    .badge-status-pending   { background: rgba(217,119,6,0.09);  color: #d97706; border: 1px solid rgba(217,119,6,0.2); }
+    .badge-status-auto      { background: rgba(37,99,235,0.06);  color: #2563eb; border: 1px solid rgba(37,99,235,0.15); }
+
+    .lane-badges { display: flex; flex-wrap: wrap; gap: 3px; }
+
+    /* ── PAGINATION ── */
+    .pagination-bar {
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      padding: 0.875rem 1.25rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-top: 14px;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+
+    .page-info { font-size: 0.72rem; color: #94a3b8; }
+
+    .page-btns { display: flex; gap: 0.3rem; }
+
+    .page-btn {
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      color: #64748b;
+      font-size: 0.72rem;
+      font-weight: 500;
+      padding: 5px 11px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-family: inherit;
+      transition: all 0.15s;
+    }
+
+    .page-btn.active, .page-btn:hover { border-color: var(--gold); color: var(--gold); }
+    .page-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 960px) {
+      .sidebar { display: none; }
+      .main-content { margin-left: 0; }
+      .stats-row { grid-template-columns: repeat(2, 1fr); }
+    }
+
+    @media (max-width: 600px) {
+      .topbar { padding: 0 16px; }
+      .topbar-center { display: none; }
+      .main-content { padding: 16px 12px 3rem; }
+      .reviewer-name { display: none; }
+      .card-row-3 { max-width: 100%; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ── TOPBAR ── -->
+<nav class="topbar">
+  <div class="topbar-left">
+    <a href="/dashboard/main.html" class="topbar-logo">F.A.S.</a>
+    <div class="topbar-divider"></div>
+    <span class="topbar-page">Rejection Queue</span>
+  </div>
+  <div class="topbar-center">
+    <span class="topbar-center-label">Rejection Queue</span>
+  </div>
+  <div class="topbar-right">
+    <div class="reviewer-avatar">SC</div>
+    <span class="reviewer-name">Sarah Chen</span>
+  </div>
+</nav>
+
+<!-- ── SIDEBAR ── -->
+<aside class="sidebar">
+  <div class="sidebar-label">Dashboard</div>
+  <a href="/dashboard/main.html" class="sidebar-link">
+    <span class="icon">⬛</span> Overview
+  </a>
+  <a href="/dashboard/escalation-queue.html" class="sidebar-link">
+    <span class="icon">🚨</span> Escalation Queue
+    <span class="sidebar-badge">12</span>
+  </a>
+  <a href="/dashboard/rejections.html" class="sidebar-link active">
+    <span class="icon">📄</span> Rejections
+    <span class="sidebar-badge">12</span>
+  </a>
+
+  <div class="sidebar-label" style="margin-top:12px;">Audit</div>
+  <a href="/dashboard/audit-trail.html" class="sidebar-link">
+    <span class="icon">📋</span> Audit Trail
+  </a>
+  <a href="#" class="sidebar-link">
+    <span class="icon">📊</span> Compliance Reports
+  </a>
+
+  <div class="sidebar-label" style="margin-top:12px;">Admin</div>
+  <a href="#" class="sidebar-link">
+    <span class="icon">⚙️</span> Settings
+  </a>
+  <a href="/security.html" class="sidebar-link">
+    <span class="icon">🔒</span> Security
+  </a>
+</aside>
+
+<!-- ── MAIN CONTENT ── -->
+<main class="main-content">
+
+  <div class="page-header">
+    <div>
+      <div class="page-title">Rejection Queue</div>
+      <div class="page-subtitle">ATS rejection intercepts pending compliance review · 3 overdue</div>
+    </div>
+    <div style="display:flex;gap:8px;">
+      <button class="btn btn-ghost btn-sm" onclick="alert('Export coming soon.')">↓ Export CSV</button>
+      <button class="btn btn-primary btn-sm">+ Manual Review</button>
+    </div>
+  </div>
+
+  <!-- Stats bar -->
+  <div class="stats-row">
+    <div class="stat-card">
+      <div class="stat-card-body">
+        <div class="stat-value" style="color:#b8872e;">12</div>
+        <div class="stat-label">Pending Review</div>
+      </div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-card-body">
+        <div class="stat-value" style="color:#dc2626;">3</div>
+        <div class="stat-label">HIGH Risk</div>
+      </div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-card-body">
+        <div class="stat-value" style="color:#dc2626;">3</div>
+        <div class="stat-label">Past Review Threshold</div>
+      </div>
+      <div class="pulse-dot"></div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-card-body">
+        <div class="stat-value" style="color:#16a34a;">7</div>
+        <div class="stat-label">Reviewed Today</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Filter bar -->
+  <div class="filter-bar">
+    <div class="filter-tabs">
+      <button class="filter-tab active" onclick="setTab(this,'all')">All <span class="tab-count">12</span></button>
+      <button class="filter-tab" onclick="setTab(this,'pending')">Pending <span class="tab-count">5</span></button>
+      <button class="filter-tab" onclick="setTab(this,'reviewed')">Reviewed <span class="tab-count">5</span></button>
+      <button class="filter-tab" onclick="setTab(this,'overridden')">Overridden <span class="tab-count">2</span></button>
+    </div>
+    <div class="filter-controls">
+      <div class="filter-group">
+        <span class="filter-label">Risk</span>
+        <select class="filter-select">
+          <option>All</option>
+          <option>HIGH</option>
+          <option>MEDIUM</option>
+          <option>LOW</option>
+        </select>
+      </div>
+      <div class="filter-group">
+        <span class="filter-label">Lane</span>
+        <select class="filter-select">
+          <option>All</option>
+          <option>Age Proxy</option>
+          <option>Gap Penalty</option>
+          <option>Disparate Impact</option>
+          <option>Credential</option>
+          <option>Keyword</option>
+          <option>Disability</option>
+          <option>Legal</option>
+        </select>
+      </div>
+      <div class="filter-group" style="flex:1;min-width:180px;">
+        <input type="text" class="filter-input" placeholder="Search candidate ID or role…" style="width:100%;">
+      </div>
+      <div class="filter-group">
+        <span class="filter-label">Date</span>
+        <div class="date-range">
+          <input type="date" class="filter-select" style="font-size:0.74rem;padding:5px 8px;">
+          <span class="date-sep">→</span>
+          <input type="date" class="filter-select" style="font-size:0.74rem;padding:5px 8px;">
+        </div>
+      </div>
+      <div class="filter-actions">
+        <button class="btn btn-ghost btn-sm" onclick="clearFilters()">Clear</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ──────────────────────────────────────
+       OVERDUE — 3 cards
+  ────────────────────────────────────── -->
+  <div class="section-label">Overdue · Requires Immediate Review</div>
+  <div class="card-list" style="margin-bottom:18px;">
+
+    <!-- Card 3: #28485 — OVERDUE 6h41m -->
+    <a href="/dashboard/rejection-detail.html?id=28485" class="rejection-card risk-high overdue">
+      <div class="card-inner">
+        <div class="card-row-1">
+          <span class="case-id">#28485</span>
+          <span class="badge badge-high">HIGH</span>
+          <span class="badge badge-overdue">⏱ OVERDUE 6h 41m</span>
+          <div class="lane-badges">
+            <span class="badge badge-lane">Legal</span>
+          </div>
+        </div>
+        <div class="card-row-2">
+          <span class="card-role">Software Engineer</span>
+          <div class="card-meta">
+            <span>Lever</span>
+            <span class="card-meta-sep">·</span>
+            <span>Denver, CO</span>
+          </div>
+        </div>
+        <div class="card-row-3">
+          <span class="reason-prefix">Reason</span>Does not meet authorization requirements
+        </div>
+        <div class="card-row-4">
+          <div class="card-row-4-left">
+            <span class="card-time">Intercepted 6h 41m ago</span>
+            <span class="card-reviewer unassigned">⚠ Unassigned</span>
+            <span class="card-jurisdiction">SB205</span>
+          </div>
+          <div class="card-actions">
+            <button class="btn btn-secondary btn-sm" onclick="event.preventDefault();alert('Assign dialog.')">Assign</button>
+            <button class="btn btn-primary btn-sm" onclick="event.preventDefault();window.location='/dashboard/rejection-detail.html?id=28485'">Review Now →</button>
+          </div>
+        </div>
+      </div>
+    </a>
+
+    <!-- Card 2: #28488 — OVERDUE 5h07m -->
+    <a href="/dashboard/rejection-detail.html?id=28488" class="rejection-card risk-high overdue">
+      <div class="card-inner">
+        <div class="card-row-1">
+          <span class="case-id">#28488</span>
+          <span class="badge badge-high">HIGH</span>
+          <span class="badge badge-overdue">⏱ OVERDUE 5h 07m</span>
+          <div class="lane-badges">
+            <span class="badge badge-lane">Disparate Impact</span>
+          </div>
+        </div>
+        <div class="card-row-2">
+          <span class="card-role">Director, HR Technology</span>
+          <div class="card-meta">
+            <span>Greenhouse</span>
+            <span class="card-meta-sep">·</span>
+            <span>New York, NY</span>
+          </div>
+        </div>
+        <div class="card-row-3">
+          <span class="reason-prefix">Reason</span>Candidate not selected for further consideration
+        </div>
+        <div class="card-row-4">
+          <div class="card-row-4-left">
+            <span class="card-time">Intercepted 5h 07m ago</span>
+            <span class="card-reviewer unassigned">⚠ Unassigned</span>
+            <span class="card-jurisdiction">LL144</span>
+          </div>
+          <div class="card-actions">
+            <button class="btn btn-secondary btn-sm" onclick="event.preventDefault();alert('Assign dialog.')">Assign</button>
+            <button class="btn btn-primary btn-sm" onclick="event.preventDefault();window.location='/dashboard/rejection-detail.html?id=28488'">Review Now →</button>
+          </div>
+        </div>
+      </div>
+    </a>
+
+    <!-- Card 1: #28491 — OVERDUE 4h23m -->
+    <a href="/dashboard/rejection-detail.html?id=28491" class="rejection-card risk-high overdue">
+      <div class="card-inner">
+        <div class="card-row-1">
+          <span class="case-id">#28491</span>
+          <span class="badge badge-high">HIGH</span>
+          <span class="badge badge-overdue">⏱ OVERDUE 4h 23m</span>
+          <div class="lane-badges">
+            <span class="badge badge-lane">Age Proxy</span>
+            <span class="badge badge-lane">Keyword</span>
+          </div>
+        </div>
+        <div class="card-row-2">
+          <span class="card-role">Senior Analyst, Finance</span>
+          <div class="card-meta">
+            <span>Workday</span>
+            <span class="card-meta-sep">·</span>
+            <span>Short Hills, NJ</span>
+          </div>
+        </div>
+        <div class="card-row-3">
+          <span class="reason-prefix">Reason</span>Does not meet minimum qualifications
+        </div>
+        <div class="card-row-4">
+          <div class="card-row-4-left">
+            <span class="card-time">Intercepted 4h 23m ago</span>
+            <span class="card-reviewer unassigned">⚠ Unassigned</span>
+            <span class="card-jurisdiction">LL144</span>
+          </div>
+          <div class="card-actions">
+            <button class="btn btn-secondary btn-sm" onclick="event.preventDefault();alert('Assign dialog.')">Assign</button>
+            <button class="btn btn-primary btn-sm" onclick="event.preventDefault();window.location='/dashboard/rejection-detail.html?id=28491'">Review Now →</button>
+          </div>
+        </div>
+      </div>
+    </a>
+
+    <!-- Card 11: #28467 — OVERDUE (no time) -->
+    <a href="/dashboard/rejection-detail.html?id=28467" class="rejection-card risk-high overdue">
+      <div class="card-inner">
+        <div class="card-row-1">
+          <span class="case-id">#28467</span>
+          <span class="badge badge-high">HIGH</span>
+          <span class="badge badge-overdue">⏱ OVERDUE</span>
+          <div class="lane-badges">
+            <span class="badge badge-lane">Disparate Impact</span>
+            <span class="badge badge-lane">Legal</span>
+          </div>
+        </div>
+        <div class="card-row-2">
+          <span class="card-role">Legal Counsel</span>
+          <div class="card-meta">
+            <span>iCIMS</span>
+            <span class="card-meta-sep">·</span>
+            <span>Denver, CO</span>
+          </div>
+        </div>
+        <div class="card-row-3">
+          <span class="reason-prefix">Reason</span>Does not meet minimum qualifications
+        </div>
+        <div class="card-row-4">
+          <div class="card-row-4-left">
+            <span class="card-time">Intercepted earlier today</span>
+            <span class="card-reviewer unassigned">⚠ Unassigned</span>
+            <span class="card-jurisdiction">SB205</span>
+          </div>
+          <div class="card-actions">
+            <button class="btn btn-secondary btn-sm" onclick="event.preventDefault();alert('Assign dialog.')">Assign</button>
+            <button class="btn btn-primary btn-sm" onclick="event.preventDefault();window.location='/dashboard/rejection-detail.html?id=28467'">Review Now →</button>
+          </div>
+        </div>
+      </div>
+    </a>
+
+  </div>
+
+  <!-- ──────────────────────────────────────
+       HIGH RISK PENDING — 2 cards
+  ────────────────────────────────────── -->
+  <div class="section-label">HIGH Risk · Pending Review</div>
+  <div class="card-list" style="margin-bottom:18px;">
+
+    <!-- Card 4: #28495 -->
+    <a href="/dashboard/rejection-detail.html?id=28495" class="rejection-card risk-high">
+      <div class="card-inner">
+        <div class="card-row-1">
+          <span class="case-id">#28495</span>
+          <span class="badge badge-high">HIGH</span>
+          <span class="badge badge-timer">⏱ 2h 14m remaining</span>
+          <div class="lane-badges">
+            <span class="badge badge-lane">Gap Penalty</span>
+          </div>
+        </div>
+        <div class="card-row-2">
+          <span class="card-role">Marketing Manager, B2B SaaS</span>
+          <div class="card-meta">
+            <span>Workday</span>
+            <span class="card-meta-sep">·</span>
+            <span>Chicago, IL</span>
+          </div>
+        </div>
+        <div class="card-row-3">
+          <span class="reason-prefix">Reason</span>Employment history gaps inconsistent with requirements
+        </div>
+        <div class="card-row-4">
+          <div class="card-row-4-left">
+            <span class="card-time">Intercepted 1h 46m ago</span>
+            <span class="card-reviewer">👤 Sarah Chen</span>
+            <span class="badge badge-status-pending" style="font-size:0.6rem;">Pending</span>
+          </div>
+          <div class="card-actions">
+            <button class="btn btn-secondary btn-sm" onclick="event.preventDefault();alert('Assign dialog.')">Assign</button>
+            <button class="btn btn-primary btn-sm" onclick="event.preventDefault();window.location='/dashboard/rejection-detail.html?id=28495'">Review Now →</button>
+          </div>
+        </div>
+      </div>
+    </a>
+
+    <!-- Card 5: #28497 -->
+    <a href="/dashboard/rejection-detail.html?id=28497" class="rejection-card risk-high">
+      <div class="card-inner">
+        <div class="card-row-1">
+          <span class="case-id">#28497</span>
+          <span class="badge badge-high">HIGH</span>
+          <span class="badge badge-timer">⏱ 3h 47m remaining</span>
+          <div class="lane-badges">
+            <span class="badge badge-lane">Keyword</span>
+          </div>
+        </div>
+        <div class="card-row-2">
+          <span class="card-role">Project Manager</span>
+          <div class="card-meta">
+            <span>Greenhouse</span>
+            <span class="card-meta-sep">·</span>
+            <span>Austin, TX</span>
+          </div>
+        </div>
+        <div class="card-row-3">
+          <span class="reason-prefix">Reason</span>Does not meet minimum qualifications
+        </div>
+        <div class="card-row-4">
+          <div class="card-row-4-left">
+            <span class="card-time">Intercepted 16m ago</span>
+            <span class="card-reviewer unassigned">⚠ Unassigned</span>
+            <span class="badge badge-status-pending" style="font-size:0.6rem;">Pending</span>
+          </div>
+          <div class="card-actions">
+            <button class="btn btn-secondary btn-sm" onclick="event.preventDefault();alert('Assign dialog.')">Assign</button>
+            <button class="btn btn-primary btn-sm" onclick="event.preventDefault();window.location='/dashboard/rejection-detail.html?id=28497'">Review Now →</button>
+          </div>
+        </div>
+      </div>
+    </a>
+
+  </div>
+
+  <!-- ──────────────────────────────────────
+       MEDIUM RISK PENDING — 1 card
+  ────────────────────────────────────── -->
+  <div class="section-label">MEDIUM Risk · Pending Review</div>
+  <div class="card-list" style="margin-bottom:18px;">
+
+    <!-- Card 8: #28476 — Modified / HIGH but placed under reviewed -->
+    <!-- Card 8 is HIGH + Modified, Card 12 is MEDIUM + Confirmed -->
+    <!-- Following spec sort: OVERDUE → HIGH pending → MEDIUM pending → reviewed last -->
+    <!-- #28476 is HIGH but Modified (reviewed), so goes to reviewed section -->
+    <!-- Wait, looking again: Card 8 status is "Modified" which is a reviewed state -->
+    <!-- Actually let me re-read: sort is 1.OVERDUE 2.HIGH pending 3.MEDIUM pending 4.Reviewed/confirmed last -->
+    <!-- Cards 4,5 are HIGH+pending (timer) = section 2 ✓ -->
+    <!-- No explicit MEDIUM pending in the spec... Card 6,9 are MEDIUM+Overridden (reviewed), Card 12 is MEDIUM+Confirmed -->
+    <!-- So MEDIUM pending section is empty? -->
+    <!-- Actually I'll skip the MEDIUM pending section since no cards fit that exactly -->
+
+  </div>
+
+  <!-- ──────────────────────────────────────
+       REVIEWED / CONFIRMED / CLOSED — last
+  ────────────────────────────────────── -->
+  <div class="section-label">Reviewed · Confirmed / Overridden</div>
+  <div class="card-list" style="margin-bottom:0;">
+
+    <!-- Card 6: #28482 — MEDIUM Overridden -->
+    <a href="/dashboard/rejection-detail.html?id=28482" class="rejection-card risk-medium">
+      <div class="card-inner">
+        <div class="card-row-1">
+          <span class="case-id">#28482</span>
+          <span class="badge badge-medium">MEDIUM</span>
+          <span class="badge badge-status-overridden">Overridden</span>
+          <div class="lane-badges">
+            <span class="badge badge-lane">Gap Penalty</span>
+          </div>
+        </div>
+        <div class="card-row-2">
+          <span class="card-role">Marketing Manager</span>
+          <div class="card-meta">
+            <span>Workday</span>
+            <span class="card-meta-sep">·</span>
+            <span>Austin, TX</span>
+          </div>
+        </div>
+        <div class="card-row-3">
+          <span class="reason-prefix">Reason</span>Employment history concern
+        </div>
+        <div class="card-row-4">
+          <div class="card-row-4-left">
+            <span class="card-time">Reviewed 2h ago</span>
+            <span class="card-reviewer">👤 Sarah Chen</span>
+          </div>
+          <div class="card-actions">
+            <button class="btn btn-ghost btn-sm" onclick="event.preventDefault();window.location='/dashboard/rejection-detail.html?id=28482'">View →</button>
+          </div>
+        </div>
+      </div>
+    </a>
+
+    <!-- Card 7: #28479 — LOW Confirmed -->
+    <a href="/dashboard/rejection-detail.html?id=28479" class="rejection-card risk-low">
+      <div class="card-inner">
+        <div class="card-row-1">
+          <span class="case-id">#28479</span>
+          <span class="badge badge-low">LOW</span>
+          <span class="badge badge-status-confirmed">Confirmed</span>
+          <div class="lane-badges">
+            <span class="badge badge-lane">Credential</span>
+          </div>
+        </div>
+        <div class="card-row-2">
+          <span class="card-role">Project Manager</span>
+          <div class="card-meta">
+            <span>iCIMS</span>
+            <span class="card-meta-sep">·</span>
+            <span>Chicago, IL</span>
+          </div>
+        </div>
+        <div class="card-row-3">
+          <span class="reason-prefix">Reason</span>Does not meet degree requirements
+        </div>
+        <div class="card-row-4">
+          <div class="card-row-4-left">
+            <span class="card-time">Reviewed 3h ago</span>
+            <span class="card-reviewer">👤 James Park</span>
+          </div>
+          <div class="card-actions">
+            <button class="btn btn-ghost btn-sm" onclick="event.preventDefault();window.location='/dashboard/rejection-detail.html?id=28479'">View →</button>
+          </div>
+        </div>
+      </div>
+    </a>
+
+    <!-- Card 8: #28476 — HIGH Modified -->
+    <a href="/dashboard/rejection-detail.html?id=28476" class="rejection-card risk-reviewed">
+      <div class="card-inner">
+        <div class="card-row-1">
+          <span class="case-id">#28476</span>
+          <span class="badge badge-high">HIGH</span>
+          <span class="badge badge-status-modified">Modified</span>
+          <div class="lane-badges">
+            <span class="badge badge-lane">Disability</span>
+            <span class="badge badge-lane">Keyword</span>
+          </div>
+        </div>
+        <div class="card-row-2">
+          <span class="card-role">Data Scientist</span>
+          <div class="card-meta">
+            <span>Greenhouse</span>
+            <span class="card-meta-sep">·</span>
+            <span>San Francisco, CA</span>
+          </div>
+        </div>
+        <div class="card-row-3">
+          <span class="reason-prefix">Reason</span>Qualifications below threshold
+        </div>
+        <div class="card-row-4">
+          <div class="card-row-4-left">
+            <span class="card-time">Reviewed 4h ago</span>
+            <span class="card-reviewer">👤 Maria Lopez</span>
+            <span class="card-jurisdiction">SB205</span>
+          </div>
+          <div class="card-actions">
+            <button class="btn btn-ghost btn-sm" onclick="event.preventDefault();window.location='/dashboard/rejection-detail.html?id=28476'">View →</button>
+          </div>
+        </div>
+      </div>
+    </a>
+
+    <!-- Card 9: #28473 — MEDIUM Overridden -->
+    <a href="/dashboard/rejection-detail.html?id=28473" class="rejection-card risk-reviewed">
+      <div class="card-inner">
+        <div class="card-row-1">
+          <span class="case-id">#28473</span>
+          <span class="badge badge-medium">MEDIUM</span>
+          <span class="badge badge-status-overridden">Overridden</span>
+          <div class="lane-badges">
+            <span class="badge badge-lane">Age Proxy</span>
+          </div>
+        </div>
+        <div class="card-row-2">
+          <span class="card-role">Sales Director</span>
+          <div class="card-meta">
+            <span>Workday</span>
+            <span class="card-meta-sep">·</span>
+            <span>New York, NY</span>
+          </div>
+        </div>
+        <div class="card-row-3">
+          <span class="reason-prefix">Reason</span>Experience below requirements
+        </div>
+        <div class="card-row-4">
+          <div class="card-row-4-left">
+            <span class="card-time">Reviewed 5h ago</span>
+            <span class="card-reviewer">👤 Sarah Chen</span>
+            <span class="card-jurisdiction">LL144</span>
+          </div>
+          <div class="card-actions">
+            <button class="btn btn-ghost btn-sm" onclick="event.preventDefault();window.location='/dashboard/rejection-detail.html?id=28473'">View →</button>
+          </div>
+        </div>
+      </div>
+    </a>
+
+    <!-- Card 10: #28470 — LOW Confirmed auto-approved -->
+    <a href="/dashboard/rejection-detail.html?id=28470" class="rejection-card risk-low">
+      <div class="card-inner">
+        <div class="card-row-1">
+          <span class="case-id">#28470</span>
+          <span class="badge badge-low">LOW</span>
+          <span class="badge badge-status-confirmed">Confirmed</span>
+          <div class="lane-badges">
+            <span class="badge badge-none">None triggered</span>
+          </div>
+        </div>
+        <div class="card-row-2">
+          <span class="card-role">UX Designer</span>
+          <div class="card-meta">
+            <span>Lever</span>
+            <span class="card-meta-sep">·</span>
+            <span>Seattle, WA</span>
+          </div>
+        </div>
+        <div class="card-row-3">
+          <span class="reason-prefix">Reason</span>Score below auto-approve threshold
+        </div>
+        <div class="card-row-4">
+          <div class="card-row-4-left">
+            <span class="card-time">Reviewed 6h ago</span>
+            <span class="card-reviewer" style="color:#2563eb;font-weight:600;">⚡ Auto-approved</span>
+          </div>
+          <div class="card-actions">
+            <button class="btn btn-ghost btn-sm" onclick="event.preventDefault();window.location='/dashboard/rejection-detail.html?id=28470'">View →</button>
+          </div>
+        </div>
+      </div>
+    </a>
+
+    <!-- Card 12: #28464 — MEDIUM Confirmed -->
+    <a href="/dashboard/rejection-detail.html?id=28464" class="rejection-card risk-reviewed">
+      <div class="card-inner">
+        <div class="card-row-1">
+          <span class="case-id">#28464</span>
+          <span class="badge badge-medium">MEDIUM</span>
+          <span class="badge badge-status-confirmed">Confirmed</span>
+          <div class="lane-badges">
+            <span class="badge badge-lane">Gap Penalty</span>
+          </div>
+        </div>
+        <div class="card-row-2">
+          <span class="card-role">Operations Manager</span>
+          <div class="card-meta">
+            <span>ADP</span>
+            <span class="card-meta-sep">·</span>
+            <span>Miami, FL</span>
+          </div>
+        </div>
+        <div class="card-row-3">
+          <span class="reason-prefix">Reason</span>Employment history concern
+        </div>
+        <div class="card-row-4">
+          <div class="card-row-4-left">
+            <span class="card-time">Reviewed 7h ago</span>
+            <span class="card-reviewer">👤 James Park</span>
+          </div>
+          <div class="card-actions">
+            <button class="btn btn-ghost btn-sm" onclick="event.preventDefault();window.location='/dashboard/rejection-detail.html?id=28464'">View →</button>
+          </div>
+        </div>
+      </div>
+    </a>
+
+  </div>
+
+  <!-- Pagination -->
+  <div class="pagination-bar">
+    <span class="page-info">Showing 1–10 of 12 rejections</span>
+    <div class="page-btns">
+      <button class="page-btn" disabled>← Prev</button>
+      <button class="page-btn active">1</button>
+      <button class="page-btn">2</button>
+      <button class="page-btn">Next →</button>
+    </div>
+  </div>
+
+</main>
+
+<script>
+  function setTab(el, tab) {
+    document.querySelectorAll('.filter-tab').forEach(t => t.classList.remove('active'));
+    el.classList.add('active');
+  }
+
+  function clearFilters() {
+    document.querySelectorAll('.filter-select').forEach(s => { if (s.tagName === 'SELECT') s.selectedIndex = 0; });
+    document.querySelectorAll('input[type="text"]').forEach(i => i.value = '');
+    document.querySelectorAll('input[type="date"]').forEach(i => i.value = '');
+  }
+</script>
+
+</body>
+</html>
