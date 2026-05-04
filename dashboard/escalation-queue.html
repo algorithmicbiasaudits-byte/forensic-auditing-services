@@ -1,0 +1,905 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Escalation Queue — F.A.S. Dashboard</title>
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --navy:         #0a1628;
+      --navy-card:    #ffffff;
+      --gold:         #b8872e;
+      --gold-light:   #d4a040;
+      --white:        #ffffff;
+      --text-muted:   #64748b;
+      --text-dim:     #94a3b8;
+      --border:       #e2e8f0;
+      --border-hover: #cbd5e1;
+      --danger:       #dc2626;
+      --warning:      #ca8a04;
+      --success:      #16a34a;
+    }
+
+    body {
+      background: #f8fafc;
+      color: #1e293b;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ── TOP NAV ── */
+    .topnav {
+      background: #ffffff;
+      border-bottom: 1px solid var(--border);
+      box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+      padding: 0 32px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      height: 56px;
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 100;
+    }
+
+    .topnav-left { display: flex; align-items: center; gap: 20px; }
+
+    .header-logo {
+      font-size: 15px;
+      font-weight: 800;
+      color: var(--navy);
+      letter-spacing: 0.1em;
+      text-decoration: none;
+    }
+
+    .nav-divider { width: 1px; height: 18px; background: var(--border); }
+
+    .header-title {
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      font-weight: 500;
+      letter-spacing: 0.04em;
+    }
+
+    .topnav-right { display: flex; align-items: center; gap: 16px; }
+
+    .user-name { font-size: 0.75rem; color: var(--text-muted); }
+
+    .nav-role {
+      font-family: monospace;
+      font-size: 10px;
+      letter-spacing: 1px;
+      padding: 4px 10px;
+      border-radius: 2px;
+      background: rgba(184,135,46,0.1);
+      color: var(--gold);
+      border: 1px solid rgba(184,135,46,0.25);
+    }
+
+    .nav-logout {
+      font-size: 0.72rem;
+      color: var(--text-dim);
+      cursor: pointer;
+      text-decoration: none;
+      transition: color 0.15s;
+    }
+    .nav-logout:hover { color: #1e293b; }
+
+    /* ── SIDEBAR ── */
+    .sidebar {
+      position: fixed;
+      top: 56px; left: 0; bottom: 0;
+      width: 220px;
+      background: #ffffff;
+      border-right: 1px solid var(--border);
+      padding: 20px 0;
+      overflow-y: auto;
+      z-index: 90;
+    }
+
+    .sidebar-label {
+      font-family: monospace;
+      font-size: 9px;
+      letter-spacing: 2px;
+      color: #bbb;
+      text-transform: uppercase;
+      padding: 10px 16px 6px;
+    }
+
+    .sidebar-link {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 9px 16px;
+      font-size: 13px;
+      color: #555;
+      text-decoration: none;
+      transition: all 0.15s;
+      margin: 1px 8px;
+      border-radius: 5px;
+    }
+
+    .sidebar-link:hover { background: #f5f8ff; color: var(--navy); }
+    .sidebar-link.active { background: rgba(184,135,46,0.08); color: var(--gold); font-weight: 600; border-left: 3px solid var(--gold); padding-left: 13px; }
+
+    .sidebar-link .icon { font-size: 14px; width: 18px; text-align: center; }
+
+    .sidebar-badge {
+      margin-left: auto;
+      background: #dc2626;
+      color: white;
+      font-size: 10px;
+      font-weight: 700;
+      padding: 2px 7px;
+      border-radius: 10px;
+      min-width: 20px;
+      text-align: center;
+    }
+
+    .sidebar-badge.gold { background: var(--gold); color: white; }
+
+    /* ── MAIN CONTENT ── */
+    .main-content {
+      margin-left: 220px;
+      margin-top: 56px;
+      padding: 28px 32px 4rem;
+      flex: 1;
+    }
+
+    /* ── PAGE HEADER ── */
+    .page-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 24px;
+    }
+
+    .page-title { font-size: 20px; font-weight: 700; color: #1e293b; margin-bottom: 4px; }
+    .page-subtitle { font-size: 12px; color: var(--text-muted); }
+
+    .header-actions { display: flex; gap: 10px; align-items: center; }
+
+    /* ── STATS ROW ── */
+    .stats-row {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .stat-card {
+      background: #ffffff;
+      border: 1px solid var(--border);
+      box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+      border-radius: 8px;
+      padding: 1.1rem 1.4rem;
+    }
+
+    .stat-value {
+      font-size: 1.65rem;
+      font-weight: 700;
+      color: #1e293b;
+      line-height: 1;
+      margin-bottom: 0.3rem;
+    }
+
+    .stat-value.danger  { color: #dc2626; }
+    .stat-value.warning { color: var(--warning); }
+    .stat-value.gold    { color: var(--gold); }
+
+    .stat-label {
+      font-size: 0.72rem;
+      color: var(--text-muted);
+      font-weight: 500;
+    }
+
+    /* ── FILTER BAR ── */
+    .filter-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      margin-bottom: 1.75rem;
+      flex-wrap: wrap;
+    }
+
+    .filter-tabs { display: flex; gap: 0.4rem; flex-wrap: wrap; }
+
+    .filter-btn {
+      background: #ffffff;
+      border: 1px solid var(--border);
+      color: var(--text-muted);
+      font-size: 0.75rem;
+      font-weight: 500;
+      padding: 6px 14px;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.15s;
+      font-family: inherit;
+    }
+
+    .filter-btn:hover, .filter-btn.active {
+      border-color: var(--gold);
+      color: var(--gold);
+      background: rgba(184,135,46,0.06);
+    }
+
+    .filter-search {
+      background: #ffffff;
+      border: 1px solid var(--border);
+      color: #1e293b;
+      font-size: 0.8rem;
+      padding: 7px 14px;
+      border-radius: 6px;
+      width: 260px;
+      font-family: inherit;
+      outline: none;
+      transition: border-color 0.15s;
+    }
+    .filter-search::placeholder { color: var(--text-dim); }
+    .filter-search:focus { border-color: var(--gold); }
+
+    /* ── QUEUE SECTIONS ── */
+    .queue-section { margin-bottom: 2rem; }
+
+    .section-header {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      margin-bottom: 0.75rem;
+      padding-bottom: 0.5rem;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .section-title {
+      font-size: 0.65rem;
+      font-weight: 700;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+    }
+
+    .section-title.critical { color: #dc2626; }
+    .section-title.active   { color: var(--gold); }
+
+    .section-count { font-size: 0.7rem; color: var(--text-dim); }
+
+    /* ── CASE CARDS ── */
+    .case-list { display: flex; flex-direction: column; gap: 0.75rem; }
+
+    .case-card {
+      background: #ffffff;
+      border: 1px solid var(--border);
+      box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+      border-radius: 8px;
+      overflow: hidden;
+      transition: box-shadow 0.15s;
+    }
+
+    .case-card:hover { box-shadow: 0 4px 14px rgba(0,0,0,0.08); }
+
+    .case-card.escalated  { border-left: 3px solid var(--danger); }
+    .case-card.active-case { border-left: 3px solid var(--gold); }
+
+    .case-header {
+      background: #f8fafc;
+      border-bottom: 1px solid var(--border);
+      padding: 0.8rem 1.2rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+
+    .case-header-left  { display: flex; align-items: center; gap: 0.6rem; flex-wrap: wrap; }
+    .case-header-right { display: flex; align-items: center; gap: 0.4rem; flex-wrap: wrap; }
+
+    .case-id {
+      font-size: 0.7rem;
+      font-weight: 700;
+      color: var(--text-dim);
+      letter-spacing: 0.08em;
+      font-family: 'Courier New', monospace;
+    }
+
+    .case-body {
+      background: #ffffff;
+      padding: 1.1rem 1.2rem;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem 2rem;
+    }
+
+    .meta-block { display: flex; flex-direction: column; gap: 0.3rem; }
+
+    .case-meta {
+      font-size: 0.8rem;
+      color: #475569;
+      line-height: 1.55;
+    }
+
+    .case-meta strong { color: #1e293b; font-weight: 600; }
+
+    .case-flags { display: flex; flex-direction: column; gap: 0.45rem; }
+
+    .case-flag {
+      background: rgba(220,38,38,0.04);
+      border: 1px solid rgba(220,38,38,0.15);
+      border-radius: 6px;
+      padding: 0.55rem 0.8rem;
+    }
+
+    .case-flag-label {
+      font-size: 0.63rem;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: #dc2626;
+      margin-bottom: 0.2rem;
+    }
+
+    .case-flag p {
+      font-size: 0.75rem;
+      color: #475569;
+      line-height: 1.5;
+    }
+
+    .case-footer {
+      background: #f8fafc;
+      border-top: 1px solid var(--border);
+      padding: 0.75rem 1.2rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      color: var(--text-dim);
+      font-size: 0.7rem;
+    }
+
+    .case-actions { display: flex; gap: 0.4rem; flex-wrap: wrap; }
+
+    /* ── BUTTONS ── */
+    .btn {
+      font-size: 0.72rem;
+      font-weight: 600;
+      padding: 6px 14px;
+      border-radius: 5px;
+      cursor: pointer;
+      font-family: inherit;
+      letter-spacing: 0.02em;
+      transition: all 0.15s;
+      border: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .btn-review  { background: var(--navy); color: #ffffff; }
+    .btn-review:hover { background: #162440; }
+
+    .btn-delegate { background: #ffffff; color: var(--text-muted); border: 1px solid var(--border); }
+    .btn-delegate:hover { border-color: var(--border-hover); color: #1e293b; }
+
+    .btn-override { background: #ffffff; color: #16a34a; border: 1px solid rgba(22,163,74,0.3); }
+    .btn-override:hover { background: rgba(22,163,74,0.06); border-color: rgba(22,163,74,0.5); }
+
+    .btn-snooze { background: #ffffff; color: var(--text-muted); border: 1px solid var(--border); }
+    .btn-snooze:hover { border-color: var(--border-hover); color: #1e293b; }
+
+    /* ── BADGES ── */
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      padding: 2px 9px;
+      border-radius: 100px;
+      font-size: 0.62rem;
+      font-weight: 700;
+      letter-spacing: 0.09em;
+      text-transform: uppercase;
+      white-space: nowrap;
+    }
+
+    .badge-risk-high   { background: rgba(220,38,38,0.09); color: #dc2626; border: 1px solid rgba(220,38,38,0.2); }
+    .badge-risk-medium { background: rgba(202,138,4,0.09); color: #ca8a04; border: 1px solid rgba(202,138,4,0.2); }
+    .badge-risk-low    { background: rgba(22,163,74,0.09); color: #16a34a; border: 1px solid rgba(22,163,74,0.2); }
+
+    .badge-timer-critical { background: rgba(220,38,38,0.07); color: #dc2626; border: 1px solid rgba(220,38,38,0.2); }
+    .badge-timer-warning  { background: rgba(202,138,4,0.07); color: #ca8a04; border: 1px solid rgba(202,138,4,0.2); }
+    .badge-timer-normal   { background: rgba(100,116,139,0.07); color: #64748b; border: 1px solid rgba(100,116,139,0.2); }
+
+    .badge-lane {
+      background: rgba(37,99,235,0.05);
+      color: #2563eb;
+      border: 1px solid rgba(37,99,235,0.15);
+      font-size: 0.58rem;
+      padding: 2px 7px;
+      border-radius: 4px;
+    }
+
+    .lane-badges { display: flex; flex-wrap: wrap; gap: 3px; margin-top: 5px; }
+
+    .badge-jurisdiction {
+      background: rgba(10,22,40,0.05);
+      color: var(--navy);
+      border: 1px solid rgba(10,22,40,0.14);
+      font-size: 0.6rem;
+      padding: 2px 8px;
+      border-radius: 100px;
+      font-weight: 600;
+      letter-spacing: 0.07em;
+    }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 900px) {
+      .sidebar { display: none; }
+      .main-content { margin-left: 0; }
+      .stats-row { grid-template-columns: repeat(2, 1fr); }
+      .case-body { grid-template-columns: 1fr; }
+    }
+
+    @media (max-width: 600px) {
+      .topnav { padding: 0 16px; }
+      .main-content { padding: 16px 16px 3rem; }
+      .filter-search { width: 100%; }
+      .user-name, .nav-role { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ── TOP NAV ── -->
+<nav class="topnav">
+  <div class="topnav-left">
+    <a href="/dashboard/main.html" class="header-logo">F.A.S.</a>
+    <div class="nav-divider"></div>
+    <span class="header-title">Escalation Queue</span>
+  </div>
+  <div class="topnav-right">
+    <span class="user-name">Sarah Chen</span>
+    <span class="nav-role">COMPLIANCE OFFICER</span>
+    <a href="/dashboard/login.html" class="nav-logout">Sign out</a>
+  </div>
+</nav>
+
+<!-- ── SIDEBAR ── -->
+<aside class="sidebar">
+  <div class="sidebar-label">Dashboard</div>
+  <a href="/dashboard/main.html" class="sidebar-link">
+    <span class="icon">⬛</span> Overview
+  </a>
+  <a href="/dashboard/escalation-queue.html" class="sidebar-link active">
+    <span class="icon">🚨</span> Escalation Queue
+    <span class="sidebar-badge">12</span>
+  </a>
+  <a href="/dashboard/rejection-detail.html" class="sidebar-link">
+    <span class="icon">📄</span> Rejection Detail
+  </a>
+
+  <div class="sidebar-label" style="margin-top:12px;">Audit</div>
+  <a href="#" class="sidebar-link">
+    <span class="icon">📋</span> Audit Log
+  </a>
+  <a href="#" class="sidebar-link">
+    <span class="icon">📊</span> Compliance Reports
+  </a>
+
+  <div class="sidebar-label" style="margin-top:12px;">Admin</div>
+  <a href="#" class="sidebar-link">
+    <span class="icon">⚙️</span> Settings
+  </a>
+  <a href="/security.html" class="sidebar-link">
+    <span class="icon">🔒</span> Security
+  </a>
+</aside>
+
+<!-- ── MAIN CONTENT ── -->
+<main class="main-content">
+
+  <!-- Page header -->
+  <div class="page-header">
+    <div>
+      <div class="page-title">Escalation Queue</div>
+      <div class="page-subtitle">ATS rejections flagged for human review before finalization · Updated 2 min ago</div>
+    </div>
+    <div class="header-actions">
+      <button class="btn btn-delegate" onclick="alert('Export feature coming soon.')">↓ Export CSV</button>
+      <button class="btn btn-review" onclick="alert('Bulk review coming in v1.1.')">Review All Critical →</button>
+    </div>
+  </div>
+
+  <!-- Stats -->
+  <div class="stats-row">
+    <div class="stat-card">
+      <div class="stat-value">12</div>
+      <div class="stat-label">Total in Queue</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value danger">3</div>
+      <div class="stat-label">Critical — SLA Exceeded</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value warning">7</div>
+      <div class="stat-label">Pending Review</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value gold">2.4h</div>
+      <div class="stat-label">Avg Review Time</div>
+    </div>
+  </div>
+
+  <!-- Filter bar -->
+  <div class="filter-bar">
+    <div class="filter-tabs">
+      <button class="filter-btn active" onclick="setFilter(this,'all')">All (12)</button>
+      <button class="filter-btn" onclick="setFilter(this,'critical')">Critical (3)</button>
+      <button class="filter-btn" onclick="setFilter(this,'pending')">Pending (7)</button>
+      <button class="filter-btn" onclick="setFilter(this,'delegated')">Delegated (2)</button>
+    </div>
+    <input type="text" class="filter-search" placeholder="Search by candidate, role, or case ID…" oninput="filterSearch(this.value)">
+  </div>
+
+  <!-- ── CRITICAL SECTION ── -->
+  <div class="queue-section" id="section-critical">
+    <div class="section-header">
+      <span class="section-title critical">● Critical</span>
+      <span class="section-count">3 cases — SLA exceeded, review required now</span>
+    </div>
+    <div class="case-list">
+
+      <!-- CASE 1 -->
+      <div class="case-card escalated" data-case="FAS-2847">
+        <div class="case-header">
+          <div class="case-header-left">
+            <span class="case-id">FAS-2847</span>
+            <span class="badge badge-risk-high">High Risk</span>
+            <span class="badge badge-jurisdiction">NYC LL144</span>
+          </div>
+          <div class="case-header-right">
+            <span class="badge badge-timer-critical">⏱ 6.2h in queue</span>
+          </div>
+        </div>
+        <div class="case-body">
+          <div class="meta-block">
+            <div class="case-meta"><strong>Position</strong><br>Senior Accountant — Financial Controls</div>
+            <div class="case-meta" style="margin-top:0.5rem"><strong>ATS</strong> Workday &nbsp;·&nbsp; <strong>Req ID</strong> WD-4412</div>
+            <div class="case-meta" style="margin-top:0.5rem"><strong>Candidate ID</strong> C-28847 &nbsp;·&nbsp; <strong>Applied</strong> May 3, 2026</div>
+            <div class="lane-badges" style="margin-top:0.6rem">
+              <span class="badge badge-lane">Age Proxy</span>
+              <span class="badge badge-lane">Gap Penalty</span>
+            </div>
+          </div>
+          <div class="case-flags">
+            <div class="case-flag">
+              <div class="case-flag-label">Lane 1 — Age Proxy Signal</div>
+              <p>Requirement for "recent graduate 2020–2022" filters candidates by graduation year — a documented age proxy under NYC LL144 §23-1502.</p>
+            </div>
+            <div class="case-flag">
+              <div class="case-flag-label">Lane 2 — Employment Gap Penalty</div>
+              <p>ATS scoring deducted 18 points for a 14-month gap (2021–2022). Gap pre-dates the job requirement window.</p>
+            </div>
+          </div>
+        </div>
+        <div class="case-footer">
+          <span>Flagged by F.A.S. engine · Audit ID AUD-9921 · Assigned: S. Chen</span>
+          <div class="case-actions">
+            <button class="btn btn-review" onclick="openReview('FAS-2847')">Review →</button>
+            <button class="btn btn-delegate" onclick="delegate('FAS-2847')">Delegate</button>
+            <button class="btn btn-override" onclick="override('FAS-2847')">Override — Allow</button>
+            <button class="btn btn-snooze" onclick="snooze('FAS-2847')">⏸ Snooze 1h</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- CASE 2 -->
+      <div class="case-card escalated" data-case="FAS-2851">
+        <div class="case-header">
+          <div class="case-header-left">
+            <span class="case-id">FAS-2851</span>
+            <span class="badge badge-risk-high">High Risk</span>
+            <span class="badge badge-jurisdiction">OFCCP</span>
+          </div>
+          <div class="case-header-right">
+            <span class="badge badge-timer-critical">⏱ 5.1h in queue</span>
+          </div>
+        </div>
+        <div class="case-body">
+          <div class="meta-block">
+            <div class="case-meta"><strong>Position</strong><br>Senior Software Engineer — Platform</div>
+            <div class="case-meta" style="margin-top:0.5rem"><strong>ATS</strong> Greenhouse &nbsp;·&nbsp; <strong>Req ID</strong> GH-1183</div>
+            <div class="case-meta" style="margin-top:0.5rem"><strong>Candidate ID</strong> C-28851 &nbsp;·&nbsp; <strong>Applied</strong> May 3, 2026</div>
+            <div class="lane-badges" style="margin-top:0.6rem">
+              <span class="badge badge-lane">Disparate Impact</span>
+              <span class="badge badge-lane">Keyword Mismatch</span>
+            </div>
+          </div>
+          <div class="case-flags">
+            <div class="case-flag">
+              <div class="case-flag-label">Lane 3 — Disparate Impact Pattern</div>
+              <p>"Must have continuous 5-year tenure at a single employer" screens out 34% of Black and Hispanic applicants vs. 12% of white applicants — EEOC 4/5ths rule violation risk.</p>
+            </div>
+            <div class="case-flag">
+              <div class="case-flag-label">Lane 5 — Keyword Mismatch</div>
+              <p>ATS rejected on "Kubernetes" vs candidate's listed "K8s" — documented synonym. Candidate meets the underlying requirement.</p>
+            </div>
+          </div>
+        </div>
+        <div class="case-footer">
+          <span>Flagged by F.A.S. engine · Audit ID AUD-9925 · Assigned: M. Torres</span>
+          <div class="case-actions">
+            <button class="btn btn-review" onclick="openReview('FAS-2851')">Review →</button>
+            <button class="btn btn-delegate" onclick="delegate('FAS-2851')">Delegate</button>
+            <button class="btn btn-override" onclick="override('FAS-2851')">Override — Allow</button>
+            <button class="btn btn-snooze" onclick="snooze('FAS-2851')">⏸ Snooze 1h</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- CASE 3 -->
+      <div class="case-card escalated" data-case="FAS-2853">
+        <div class="case-header">
+          <div class="case-header-left">
+            <span class="case-id">FAS-2853</span>
+            <span class="badge badge-risk-high">High Risk</span>
+            <span class="badge badge-jurisdiction">Colorado SB205</span>
+          </div>
+          <div class="case-header-right">
+            <span class="badge badge-timer-critical">⏱ 4.3h in queue</span>
+          </div>
+        </div>
+        <div class="case-body">
+          <div class="meta-block">
+            <div class="case-meta"><strong>Position</strong><br>Director of Operations — Supply Chain</div>
+            <div class="case-meta" style="margin-top:0.5rem"><strong>ATS</strong> Lever &nbsp;·&nbsp; <strong>Req ID</strong> LV-0882</div>
+            <div class="case-meta" style="margin-top:0.5rem"><strong>Candidate ID</strong> C-28853 &nbsp;·&nbsp; <strong>Applied</strong> May 3, 2026</div>
+            <div class="lane-badges" style="margin-top:0.6rem">
+              <span class="badge badge-lane">Credential Inflation</span>
+              <span class="badge badge-lane">Disability Exclusion</span>
+            </div>
+          </div>
+          <div class="case-flags">
+            <div class="case-flag">
+              <div class="case-flag-label">Lane 4 — Credential Inflation</div>
+              <p>MBA required for a role where 87% of current incumbents hold a Bachelor's. Requirement exceeds documented necessity and has disparate impact under SB205 §8-27-101.</p>
+            </div>
+            <div class="case-flag">
+              <div class="case-flag-label">Lane 6 — Disability Exclusion Language</div>
+              <p>"Must be able to travel 60% without accommodation" — language screens out protected disabilities without established business necessity documentation.</p>
+            </div>
+          </div>
+        </div>
+        <div class="case-footer">
+          <span>Flagged by F.A.S. engine · Audit ID AUD-9927 · Assigned: S. Chen</span>
+          <div class="case-actions">
+            <button class="btn btn-review" onclick="openReview('FAS-2853')">Review →</button>
+            <button class="btn btn-delegate" onclick="delegate('FAS-2853')">Delegate</button>
+            <button class="btn btn-override" onclick="override('FAS-2853')">Override — Allow</button>
+            <button class="btn btn-snooze" onclick="snooze('FAS-2853')">⏸ Snooze 1h</button>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ── ACTIVE SECTION ── -->
+  <div class="queue-section" id="section-active">
+    <div class="section-header">
+      <span class="section-title active">● Active</span>
+      <span class="section-count">9 cases pending review — within SLA</span>
+    </div>
+    <div class="case-list">
+
+      <!-- CASE 4 -->
+      <div class="case-card active-case" data-case="FAS-2856">
+        <div class="case-header">
+          <div class="case-header-left">
+            <span class="case-id">FAS-2856</span>
+            <span class="badge badge-risk-medium">Medium Risk</span>
+            <span class="badge badge-jurisdiction">EEOC</span>
+          </div>
+          <div class="case-header-right">
+            <span class="badge badge-timer-warning">⏱ 2.8h in queue</span>
+          </div>
+        </div>
+        <div class="case-body">
+          <div class="meta-block">
+            <div class="case-meta"><strong>Position</strong><br>Data Analyst — Customer Insights</div>
+            <div class="case-meta" style="margin-top:0.5rem"><strong>ATS</strong> iCIMS &nbsp;·&nbsp; <strong>Req ID</strong> IC-3301</div>
+            <div class="case-meta" style="margin-top:0.5rem"><strong>Candidate ID</strong> C-28856 &nbsp;·&nbsp; <strong>Applied</strong> May 4, 2026</div>
+            <div class="lane-badges" style="margin-top:0.6rem">
+              <span class="badge badge-lane">Keyword Mismatch</span>
+            </div>
+          </div>
+          <div class="case-flags">
+            <div class="case-flag">
+              <div class="case-flag-label">Lane 5 — Keyword Mismatch</div>
+              <p>ATS rejected on "Tableau" requirement vs candidate's listed "Power BI, Looker." Candidate has equivalent data visualization experience under a different tool name.</p>
+            </div>
+          </div>
+        </div>
+        <div class="case-footer">
+          <span>Flagged by F.A.S. engine · Audit ID AUD-9931 · Unassigned</span>
+          <div class="case-actions">
+            <button class="btn btn-review" onclick="openReview('FAS-2856')">Review →</button>
+            <button class="btn btn-delegate" onclick="delegate('FAS-2856')">Delegate</button>
+            <button class="btn btn-override" onclick="override('FAS-2856')">Override — Allow</button>
+            <button class="btn btn-snooze" onclick="snooze('FAS-2856')">⏸ Snooze 1h</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- CASE 5 -->
+      <div class="case-card active-case" data-case="FAS-2858">
+        <div class="case-header">
+          <div class="case-header-left">
+            <span class="case-id">FAS-2858</span>
+            <span class="badge badge-risk-medium">Medium Risk</span>
+            <span class="badge badge-jurisdiction">OFCCP</span>
+          </div>
+          <div class="case-header-right">
+            <span class="badge badge-timer-warning">⏱ 2.1h in queue</span>
+          </div>
+        </div>
+        <div class="case-body">
+          <div class="meta-block">
+            <div class="case-meta"><strong>Position</strong><br>HR Business Partner — People Operations</div>
+            <div class="case-meta" style="margin-top:0.5rem"><strong>ATS</strong> Taleo &nbsp;·&nbsp; <strong>Req ID</strong> TL-0774</div>
+            <div class="case-meta" style="margin-top:0.5rem"><strong>Candidate ID</strong> C-28858 &nbsp;·&nbsp; <strong>Applied</strong> May 4, 2026</div>
+            <div class="lane-badges" style="margin-top:0.6rem">
+              <span class="badge badge-lane">Gap Penalty</span>
+              <span class="badge badge-lane">Legal Trigger</span>
+            </div>
+          </div>
+          <div class="case-flags">
+            <div class="case-flag">
+              <div class="case-flag-label">Lane 2 — Employment Gap Penalty</div>
+              <p>Candidate scored -12 for an 8-month gap. Gap corresponds to documented parental leave — penalization may violate FMLA-adjacent OFCCP guidelines.</p>
+            </div>
+          </div>
+        </div>
+        <div class="case-footer">
+          <span>Flagged by F.A.S. engine · Audit ID AUD-9934 · Assigned: M. Torres</span>
+          <div class="case-actions">
+            <button class="btn btn-review" onclick="openReview('FAS-2858')">Review →</button>
+            <button class="btn btn-delegate" onclick="delegate('FAS-2858')">Delegate</button>
+            <button class="btn btn-override" onclick="override('FAS-2858')">Override — Allow</button>
+            <button class="btn btn-snooze" onclick="snooze('FAS-2858')">⏸ Snooze 1h</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- CASE 6 -->
+      <div class="case-card active-case" data-case="FAS-2861">
+        <div class="case-header">
+          <div class="case-header-left">
+            <span class="case-id">FAS-2861</span>
+            <span class="badge badge-risk-medium">Medium Risk</span>
+            <span class="badge badge-jurisdiction">NYC LL144</span>
+          </div>
+          <div class="case-header-right">
+            <span class="badge badge-timer-normal">⏱ 1.4h in queue</span>
+          </div>
+        </div>
+        <div class="case-body">
+          <div class="meta-block">
+            <div class="case-meta"><strong>Position</strong><br>Regional Sales Manager — Enterprise</div>
+            <div class="case-meta" style="margin-top:0.5rem"><strong>ATS</strong> Workday &nbsp;·&nbsp; <strong>Req ID</strong> WD-4478</div>
+            <div class="case-meta" style="margin-top:0.5rem"><strong>Candidate ID</strong> C-28861 &nbsp;·&nbsp; <strong>Applied</strong> May 4, 2026</div>
+            <div class="lane-badges" style="margin-top:0.6rem">
+              <span class="badge badge-lane">Age Proxy</span>
+            </div>
+          </div>
+          <div class="case-flags">
+            <div class="case-flag">
+              <div class="case-flag-label">Lane 1 — Age Proxy Signal</div>
+              <p>"Fast-rising career trajectory in last 3 years" scoring weights recency of promotions — may disproportionately exclude candidates 45+ under NYC LL144.</p>
+            </div>
+          </div>
+        </div>
+        <div class="case-footer">
+          <span>Flagged by F.A.S. engine · Audit ID AUD-9938 · Unassigned</span>
+          <div class="case-actions">
+            <button class="btn btn-review" onclick="openReview('FAS-2861')">Review →</button>
+            <button class="btn btn-delegate" onclick="delegate('FAS-2861')">Delegate</button>
+            <button class="btn btn-override" onclick="override('FAS-2861')">Override — Allow</button>
+            <button class="btn btn-snooze" onclick="snooze('FAS-2861')">⏸ Snooze 1h</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- CASE 7 -->
+      <div class="case-card active-case" data-case="FAS-2863">
+        <div class="case-header">
+          <div class="case-header-left">
+            <span class="case-id">FAS-2863</span>
+            <span class="badge badge-risk-low">Low Risk</span>
+            <span class="badge badge-jurisdiction">EEOC</span>
+          </div>
+          <div class="case-header-right">
+            <span class="badge badge-timer-normal">⏱ 0.9h in queue</span>
+          </div>
+        </div>
+        <div class="case-body">
+          <div class="meta-block">
+            <div class="case-meta"><strong>Position</strong><br>Senior UX Designer — Mobile Products</div>
+            <div class="case-meta" style="margin-top:0.5rem"><strong>ATS</strong> Greenhouse &nbsp;·&nbsp; <strong>Req ID</strong> GH-1201</div>
+            <div class="case-meta" style="margin-top:0.5rem"><strong>Candidate ID</strong> C-28863 &nbsp;·&nbsp; <strong>Applied</strong> May 4, 2026</div>
+            <div class="lane-badges" style="margin-top:0.6rem">
+              <span class="badge badge-lane">Credential Inflation</span>
+            </div>
+          </div>
+          <div class="case-flags">
+            <div class="case-flag">
+              <div class="case-flag-label">Lane 4 — Credential Inflation</div>
+              <p>Master's degree in HCI or Design listed as required. Role analysis suggests Bachelor's + portfolio is the operative qualification. Flagged for review — low severity.</p>
+            </div>
+          </div>
+        </div>
+        <div class="case-footer">
+          <span>Flagged by F.A.S. engine · Audit ID AUD-9941 · Assigned: S. Chen</span>
+          <div class="case-actions">
+            <button class="btn btn-review" onclick="openReview('FAS-2863')">Review →</button>
+            <button class="btn btn-delegate" onclick="delegate('FAS-2863')">Delegate</button>
+            <button class="btn btn-override" onclick="override('FAS-2863')">Override — Allow</button>
+            <button class="btn btn-snooze" onclick="snooze('FAS-2863')">⏸ Snooze 1h</button>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+</main>
+
+<script>
+  function openReview(id) {
+    window.location.href = '/dashboard/rejection-detail.html?case=' + id;
+  }
+
+  function delegate(id) {
+    alert('Case ' + id + ' delegated to next available reviewer.');
+  }
+
+  function override(id) {
+    if (confirm('Override audit flag for ' + id + '? This action will be logged and requires documented justification in the audit trail.')) {
+      alert('Override recorded for ' + id + '. Please document your justification in the case notes.');
+    }
+  }
+
+  function snooze(id) {
+    alert('Case ' + id + ' snoozed for 1 hour. You will be notified at ' + new Date(Date.now() + 3600000).toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'}) + '.');
+  }
+
+  function setFilter(btn, filter) {
+    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    const cards = document.querySelectorAll('.case-card');
+    cards.forEach(card => {
+      if (filter === 'all') {
+        card.style.display = '';
+      } else if (filter === 'critical') {
+        card.style.display = card.classList.contains('escalated') ? '' : 'none';
+      } else if (filter === 'pending') {
+        card.style.display = card.classList.contains('active-case') ? '' : 'none';
+      } else {
+        card.style.display = 'none';
+      }
+    });
+  }
+
+  function filterSearch(query) {
+    const q = query.toLowerCase();
+    document.querySelectorAll('.case-card').forEach(card => {
+      const text = card.textContent.toLowerCase();
+      card.style.display = (!q || text.includes(q)) ? '' : 'none';
+    });
+  }
+</script>
+
+</body>
+</html>
