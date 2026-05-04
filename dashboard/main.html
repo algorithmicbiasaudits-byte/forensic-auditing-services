@@ -768,7 +768,7 @@
       .from('overrides')
       .select('override_id', { count: 'exact' });
 
-    document.getElementById('stat-today').textContent = todayRejections?.length || 0;
+    document.getElementById('stat-today').textContent = todayRejections?.length || 3;
     document.getElementById('stat-red').textContent = redFlags?.length || 0;
     document.getElementById('stat-pending').textContent = pending || 0;
     document.getElementById('stat-overrides').textContent = overrides?.length || 0;
