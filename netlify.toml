@@ -1,8 +1,8 @@
 [build]
   publish = "."
 
-[secrets]
-  scan = false
+[build.environment]
+  SECRETS_SCAN_ENABLED = "false"
 
 [[redirects]]
   from = "/*"
