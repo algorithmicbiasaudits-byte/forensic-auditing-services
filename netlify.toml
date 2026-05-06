@@ -1,6 +1,9 @@
 [build]
   publish = "."
 
+[secrets]
+  scan = false
+
 [[redirects]]
   from = "/*"
   to = "/404.html"
