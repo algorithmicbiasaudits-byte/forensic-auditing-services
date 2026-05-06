@@ -1,0 +1,518 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Contact — F.A.S. Forensic Auditing Services</title>
+  <meta name="description" content="Contact Forensic Auditing Services by ALS Consulting. Reach out with questions about F.A.S. compliance auditing for AI-driven hiring decisions.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --navy: #1a3a6b;
+      --navy-mid: #1e4480;
+      --navy-dark: #152f5a;
+      --gold: #b8872e;
+      --gold-light: #d4a44a;
+      --gold-muted: rgba(184,135,46,0.12);
+      --white: #ffffff;
+      --off-white: #f8f7f4;
+      --gray-100: #f2f1ee;
+      --gray-300: #d0cec8;
+      --gray-600: #555;
+      --gray-800: #2d2d2d;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: var(--off-white);
+      color: var(--gray-800);
+      line-height: 1.6;
+      min-height: 100vh;
+    }
+
+    header {
+      background: var(--navy);
+      padding: 20px 48px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 2px solid var(--gold);
+    }
+
+    .logo-wrap a {
+      font-size: 13px;
+      font-weight: 500;
+      color: rgba(255,255,255,0.6);
+      text-decoration: none;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      transition: color 0.2s;
+    }
+    .logo-wrap a:hover { color: var(--gold); }
+    .brand-subtitle { font-size: 11px; color: var(--gold); margin-top: 4px; }
+
+    nav a {
+      color: rgba(255,255,255,0.7);
+      text-decoration: none;
+      font-size: 13px;
+      padding: 8px 16px;
+      transition: color 0.2s;
+    }
+    nav a:hover { color: white; }
+
+    .page-wrap {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 64px 48px;
+      display: grid;
+      grid-template-columns: 1fr 1.4fr;
+      gap: 64px;
+      align-items: start;
+    }
+
+    /* LEFT PANEL */
+    .left-panel { position: sticky; top: 40px; }
+
+    .section-badge {
+      display: inline-flex;
+      align-items: center;
+      background: var(--gold-muted);
+      border: 1px solid rgba(184,135,46,0.3);
+      color: var(--gold);
+      font-size: 11px;
+      font-weight: 600;
+      padding: 6px 16px;
+      border-radius: 20px;
+      margin-bottom: 24px;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+    }
+
+    .left-panel h1 {
+      font-family: 'Playfair Display', serif;
+      font-size: 38px;
+      font-weight: 700;
+      color: var(--navy);
+      line-height: 1.2;
+      margin-bottom: 20px;
+    }
+
+    .left-panel h1 em { font-style: normal; color: var(--gold); }
+
+    .left-panel p {
+      font-size: 15px;
+      color: var(--gray-600);
+      line-height: 1.85;
+      margin-bottom: 16px;
+    }
+
+    .divider { width: 48px; height: 2px; background: var(--gold); margin: 28px 0; }
+
+    .contact-detail {
+      display: flex;
+      gap: 14px;
+      align-items: flex-start;
+      margin-bottom: 20px;
+    }
+
+    .contact-icon {
+      width: 36px;
+      height: 36px;
+      background: var(--navy);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      font-size: 15px;
+    }
+
+    .contact-detail-text strong {
+      display: block;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--navy);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 3px;
+    }
+
+    .contact-detail-text a,
+    .contact-detail-text span {
+      font-size: 14px;
+      color: var(--gray-600);
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+
+    .contact-detail-text a:hover { color: var(--gold); }
+
+    .response-note {
+      margin-top: 28px;
+      background: var(--navy);
+      padding: 20px 24px;
+      border-left: 3px solid var(--gold);
+    }
+
+    .response-note p {
+      font-size: 12px;
+      color: rgba(255,255,255,0.6);
+      line-height: 1.7;
+      margin: 0;
+    }
+
+    .response-note strong { color: var(--gold); }
+
+    /* FORM PANEL */
+    .form-panel {
+      background: var(--white);
+      border: 1px solid #e0ddd6;
+      border-top: 4px solid var(--gold);
+      padding: 48px 44px;
+    }
+
+    .form-header { margin-bottom: 36px; }
+
+    .form-header h2 {
+      font-family: 'Playfair Display', serif;
+      font-size: 24px;
+      color: var(--navy);
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+
+    .form-header p { font-size: 13px; color: var(--gray-600); }
+
+    .form-group { margin-bottom: 22px; }
+
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+      margin-bottom: 22px;
+    }
+
+    label {
+      display: block;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--navy);
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+      margin-bottom: 8px;
+    }
+
+    label .req { color: var(--gold); margin-left: 2px; }
+
+    input[type="text"],
+    input[type="email"],
+    input[type="tel"],
+    textarea {
+      width: 100%;
+      padding: 12px 16px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 14px;
+      color: var(--gray-800);
+      background: var(--off-white);
+      border: 1px solid var(--gray-300);
+      border-radius: 2px;
+      outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+
+    input:focus, textarea:focus {
+      border-color: var(--gold);
+      box-shadow: 0 0 0 3px rgba(184,135,46,0.1);
+      background: var(--white);
+    }
+
+    /* PHONE ROW */
+    .phone-wrap {
+      display: flex;
+      gap: 10px;
+    }
+
+    .country-code-wrap { position: relative; flex-shrink: 0; }
+
+    .country-code-select {
+      appearance: none;
+      padding: 12px 36px 12px 12px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 14px;
+      color: var(--gray-800);
+      background: var(--off-white);
+      border: 1px solid var(--gray-300);
+      border-radius: 2px;
+      outline: none;
+      cursor: pointer;
+      transition: border-color 0.2s, box-shadow 0.2s;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23b8872e' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 10px center;
+      width: 130px;
+    }
+
+    .country-code-select:focus {
+      border-color: var(--gold);
+      box-shadow: 0 0 0 3px rgba(184,135,46,0.1);
+      background-color: var(--white);
+    }
+
+    .phone-number-input { flex: 1; }
+
+    textarea {
+      resize: vertical;
+      min-height: 130px;
+      line-height: 1.7;
+    }
+
+    .char-count {
+      text-align: right;
+      font-size: 11px;
+      color: var(--gray-600);
+      margin-top: 6px;
+    }
+
+    .char-count.warn { color: #c0392b; }
+
+    .section-divider {
+      border: none;
+      border-top: 1px solid #e8e5df;
+      margin: 28px 0;
+    }
+
+    .section-title {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--gold);
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      margin-bottom: 20px;
+    }
+
+    .submit-btn {
+      width: 100%;
+      background: var(--gold);
+      color: var(--navy);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 15px;
+      font-weight: 600;
+      padding: 16px;
+      border: none;
+      border-radius: 2px;
+      cursor: pointer;
+      letter-spacing: 0.5px;
+      transition: background 0.2s, transform 0.15s;
+      margin-top: 32px;
+    }
+
+    .submit-btn:hover { background: var(--gold-light); transform: translateY(-1px); }
+
+    .form-disclaimer {
+      margin-top: 14px;
+      font-size: 11px;
+      color: var(--gray-600);
+      text-align: center;
+      line-height: 1.6;
+    }
+
+    .form-disclaimer a { color: var(--gold); text-decoration: none; }
+
+    footer {
+      background: var(--navy-dark);
+      padding: 36px 48px;
+      text-align: center;
+      border-top: 2px solid var(--gold);
+    }
+
+    footer .brand { color: var(--gold); font-size: 14px; font-weight: 600; margin-bottom: 6px; }
+    footer p { color: rgba(255,255,255,0.4); font-size: 12px; margin: 4px 0; }
+    footer a { color: var(--gold); text-decoration: none; }
+    footer a:hover { text-decoration: underline; }
+
+    @media (max-width: 900px) {
+      .page-wrap { grid-template-columns: 1fr; gap: 40px; padding: 40px 24px; }
+      .left-panel { position: static; }
+      .form-panel { padding: 32px 24px; }
+      header { flex-direction: column; padding: 20px 24px; gap: 12px; }
+      .form-row { grid-template-columns: 1fr; gap: 0; }
+      .form-row .form-group { margin-bottom: 22px; }
+      .phone-wrap { flex-direction: column; }
+      .country-code-select { width: 100%; }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="logo-wrap">
+    <a href="https://alsconsulting.netlify.app" target="_blank">← ALS Consulting</a>
+    <div class="brand-subtitle">F.A.S. — Forensic Auditing Services</div>
+  </div>
+  <nav>
+    <a href="index.html">← Back to F.A.S.</a>
+  </nav>
+</header>
+
+<div class="page-wrap">
+
+  <!-- LEFT PANEL -->
+  <div class="left-panel">
+    <div class="section-badge">Get in Touch</div>
+    <h1>We'd Like to <em>Hear</em> From You</h1>
+    <p>Whether you have questions about F.A.S., want to understand how it fits your organization, or are ready to discuss next steps — reach out and we will respond promptly.</p>
+
+    <div class="divider"></div>
+
+    <div class="contact-detail">
+      <div class="contact-icon">✉</div>
+      <div class="contact-detail-text">
+        <strong>Email</strong>
+        <a href="mailto:info@alsconsulting.services">info@alsconsulting.services</a>
+      </div>
+    </div>
+
+    <div class="contact-detail">
+      <div class="contact-icon">🌐</div>
+      <div class="contact-detail-text">
+        <strong>Website</strong>
+        <a href="https://alsconsulting.netlify.app" target="_blank">alsconsulting.netlify.app</a>
+      </div>
+    </div>
+
+    <div class="contact-detail">
+      <div class="contact-icon">📅</div>
+      <div class="contact-detail-text">
+        <strong>Book a Call</strong>
+        <a href="https://calendly.com/astargill-ih3e/30min" target="_blank">Schedule a 30-minute conversation</a>
+      </div>
+    </div>
+
+    <div class="response-note">
+      <p><strong>Response time:</strong> We respond to all inquiries within one business day. For urgent compliance matters, include "URGENT" in your message and we will prioritize your request.</p>
+    </div>
+  </div>
+
+  <!-- FORM PANEL -->
+  <div class="form-panel">
+    <div class="form-header">
+      <h2>Send Us a Message</h2>
+      <p>All fields marked <span style="color:var(--gold);">*</span> are required.</p>
+    </div>
+
+    <form name="fas-contact" method="POST" action="apply-thank-you.html" data-netlify="true" netlify-honeypot="bot-field">
+      <input type="hidden" name="form-name" value="fas-contact">
+      <p style="display:none;"><label>Don't fill this out: <input name="bot-field"></label></p>
+
+      <div class="section-title">Organization</div>
+
+      <div class="form-group">
+        <label for="org-name">Organization Name <span class="req">*</span></label>
+        <input type="text" id="org-name" name="organization_name" required placeholder="Acme Corporation">
+      </div>
+
+      <hr class="section-divider">
+      <div class="section-title">Contact Person</div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label for="first-name">First Name <span class="req">*</span></label>
+          <input type="text" id="first-name" name="first_name" required placeholder="Jane">
+        </div>
+        <div class="form-group">
+          <label for="last-name">Last Name <span class="req">*</span></label>
+          <input type="text" id="last-name" name="last_name" required placeholder="Smith">
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="email">Work Email <span class="req">*</span></label>
+        <input type="email" id="email" name="email" required placeholder="jane.smith@organization.com">
+      </div>
+
+      <div class="form-group">
+        <label for="phone">Phone Number</label>
+        <div class="phone-wrap">
+          <select class="country-code-select" name="country_code" id="country-code">
+            <option value="+1">🇺🇸 +1</option>
+            <option value="+1-CA">🇨🇦 +1</option>
+            <option value="+44">🇬🇧 +44</option>
+            <option value="+61">🇦🇺 +61</option>
+            <option value="+33">🇫🇷 +33</option>
+            <option value="+49">🇩🇪 +49</option>
+            <option value="+31">🇳🇱 +31</option>
+            <option value="+32">🇧🇪 +32</option>
+            <option value="+41">🇨🇭 +41</option>
+            <option value="+46">🇸🇪 +46</option>
+            <option value="+47">🇳🇴 +47</option>
+            <option value="+45">🇩🇰 +45</option>
+            <option value="+353">🇮🇪 +353</option>
+            <option value="+34">🇪🇸 +34</option>
+            <option value="+39">🇮🇹 +39</option>
+            <option value="+351">🇵🇹 +351</option>
+            <option value="+48">🇵🇱 +48</option>
+            <option value="+91">🇮🇳 +91</option>
+            <option value="+65">🇸🇬 +65</option>
+            <option value="+81">🇯🇵 +81</option>
+            <option value="+82">🇰🇷 +82</option>
+            <option value="+55">🇧🇷 +55</option>
+            <option value="+52">🇲🇽 +52</option>
+            <option value="+27">🇿🇦 +27</option>
+            <option value="+234">🇳🇬 +234</option>
+            <option value="+other">Other</option>
+          </select>
+          <input type="tel" id="phone" name="phone" class="phone-number-input" placeholder="(555) 000-0000">
+        </div>
+      </div>
+
+      <hr class="section-divider">
+      <div class="section-title">Your Message</div>
+
+      <div class="form-group">
+        <label for="comments">Message <span class="req">*</span></label>
+        <textarea
+          id="comments"
+          name="message"
+          required
+          maxlength="1500"
+          placeholder="Tell us about your organization, your compliance concerns, or any questions you have about F.A.S."
+          oninput="updateCharCount(this)"
+        ></textarea>
+        <div class="char-count" id="char-count">0 / 1,500</div>
+      </div>
+
+      <button type="submit" class="submit-btn">Send Message</button>
+      <p class="form-disclaimer">By submitting this form you agree to be contacted by ALS Consulting regarding F.A.S. We do not share your information with third parties. <a href="terms.html">Terms apply.</a></p>
+
+    </form>
+  </div>
+</div>
+
+<footer>
+  <div class="brand">F.A.S. — Forensic Auditing Services</div>
+  <p>A service of ALS Consulting</p>
+  <p style="margin-top:14px;">
+    <a href="index.html">Home</a> &nbsp;|&nbsp;
+    <a href="terms.html">Terms</a> &nbsp;|&nbsp;
+    <a href="faq.html">FAQ</a> &nbsp;|&nbsp;
+    <a href="subprocessors.html">Subprocessors</a> &nbsp;|&nbsp;
+    <a href="waitlist.html">Join Waitlist</a>
+  </p>
+  <p style="margin-top:14px;font-size:11px;color:rgba(255,255,255,0.25);">© 2026 ALS Consulting Services. All rights reserved.</p>
+</footer>
+
+<script>
+  function updateCharCount(el) {
+    const count = el.value.length;
+    const counter = document.getElementById('char-count');
+    counter.textContent = count.toLocaleString() + ' / 1,500';
+    counter.classList.toggle('warn', count > 1400);
+  }
+</script>
+
+</body>
+</html>
