@@ -1,1175 +1,1992 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Rejection Detail | F.A.S. Dashboard</title>
-<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@300;400;500;600&family=IBM+Plex+Serif:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script>
-  const { createClient } = supabase;
-  const supabaseClient = createClient(
-    'https://znjvjofsfvxccmidfpgy.supabase.co',
-    'sb_publishable_9eXyp1KWa4g_uvM4TCliBg_XAwwSuwD'
-  );
-</script>
-<style>
-:root {
-  --navy:      #0a1628;
-  --navy-2:    #0f1e35;
-  --navy-3:    #162440;
-  --navy-4:    #1e3054;
-  --blue:      #1a5fa8;
-  --blue-2:    #2e7de0;
-  --blue-pale: #dbeafe;
-  --gold:      #b8872e;
-  --gold-2:    #d4a040;
-  --gold-pale: #fef3c7;
-  --red:       #dc2626;
-  --red-2:     #ef4444;
-  --red-pale:  #fee2e2;
-  --yellow:    #d97706;
-  --yellow-2:  #f59e0b;
-  --yellow-pale:#fef3c7;
-  --green:     #16a34a;
-  --green-2:   #22c55e;
-  --green-pale:#dcfce7;
-  --gray-50:   #f8fafc;
-  --gray-100:  #f1f5f9;
-  --gray-200:  #e2e8f0;
-  --gray-300:  #cbd5e1;
-  --gray-400:  #94a3b8;
-  --gray-500:  #64748b;
-  --gray-600:  #475569;
-  --gray-700:  #334155;
-  --gray-800:  #1e293b;
-  --white:     #ffffff;
-  --mono:      'IBM Plex Mono', monospace;
-  --sans:      'IBM Plex Sans', sans-serif;
-  --serif:     'IBM Plex Serif', serif;
-  --r:         4px;
-  --r-lg:      8px;
-}
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>F.A.S. — Rejection Detail | CAND-2847</title>
+    <style>
+        /* ============================================
+           F.A.S. FORENSIC AUDIT SYSTEM
+           rejection-detail.html
+           Option A: Inline Expand + Fixed Sticky Banner
+           ============================================ */
 
-*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-html{scroll-behavior:smooth}
-body{font-family:var(--sans);background:var(--gray-50);color:var(--gray-800);font-size:13px;line-height:1.5}
-body::before{display:none}
+        :root {
+            --green: #22c55e;
+            --green-light: #dcfce7;
+            --yellow: #eab308;
+            --yellow-light: #fef9c3;
+            --orange: #f97316;
+            --orange-light: #ffedd5;
+            --red: #ef4444;
+            --red-light: #fee2e2;
+            --blue: #3b82f6;
+            --blue-light: #dbeafe;
+            --gray-50: #f9fafb;
+            --gray-100: #f3f4f6;
+            --gray-200: #e5e7eb;
+            --gray-300: #d1d5db;
+            --gray-400: #9ca3af;
+            --gray-500: #6b7280;
+            --gray-600: #4b5563;
+            --gray-700: #374151;
+            --gray-800: #1f2937;
+            --gray-900: #111827;
+            --white: #ffffff;
+            --font-sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            --font-mono: 'SF Mono', Monaco, 'Cascadia Code', 'Roboto Mono', Consolas, 'Courier New', monospace;
+            --space-1: 0.25rem;
+            --space-2: 0.5rem;
+            --space-3: 0.75rem;
+            --space-4: 1rem;
+            --space-5: 1.25rem;
+            --space-6: 1.5rem;
+            --space-8: 2rem;
+            --space-10: 2.5rem;
+            --space-12: 3rem;
+            --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            --transition-fast: 150ms ease;
+            --transition-base: 250ms ease;
+        }
 
-/* ── LOADING OVERLAY ── */
-#loadingOverlay{position:fixed;inset:0;background:rgba(248,250,252,0.95);display:flex;align-items:center;justify-content:center;z-index:500;font-family:'IBM Plex Mono',monospace;font-size:12px;color:#64748b;flex-direction:column;gap:12px}
-.spinner{width:28px;height:28px;border:2px solid var(--gray-200);border-top-color:var(--blue-2);border-radius:50%;animation:spin .7s linear infinite}
-@keyframes spin{to{transform:rotate(360deg)}}
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html { font-size: 16px; scroll-behavior: smooth; }
 
-/* ── TOPBAR ── */
-.topbar{background:#ffffff;border-bottom:1px solid #e2e8f0;box-shadow:0 1px 3px rgba(0,0,0,0.06);padding:0 24px;position:sticky;top:0;z-index:200}
-.topbar-inner{display:flex;align-items:center;justify-content:space-between;height:52px;max-width:1400px;margin:0 auto}
-.topbar-left{display:flex;align-items:center;gap:20px}
-.fas-logo{font-family:var(--mono);font-size:12px;font-weight:600;color:#0a1628;letter-spacing:2px;text-transform:uppercase}
-.topbar-sep{width:1px;height:20px;background:#e2e8f0}
-.breadcrumb{display:flex;align-items:center;gap:6px;font-family:var(--mono);font-size:11px;color:#94a3b8}
-.breadcrumb a{color:#94a3b8;text-decoration:none}
-.breadcrumb a:hover{color:var(--gold-2)}
-.breadcrumb-sep{color:#e2e8f0}
-.breadcrumb-cur{color:#475569}
-.topbar-right{display:flex;align-items:center;gap:12px}
-.topbar-user{font-size:11px;color:#64748b;font-family:var(--mono)}
-.topbar-role{font-size:10px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:var(--gold-2);background:rgba(184,135,46,0.1);border:1px solid rgba(184,135,46,0.25);padding:2px 8px;border-radius:10px}
+        body {
+            font-family: var(--font-sans);
+            color: var(--gray-800);
+            background-color: var(--gray-50);
+            line-height: 1.6;
+            -webkit-font-smoothing: antialiased;
+        }
 
-/* ── LAYOUT ── */
-.layout{max-width:1400px;margin:0 auto;padding:20px 24px 60px;display:grid;grid-template-columns:1fr 340px;gap:20px;align-items:start}
-.main-col{display:flex;flex-direction:column;gap:16px}
-.side-col{display:flex;flex-direction:column;gap:16px;position:sticky;top:72px}
+        /* STICKY LIVE BANNER */
+        .live-banner {
+            position: fixed;
+            top: 0; left: 0; right: 0;
+            z-index: 1000;
+            background: linear-gradient(90deg, var(--yellow-light) 0%, #fef3c7 100%);
+            border-bottom: 3px solid var(--yellow);
+            padding: var(--space-3) var(--space-6);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            transition: background var(--transition-base), border-color var(--transition-base);
+        }
 
-/* ── CARDS ── */
-.card{background:var(--white);border-radius:var(--r-lg);border:1px solid var(--gray-200);overflow:hidden}
-.card-header{padding:14px 20px;border-bottom:1px solid var(--gray-100);display:flex;align-items:center;justify-content:space-between;background:var(--gray-50)}
-.card-label{font-family:var(--mono);font-size:10px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;color:var(--gray-500)}
-.card-body{padding:20px}
+        .live-banner.critical {
+            background: linear-gradient(90deg, var(--red-light) 0%, #fecaca 100%);
+            border-bottom-color: var(--red);
+            animation: pulse-border 1s infinite;
+        }
 
-/* ── HEADER CARD ── */
-.header-card{background:#ffffff;border-color:#e2e8f0}
-.header-card .card-header{background:#f8fafc;border-bottom-color:#e2e8f0}
-.header-card .card-label{color:#94a3b8}
-.header-card .card-body{padding:20px;display:grid;grid-template-columns:1fr 1fr 1fr;gap:0}
+        @keyframes pulse-border {
+            0%, 100% { border-bottom-color: var(--red); }
+            50% { border-bottom-color: #b91c1c; }
+        }
 
-.hf{padding:16px 20px;border-right:1px solid #e2e8f0}
-.hf:last-child{border-right:none}
-.hf-label{font-family:var(--mono);font-size:9px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;color:#94a3b8;margin-bottom:6px}
-.hf-value{font-family:var(--mono);font-size:14px;font-weight:600;color:#1e293b;line-height:1.2}
-.hf-sub{font-size:11px;color:#64748b;margin-top:3px;font-family:var(--mono)}
+        .live-banner__left {
+            display: flex;
+            align-items: center;
+            gap: var(--space-4);
+        }
 
-.header-card .card-body .bottom-row{grid-column:1/-1;border-top:1px solid #e2e8f0;padding:14px 20px 0;display:flex;align-items:center;gap:20px;flex-wrap:wrap}
+        .live-banner__badge {
+            display: inline-flex;
+            align-items: center;
+            gap: var(--space-2);
+            background: var(--yellow);
+            color: var(--gray-900);
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            padding: var(--space-1) var(--space-3);
+            border-radius: 9999px;
+        }
 
-/* STATUS BADGES */
-.status-badge{display:inline-flex;align-items:center;gap:5px;font-family:var(--mono);font-size:10px;font-weight:600;letter-spacing:1px;text-transform:uppercase;padding:4px 10px;border-radius:3px}
-.status-pending{background:rgba(217,119,6,0.15);color:var(--yellow-2);border:1px solid rgba(217,119,6,0.3)}
-.status-review{background:rgba(46,125,224,0.15);color:var(--blue-2);border:1px solid rgba(46,125,224,0.3)}
-.status-escalated{background:rgba(220,38,38,0.15);color:var(--red-2);border:1px solid rgba(220,38,38,0.3)}
-.status-approved{background:rgba(22,163,74,0.15);color:var(--green-2);border:1px solid rgba(22,163,74,0.3)}
-.status-overridden{background:rgba(139,92,246,0.15);color:#a78bfa;border:1px solid rgba(139,92,246,0.3)}
+        .live-banner.critical .live-banner__badge {
+            background: var(--red);
+            color: var(--white);
+        }
 
-.risk-badge{display:inline-flex;align-items:center;gap:6px;font-family:var(--mono);font-size:11px;font-weight:600;letter-spacing:0.5px;padding:4px 12px;border-radius:3px}
-.risk-red{background:var(--red-pale);color:var(--red);border:1px solid rgba(220,38,38,0.2)}
-.risk-yellow{background:var(--yellow-pale);color:var(--yellow);border:1px solid rgba(217,119,6,0.2)}
-.risk-green{background:var(--green-pale);color:var(--green);border:1px solid rgba(22,163,74,0.2)}
-.risk-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
-.risk-red .risk-dot{background:var(--red);box-shadow:0 0 6px rgba(220,38,38,0.5)}
-.risk-yellow .risk-dot{background:var(--yellow);box-shadow:0 0 6px rgba(217,119,6,0.5)}
-.risk-green .risk-dot{background:var(--green)}
+        .live-banner__timer {
+            font-family: var(--font-mono);
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--gray-900);
+            display: flex;
+            align-items: center;
+            gap: var(--space-2);
+        }
 
-.time-badge{font-family:var(--mono);font-size:13px;font-weight:600}
-.time-warn{color:var(--yellow-2)}
-.time-crit{color:var(--red-2)}
-.time-ok{color:var(--green-2)}
+        .live-banner__actions {
+            display: flex;
+            align-items: center;
+            gap: var(--space-3);
+        }
 
-.reviewer-chip{display:inline-flex;align-items:center;gap:8px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:4px;padding:5px 10px}
-.reviewer-avatar{width:22px;height:22px;border-radius:50%;background:rgba(184,135,46,0.12);display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:9px;font-weight:600;color:#b8872e;flex-shrink:0;border:1px solid rgba(184,135,46,0.25)}
-.reviewer-name{font-size:11px;font-weight:500;color:#1e293b}
-.reviewer-role{font-family:var(--mono);font-size:9px;color:#64748b;margin-left:4px}
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: var(--space-2);
+            font-family: var(--font-sans);
+            font-size: 0.875rem;
+            font-weight: 600;
+            padding: var(--space-2) var(--space-4);
+            border-radius: 6px;
+            border: 1px solid transparent;
+            cursor: pointer;
+            transition: all var(--transition-fast);
+            white-space: nowrap;
+        }
 
-.confidence-wrap{display:flex;align-items:center;gap:8px}
-.confidence-bar-outer{width:80px;height:5px;background:#f1f5f9;border-radius:2px;overflow:hidden}
-.confidence-bar-inner{height:100%;border-radius:2px;background:linear-gradient(90deg,var(--yellow-2),var(--red-2))}
-.confidence-val{font-family:var(--mono);font-size:12px;font-weight:600;color:var(--red-2)}
+        .btn:focus { outline: 2px solid var(--blue); outline-offset: 2px; }
+        .btn--sm { padding: var(--space-1) var(--space-3); font-size: 0.8125rem; }
+        .btn--secondary { background: var(--white); color: var(--gray-700); border-color: var(--gray-300); }
+        .btn--secondary:hover { background: var(--gray-50); border-color: var(--gray-400); }
+        .btn--danger { background: var(--red); color: var(--white); border-color: var(--red); }
+        .btn--danger:hover { background: #dc2626; }
 
-/* ── ATS SOURCE ── */
-.kv-grid{display:grid;grid-template-columns:160px 1fr;gap:1px;background:var(--gray-100);border-radius:4px;overflow:hidden}
-.kv-row{display:contents}
-.kv-key{background:var(--gray-50);padding:9px 12px;font-family:var(--mono);font-size:10px;font-weight:600;letter-spacing:0.8px;text-transform:uppercase;color:var(--gray-500)}
-.kv-val{background:var(--white);padding:9px 12px;font-size:12px;color:var(--gray-700)}
-.kv-val.mono{font-family:var(--mono);font-size:11px}
-.raw-reason{font-family:var(--mono);font-size:11px;color:var(--gray-600);background:var(--gray-50);border:1px solid var(--gray-200);border-radius:4px;padding:10px 12px;line-height:1.6}
+        /* MAIN CONTAINER */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: var(--space-6);
+            padding-top: calc(60px + var(--space-6));
+        }
 
-/* ── 7 LANES ── */
-.lanes-table{width:100%;border-collapse:collapse}
-.lanes-table thead th{font-family:var(--mono);font-size:9px;font-weight:600;letter-spacing:1.2px;text-transform:uppercase;color:var(--gray-400);padding:8px 12px;text-align:left;border-bottom:2px solid var(--gray-100)}
-.lane-row{border-bottom:1px solid var(--gray-100);cursor:pointer;transition:background .15s}
-.lane-row:hover{background:var(--gray-50)}
-.lane-row.expanded{background:var(--gray-50)}
-.lane-row td{padding:11px 12px;vertical-align:middle}
-.lane-num{font-family:var(--mono);font-size:10px;color:var(--gray-400);width:28px}
-.lane-name{font-weight:600;font-size:12px;color:var(--gray-800)}
-.lane-detail{font-size:11px;color:var(--gray-500);margin-top:2px}
+        /* PAGE HEADER */
+        .page-header {
+            background: var(--white);
+            border-radius: 12px;
+            padding: var(--space-6);
+            margin-bottom: var(--space-6);
+            box-shadow: var(--shadow-sm);
+            border: 1px solid var(--gray-200);
+        }
 
-.lane-status{display:inline-flex;align-items:center;gap:5px;font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:.5px;padding:3px 9px;border-radius:3px;white-space:nowrap}
-.ls-pass{background:var(--green-pale);color:var(--green);border:1px solid rgba(22,163,74,0.2)}
-.ls-flag{background:var(--yellow-pale);color:var(--yellow);border:1px solid rgba(217,119,6,0.2)}
-.ls-fail{background:var(--red-pale);color:var(--red);border:1px solid rgba(220,38,38,0.2)}
+        .page-header__top {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            margin-bottom: var(--space-4);
+        }
 
-.lane-expand{width:24px;text-align:center;color:var(--gray-300)}
-.lane-row.expanded .lane-expand-icon{transform:rotate(90deg)}
-.lane-expand-icon{transition:transform .2s;display:inline-block;font-size:10px}
+        .page-header__title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--gray-900);
+            margin-bottom: var(--space-1);
+        }
 
-.lane-detail-row{display:none;background:#f8fafc}
-.lane-detail-row.open{display:table-row}
-.lane-detail-cell{padding:0}
-.lane-detail-inner{padding:16px 20px 16px 52px;display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;border-top:1px solid #e2e8f0}
-.lane-detail-field{}
-.ldf-label{font-family:var(--mono);font-size:9px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:#94a3b8;margin-bottom:4px}
-.ldf-value{font-size:11px;color:#475569;line-height:1.55}
-.ldf-cite{font-family:var(--mono);font-size:10px;color:var(--blue-2);margin-top:4px}
+        .page-header__subtitle {
+            font-size: 0.875rem;
+            color: var(--gray-500);
+        }
 
-/* ── COHORT ── */
-.cohort-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-.cohort-stat{background:var(--gray-50);border:1px solid var(--gray-200);border-radius:var(--r);padding:14px 16px}
-.cs-label{font-family:var(--mono);font-size:9px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:var(--gray-400);margin-bottom:6px}
-.cs-value{font-family:var(--mono);font-size:18px;font-weight:600;color:#1e293b}
-.cs-value.warn{color:var(--red)}
-.cs-sub{font-size:11px;color:var(--gray-500);margin-top:2px}
+        .btn--ghost {
+            background: transparent;
+            color: var(--gray-500);
+            border-color: var(--gray-300);
+            font-size: 0.8125rem;
+        }
 
-.dist-bars{display:flex;flex-direction:column;gap:6px;margin-top:4px}
-.dist-row{display:flex;align-items:center;gap:8px}
-.dist-label{font-size:10px;color:var(--gray-500);width:120px;font-family:var(--mono)}
-.dist-bar-outer{flex:1;height:6px;background:var(--gray-100);border-radius:3px;overflow:hidden}
-.dist-bar-inner{height:100%;border-radius:3px;background:var(--blue-2)}
-.dist-pct{font-family:var(--mono);font-size:10px;color:var(--gray-600);width:30px;text-align:right}
+        .btn--ghost:hover { background: var(--gray-100); color: var(--gray-700); }
 
-/* ── HISTORY ── */
-.history-table{width:100%;border-collapse:collapse;font-size:11px}
-.history-table th{font-family:var(--mono);font-size:9px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:var(--gray-400);padding:6px 10px;text-align:left;border-bottom:1px solid var(--gray-200)}
-.history-table td{padding:8px 10px;border-bottom:1px solid var(--gray-100);color:var(--gray-700)}
-.history-table tr:last-child td{border-bottom:none}
-.history-table td.mono{font-family:var(--mono);font-size:10px}
+        .candidate-meta {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: var(--space-4);
+            padding-top: var(--space-4);
+            border-top: 1px solid var(--gray-200);
+        }
 
-.repeat-flag{display:inline-flex;align-items:center;gap:5px;font-family:var(--mono);font-size:10px;font-weight:600;letter-spacing:.5px;color:var(--yellow);background:var(--yellow-pale);border:1px solid rgba(217,119,6,0.2);padding:2px 8px;border-radius:3px}
+        .meta-item {
+            display: flex;
+            flex-direction: column;
+            gap: var(--space-1);
+        }
 
-/* ── HUMAN REVIEW FORM ── */
-.review-form{display:flex;flex-direction:column;gap:14px}
-.form-field{}
-.form-label{display:block;font-family:var(--mono);font-size:10px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:#64748b;margin-bottom:6px}
-.form-label span{color:var(--red);margin-left:2px}
-.form-hint{font-size:11px;color:var(--gray-500);margin-bottom:6px}
-.form-select,.form-textarea,.form-input{width:100%;padding:10px 12px;border:1.5px solid var(--gray-200);border-radius:var(--r);font-family:var(--sans);font-size:12px;color:var(--gray-800);background:var(--gray-50);outline:none;transition:all .2s;-webkit-appearance:none}
-.form-select:focus,.form-textarea:focus,.form-input:focus{border-color:var(--blue-2);background:var(--white);box-shadow:0 0 0 3px rgba(46,125,224,0.08)}
-.form-select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%2394a3b8' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center;padding-right:32px;cursor:pointer}
-.form-textarea{resize:vertical;min-height:88px;line-height:1.6}
+        .meta-item__label {
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--gray-400);
+        }
 
-/* Confidence rating */
-.rating-wrap{display:flex;gap:8px}
-.rating-btn{width:36px;height:36px;border-radius:var(--r);border:1.5px solid var(--gray-200);background:var(--gray-50);font-family:var(--mono);font-size:12px;font-weight:600;color:var(--gray-500);cursor:pointer;transition:all .2s;display:flex;align-items:center;justify-content:center}
-.rating-btn:hover{border-color:var(--blue-2);color:var(--blue-2);background:var(--blue-pale)}
-.rating-btn.selected{border-color:var(--navy-2);background:var(--navy-2);color:var(--white)}
-.rating-labels{display:flex;justify-content:space-between;margin-top:4px}
-.rating-label{font-size:10px;color:var(--gray-400);font-family:var(--mono)}
+        .meta-item__value {
+            font-family: var(--font-mono);
+            font-size: 0.9375rem;
+            font-weight: 600;
+            color: var(--gray-800);
+        }
 
-/* Action buttons */
-.action-row{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-top:4px}
-.action-btn{padding:11px 8px;border-radius:var(--r);border:none;font-family:var(--mono);font-size:11px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;cursor:pointer;transition:all .2s;display:flex;align-items:center;justify-content:center;gap:5px}
-.btn-approve{background:var(--green);color:white}
-.btn-approve:hover{background:#15803d;box-shadow:0 4px 12px rgba(22,163,74,0.3);transform:translateY(-1px)}
-.btn-override{background:var(--navy-2);color:white}
-.btn-override:hover{background:var(--navy-3);box-shadow:0 4px 12px rgba(10,22,40,0.3);transform:translateY(-1px)}
-.btn-escalate{background:var(--red);color:white}
-.btn-escalate:hover{background:#b91c1c;box-shadow:0 4px 12px rgba(220,38,38,0.3);transform:translateY(-1px)}
+        /* COMPOSITE RISK SCORE */
+        .risk-summary {
+            background: var(--white);
+            border-radius: 12px;
+            padding: var(--space-6);
+            margin-bottom: var(--space-6);
+            box-shadow: var(--shadow-sm);
+            border: 1px solid var(--gray-200);
+        }
 
-/* Escalation panel */
-.escalate-panel{display:none;background:var(--red-pale);border:1px solid rgba(220,38,38,0.2);border-radius:var(--r);padding:14px;margin-top:4px}
-.escalate-panel.open{display:block;animation:fadeIn .2s ease}
-.ep-title{font-family:var(--mono);font-size:10px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:var(--red);margin-bottom:8px}
-.ep-chain{display:flex;flex-direction:column;gap:6px;margin-bottom:10px}
-.ep-tier{display:flex;align-items:center;gap:8px;font-size:11px}
-.ep-arrow{color:var(--red-2);font-size:10px}
-.ep-name{font-weight:600;color:var(--gray-800)}
-.ep-role{color:var(--gray-500);font-family:var(--mono);font-size:10px}
+        .risk-summary__header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: var(--space-4);
+        }
 
-@keyframes fadeIn{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:translateY(0)}}
+        .risk-summary__title {
+            font-size: 0.875rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--gray-500);
+        }
 
-/* ── AUDIT TRAIL ── */
-.trail-list{display:flex;flex-direction:column;position:relative}
-.trail-list::before{content:'';position:absolute;left:15px;top:0;bottom:0;width:1px;background:var(--gray-200)}
-.trail-item{display:flex;gap:12px;padding:10px 0;position:relative}
-.trail-dot{width:30px;height:30px;border-radius:50%;border:2px solid var(--gray-200);background:var(--white);display:flex;align-items:center;justify-content:center;font-size:11px;flex-shrink:0;z-index:1}
-.trail-dot.done{border-color:var(--green);background:var(--green-pale)}
-.trail-dot.active{border-color:var(--blue-2);background:var(--blue-pale);box-shadow:0 0 0 3px rgba(46,125,224,0.1)}
-.trail-content{flex:1;padding-top:4px}
-.trail-event{font-weight:600;font-size:11px;color:var(--gray-800)}
-.trail-meta{font-family:var(--mono);font-size:10px;color:var(--gray-400);margin-top:2px}
-.trail-detail{font-size:11px;color:var(--gray-600);margin-top:3px}
+        .risk-summary__score {
+            display: flex;
+            align-items: center;
+            gap: var(--space-4);
+        }
 
-/* ── ELEVATION INDICATOR ── */
-.elevation-card{background:var(--navy-2);border-color:var(--navy-3)}
-.elevation-card .card-header{background:var(--navy-3);border-bottom-color:rgba(255,255,255,0.06)}
-.elevation-card .card-label{color:rgba(255,255,255,0.35)}
-.elev-body{padding:16px 20px;display:flex;flex-direction:column;gap:10px}
-.elev-row{display:flex;flex-direction:column;gap:2px}
-.elev-label{font-family:var(--mono);font-size:9px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:rgba(255,255,255,0.3)}
-.elev-value{font-size:11px;color:rgba(255,255,255,0.7)}
-.elev-value.mono{font-family:var(--mono);font-size:10px;color:var(--blue-2)}
-.revert-notice{background:rgba(217,119,6,0.1);border:1px solid rgba(217,119,6,0.2);border-radius:3px;padding:8px 10px;font-size:10px;color:var(--yellow-2);font-family:var(--mono);line-height:1.5}
+        .risk-score__number {
+            font-family: var(--font-mono);
+            font-size: 2.5rem;
+            font-weight: 700;
+            line-height: 1;
+        }
 
-/* ── FOOTER ── */
-.detail-footer{background:var(--navy-2);border:1px solid var(--navy-3);border-radius:var(--r-lg);padding:16px 20px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px}
-.case-id{font-family:var(--mono);font-size:11px;color:rgba(255,255,255,0.4)}
-.case-id span{color:var(--gold-2);font-weight:600}
-.footer-actions{display:flex;gap:8px}
-.footer-btn{display:inline-flex;align-items:center;gap:6px;padding:7px 14px;border-radius:var(--r);font-family:var(--mono);font-size:10px;font-weight:600;letter-spacing:.8px;text-transform:uppercase;cursor:pointer;transition:all .2s;border:1px solid rgba(255,255,255,0.15);background:rgba(255,255,255,0.05);color:rgba(255,255,255,0.6)}
-.footer-btn:hover{background:rgba(255,255,255,0.1);color:white;border-color:rgba(255,255,255,0.25)}
-.footer-btn.gold{border-color:rgba(184,135,46,0.4);color:var(--gold-2)}
-.footer-btn.gold:hover{background:rgba(184,135,46,0.1)}
+        .risk-score__number--orange { color: var(--orange); }
+        .risk-score__number--red { color: var(--red); }
+        .risk-score__number--green { color: var(--green); }
+        .risk-score__number--yellow { color: var(--yellow); }
 
-/* ── SIDE COL SPECIFICS ── */
-.side-section-title{font-family:var(--mono);font-size:9px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;color:var(--gray-400);padding:0 0 6px;border-bottom:1px solid var(--gray-200);margin-bottom:10px}
+        .risk-score__label {
+            font-size: 0.875rem;
+            font-weight: 700;
+            padding: var(--space-1) var(--space-3);
+            border-radius: 6px;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
 
-/* ── TOAST ── */
-.toast-wrap{position:fixed;bottom:24px;right:24px;z-index:999;display:flex;flex-direction:column;gap:8px}
-.toast{padding:12px 16px;border-radius:var(--r-lg);font-size:12px;font-family:var(--mono);display:flex;align-items:center;gap:8px;box-shadow:0 8px 24px rgba(0,0,0,0.15);animation:slideUp .25s ease;max-width:320px}
-.toast-success{background:var(--navy-2);color:var(--green-2);border:1px solid rgba(34,197,94,0.2)}
-.toast-warn{background:var(--navy-2);color:var(--yellow-2);border:1px solid rgba(245,158,11,0.2)}
-.toast-error{background:var(--navy-2);color:var(--red-2);border:1px solid rgba(239,68,68,0.2)}
-@keyframes slideUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+        .risk-score__label--orange { background: var(--orange-light); color: #c2410c; }
+        .risk-score__label--red { background: var(--red-light); color: #b91c1c; }
+        .risk-score__label--green { background: var(--green-light); color: #15803d; }
+        .risk-score__label--yellow { background: var(--yellow-light); color: #a16207; }
 
-/* ── RESPONSIVE ── */
-@media(max-width:1024px){
-  .layout{grid-template-columns:1fr}
-  .side-col{position:static}
-  .header-card .card-body{grid-template-columns:1fr 1fr}
-}
-@media(max-width:640px){
-  .layout{padding:12px 14px 40px}
-  .header-card .card-body{grid-template-columns:1fr}
-  .action-row{grid-template-columns:1fr}
-  .cohort-grid{grid-template-columns:1fr}
-  .lane-detail-inner{grid-template-columns:1fr}
-}
-</style>
+        .risk-bar {
+            width: 100%;
+            height: 12px;
+            background: var(--gray-200);
+            border-radius: 9999px;
+            overflow: hidden;
+            margin-bottom: var(--space-2);
+        }
+
+        .risk-bar__fill {
+            height: 100%;
+            border-radius: 9999px;
+            transition: width var(--transition-base);
+        }
+
+        .risk-bar__fill--orange { background: linear-gradient(90deg, var(--yellow) 0%, var(--orange) 100%); width: 74%; }
+        .risk-bar__fill--red { background: linear-gradient(90deg, var(--orange) 0%, var(--red) 100%); width: 91%; }
+        .risk-bar__fill--green { background: var(--green); width: 12%; }
+        .risk-bar__fill--yellow { background: linear-gradient(90deg, var(--green) 0%, var(--yellow) 100%); width: 58%; }
+
+        .risk-legend {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.75rem;
+            color: var(--gray-400);
+        }
+
+        /* FORENSIC LANES */
+        .lanes-section { margin-bottom: var(--space-6); }
+
+        .lanes-section__header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: var(--space-4);
+        }
+
+        .lanes-section__title {
+            font-size: 0.875rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--gray-500);
+        }
+
+        .lanes-section__count {
+            font-size: 0.8125rem;
+            color: var(--gray-400);
+        }
+
+        .lane {
+            background: var(--white);
+            border-radius: 10px;
+            border: 1px solid var(--gray-200);
+            margin-bottom: var(--space-3);
+            overflow: hidden;
+            transition: box-shadow var(--transition-fast);
+        }
+
+        .lane:hover { box-shadow: var(--shadow-md); }
+        .lane--triggered { border-left: 4px solid var(--orange); }
+        .lane--critical { border-left: 4px solid var(--red); }
+        .lane--clean { border-left: 4px solid var(--green); }
+
+        .lane__header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: var(--space-4) var(--space-5);
+            cursor: pointer;
+            transition: background var(--transition-fast);
+        }
+
+        .lane__header:hover { background: var(--gray-50); }
+
+        .lane__left {
+            display: flex;
+            align-items: center;
+            gap: var(--space-3);
+        }
+
+        .lane__icon {
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1rem;
+            flex-shrink: 0;
+        }
+
+        .lane__icon--clean { background: var(--green-light); }
+        .lane__icon--triggered { background: var(--orange-light); }
+        .lane__icon--critical { background: var(--red-light); }
+
+        .lane__name {
+            font-weight: 600;
+            font-size: 0.9375rem;
+            color: var(--gray-800);
+        }
+
+        .lane__right {
+            display: flex;
+            align-items: center;
+            gap: var(--space-4);
+        }
+
+        .lane__status {
+            display: inline-flex;
+            align-items: center;
+            gap: var(--space-1);
+            font-size: 0.8125rem;
+            font-weight: 600;
+            padding: var(--space-1) var(--space-3);
+            border-radius: 6px;
+        }
+
+        .lane__status--clean { background: var(--green-light); color: #15803d; }
+        .lane__status--triggered { background: var(--orange-light); color: #c2410c; }
+        .lane__status--critical { background: var(--red-light); color: #b91c1c; }
+
+        .lane__risk {
+            font-family: var(--font-mono);
+            font-size: 0.875rem;
+            font-weight: 700;
+            color: var(--gray-500);
+            min-width: 60px;
+            text-align: right;
+        }
+
+        .lane__risk--orange { color: var(--orange); }
+        .lane__risk--red { color: var(--red); }
+        .lane__risk--green { color: var(--green); }
+
+        .lane__chevron {
+            font-size: 1rem;
+            color: var(--gray-400);
+            transition: transform var(--transition-fast);
+            width: 20px;
+            text-align: center;
+        }
+
+        .lane__chevron--open { transform: rotate(180deg); }
+
+        /* LANE CONTENT (EXPANDED) */
+        .lane__content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height var(--transition-base), padding var(--transition-base);
+        }
+
+        .lane__content--open {
+            max-height: 2000px;
+            padding: 0 var(--space-5) var(--space-5);
+        }
+
+        .lane__details {
+            background: var(--gray-50);
+            border-radius: 8px;
+            padding: var(--space-4);
+            margin-bottom: var(--space-4);
+        }
+
+        .detail-row {
+            display: flex;
+            align-items: flex-start;
+            gap: var(--space-3);
+            margin-bottom: var(--space-3);
+        }
+
+        .detail-row:last-child { margin-bottom: 0; }
+
+        .detail-row__label {
+            font-size: 0.8125rem;
+            font-weight: 600;
+            color: var(--gray-500);
+            min-width: 140px;
+            flex-shrink: 0;
+        }
+
+        .detail-row__value {
+            font-family: var(--font-mono);
+            font-size: 0.875rem;
+            color: var(--gray-800);
+            word-break: break-word;
+        }
+
+        .detail-row__value--highlight {
+            background: var(--yellow-light);
+            padding: var(--space-1) var(--space-2);
+            border-radius: 4px;
+            font-weight: 600;
+        }
+
+        .stat-context {
+            background: var(--blue-light);
+            border-radius: 8px;
+            padding: var(--space-4);
+            margin-bottom: var(--space-4);
+            border-left: 3px solid var(--blue);
+        }
+
+        .stat-context__text {
+            font-size: 0.875rem;
+            color: #1e40af;
+            line-height: 1.6;
+        }
+
+        .stat-context__text strong {
+            font-family: var(--font-mono);
+            font-weight: 700;
+        }
+
+        .stat-context__meta {
+            display: flex;
+            align-items: center;
+            gap: var(--space-4);
+            margin-top: var(--space-3);
+            font-size: 0.75rem;
+            color: #3b82f6;
+        }
+
+        .stat-toggle {
+            display: inline-flex;
+            align-items: center;
+            gap: var(--space-2);
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+        .stat-toggle input { display: none; }
+
+        .stat-toggle__slider {
+            width: 36px;
+            height: 20px;
+            background: var(--gray-300);
+            border-radius: 9999px;
+            position: relative;
+            transition: background var(--transition-fast);
+        }
+
+        .stat-toggle__slider::after {
+            content: '';
+            position: absolute;
+            top: 2px; left: 2px;
+            width: 16px; height: 16px;
+            background: var(--white);
+            border-radius: 50%;
+            transition: transform var(--transition-fast);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .stat-toggle input:checked + .stat-toggle__slider { background: var(--blue); }
+        .stat-toggle input:checked + .stat-toggle__slider::after { transform: translateX(16px); }
+
+        .baseline-freshness {
+            font-size: 0.75rem;
+            color: var(--gray-400);
+            font-style: italic;
+        }
+
+        /* EVIDENCE PANEL */
+        .evidence-toggle {
+            display: inline-flex;
+            align-items: center;
+            gap: var(--space-2);
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: var(--blue);
+            cursor: pointer;
+            padding: var(--space-2) 0;
+            background: none;
+            border: none;
+            transition: color var(--transition-fast);
+        }
+
+        .evidence-toggle:hover { color: #1d4ed8; }
+
+        .evidence-toggle__icon {
+            transition: transform var(--transition-fast);
+        }
+
+        .evidence-toggle__icon--open { transform: rotate(90deg); }
+
+        .evidence-panel {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height var(--transition-base), margin var(--transition-base);
+        }
+
+        .evidence-panel--open {
+            max-height: 1500px;
+            margin-top: var(--space-4);
+        }
+
+        .evidence-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: var(--space-4);
+        }
+
+        @media (max-width: 768px) {
+            .evidence-grid { grid-template-columns: 1fr; }
+        }
+
+        .evidence-card {
+            background: var(--white);
+            border-radius: 8px;
+            border: 1px solid var(--gray-200);
+            overflow: hidden;
+        }
+
+        .evidence-card__header {
+            padding: var(--space-3) var(--space-4);
+            font-size: 0.8125rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            display: flex;
+            align-items: center;
+            gap: var(--space-2);
+        }
+
+        .evidence-card__header--ats { background: var(--gray-100); color: var(--gray-600); }
+        .evidence-card__header--human { background: var(--green-light); color: #15803d; }
+
+        .evidence-card__body { padding: var(--space-4); }
+
+        .evidence-card__body pre {
+            font-family: var(--font-mono);
+            font-size: 0.8125rem;
+            color: var(--gray-700);
+            line-height: 1.7;
+            white-space: pre-wrap;
+            word-break: break-word;
+        }
+
+        .evidence-card__body--human { background: #f0fdf4; }
+
+        .reviewer-notes {
+            margin-top: var(--space-4);
+            padding-top: var(--space-4);
+            border-top: 1px dashed var(--gray-300);
+        }
+
+        .reviewer-notes__label {
+            font-size: 0.8125rem;
+            font-weight: 600;
+            color: var(--gray-600);
+            margin-bottom: var(--space-2);
+        }
+
+        .note-template {
+            width: 100%;
+            padding: var(--space-2) var(--space-3);
+            font-size: 0.875rem;
+            border: 1px solid var(--gray-300);
+            border-radius: 6px;
+            background: var(--white);
+            color: var(--gray-700);
+            margin-bottom: var(--space-2);
+            cursor: pointer;
+        }
+
+        .note-template:focus { outline: 2px solid var(--blue); outline-offset: 2px; }
+
+        .note-textarea {
+            width: 100%;
+            min-height: 80px;
+            padding: var(--space-3);
+            font-family: var(--font-sans);
+            font-size: 0.875rem;
+            border: 1px solid var(--gray-300);
+            border-radius: 6px;
+            background: var(--white);
+            color: var(--gray-700);
+            resize: vertical;
+            transition: border-color var(--transition-fast);
+        }
+
+        .note-textarea:focus {
+            outline: none;
+            border-color: var(--blue);
+            box-shadow: 0 0 0 3px var(--blue-light);
+        }
+
+        .note-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: var(--space-2);
+            font-size: 0.75rem;
+            color: var(--gray-400);
+        }
+
+        .note-save-status {
+            color: var(--green);
+            font-weight: 600;
+        }
+
+        /* LEGAL ALERTS */
+        .legal-alert {
+            background: var(--red-light);
+            border: 1px solid #fecaca;
+            border-radius: 8px;
+            padding: var(--space-4);
+            margin-bottom: var(--space-4);
+        }
+
+        .legal-alert__header {
+            display: flex;
+            align-items: center;
+            gap: var(--space-2);
+            font-size: 0.875rem;
+            font-weight: 700;
+            color: #b91c1c;
+            margin-bottom: var(--space-2);
+        }
+
+        .legal-alert__text {
+            font-size: 0.875rem;
+            color: #991b1b;
+            line-height: 1.6;
+        }
+
+        .legal-alert__action { margin-top: var(--space-3); }
+
+        .btn--link {
+            background: none;
+            color: #b91c1c;
+            padding: 0;
+            font-size: 0.875rem;
+            text-decoration: underline;
+        }
+
+        .btn--link:hover { color: #7f1d1d; }
+
+        /* EDGE CASE BANNERS */
+        .edge-banner {
+            background: var(--yellow-light);
+            border: 1px solid #fde68a;
+            border-radius: 8px;
+            padding: var(--space-4);
+            margin-bottom: var(--space-4);
+            display: flex;
+            align-items: center;
+            gap: var(--space-3);
+        }
+
+        .edge-banner__icon {
+            font-size: 1.25rem;
+            flex-shrink: 0;
+        }
+
+        .edge-banner__text {
+            font-size: 0.875rem;
+            color: #92400e;
+            flex: 1;
+        }
+
+        .edge-banner__text strong { font-weight: 700; }
+
+        /* ACTION PANEL */
+        .action-panel {
+            background: var(--white);
+            border-radius: 12px;
+            padding: var(--space-6);
+            box-shadow: var(--shadow-md);
+            border: 1px solid var(--gray-200);
+            position: sticky;
+            bottom: var(--space-4);
+            z-index: 100;
+        }
+
+        .action-panel__header {
+            font-size: 0.875rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--gray-500);
+            margin-bottom: var(--space-4);
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: var(--space-3);
+            margin-bottom: var(--space-4);
+            flex-wrap: wrap;
+        }
+
+        .btn--override {
+            background: var(--blue);
+            color: var(--white);
+            border-color: var(--blue);
+            padding: var(--space-3) var(--space-6);
+            font-size: 1rem;
+        }
+
+        .btn--override:hover { background: #2563eb; }
+
+        .btn--confirm {
+            background: var(--green);
+            color: var(--white);
+            border-color: var(--green);
+            padding: var(--space-3) var(--space-6);
+            font-size: 1rem;
+        }
+
+        .btn--confirm:hover { background: #16a34a; }
+
+        .btn--escalate {
+            background: var(--orange);
+            color: var(--white);
+            border-color: var(--orange);
+            padding: var(--space-3) var(--space-6);
+            font-size: 1rem;
+        }
+
+        .btn--escalate:hover { background: #ea580c; }
+
+        .justification-field { margin-bottom: var(--space-4); }
+
+        .justification-field__label {
+            display: block;
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: var(--gray-700);
+            margin-bottom: var(--space-2);
+        }
+
+        .justification-field__required { color: var(--red); }
+
+        .justification-field__templates {
+            display: flex;
+            gap: var(--space-2);
+            margin-bottom: var(--space-2);
+            flex-wrap: wrap;
+        }
+
+        .template-chip {
+            font-size: 0.8125rem;
+            padding: var(--space-1) var(--space-3);
+            background: var(--gray-100);
+            border: 1px solid var(--gray-200);
+            border-radius: 9999px;
+            cursor: pointer;
+            transition: all var(--transition-fast);
+            color: var(--gray-600);
+        }
+
+        .template-chip:hover {
+            background: var(--blue-light);
+            border-color: var(--blue);
+            color: var(--blue);
+        }
+
+        .template-chip--active {
+            background: var(--blue);
+            border-color: var(--blue);
+            color: var(--white);
+        }
+
+        .justification-textarea {
+            width: 100%;
+            min-height: 100px;
+            padding: var(--space-3);
+            font-family: var(--font-sans);
+            font-size: 0.9375rem;
+            border: 1px solid var(--gray-300);
+            border-radius: 8px;
+            background: var(--white);
+            color: var(--gray-800);
+            resize: vertical;
+            transition: all var(--transition-fast);
+        }
+
+        .justification-textarea:focus {
+            outline: none;
+            border-color: var(--blue);
+            box-shadow: 0 0 0 3px var(--blue-light);
+        }
+
+        .submit-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .submit-row__hint {
+            font-size: 0.8125rem;
+            color: var(--gray-400);
+        }
+
+        .btn--submit {
+            background: var(--gray-900);
+            color: var(--white);
+            border-color: var(--gray-900);
+            padding: var(--space-3) var(--space-8);
+            font-size: 1rem;
+        }
+
+        .btn--submit:hover { background: var(--gray-800); }
+        .btn--submit:disabled { opacity: 0.5; cursor: not-allowed; }
+
+        /* MINI AUDIT TRAIL */
+        .audit-section {
+            background: var(--white);
+            border-radius: 12px;
+            padding: var(--space-6);
+            margin-bottom: var(--space-6);
+            box-shadow: var(--shadow-sm);
+            border: 1px solid var(--gray-200);
+        }
+
+        .audit-section__header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: var(--space-4);
+        }
+
+        .audit-section__title {
+            font-size: 0.875rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--gray-500);
+        }
+
+        .audit-section__link {
+            font-size: 0.8125rem;
+            color: var(--blue);
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        .audit-section__link:hover { text-decoration: underline; }
+
+        .audit-log {
+            display: flex;
+            flex-direction: column;
+            gap: var(--space-3);
+        }
+
+        .audit-entry {
+            display: flex;
+            align-items: flex-start;
+            gap: var(--space-3);
+            padding: var(--space-3);
+            background: var(--gray-50);
+            border-radius: 6px;
+            font-size: 0.8125rem;
+        }
+
+        .audit-entry__time {
+            font-family: var(--font-mono);
+            color: var(--gray-400);
+            min-width: 80px;
+            flex-shrink: 0;
+        }
+
+        .audit-entry__action { color: var(--gray-700); }
+        .audit-entry__action strong { color: var(--gray-900); }
+
+        /* MODE TOGGLE (FOR DEMO) */
+        .mode-toggle {
+            position: fixed;
+            bottom: var(--space-4);
+            right: var(--space-4);
+            z-index: 999;
+            background: var(--white);
+            border: 1px solid var(--gray-300);
+            border-radius: 8px;
+            padding: var(--space-3) var(--space-4);
+            box-shadow: var(--shadow-lg);
+            font-size: 0.8125rem;
+        }
+
+        .mode-toggle__label {
+            font-weight: 600;
+            color: var(--gray-700);
+            margin-bottom: var(--space-2);
+            display: block;
+        }
+
+        .mode-toggle__buttons {
+            display: flex;
+            gap: var(--space-2);
+        }
+
+        .btn--mode {
+            font-size: 0.75rem;
+            padding: var(--space-1) var(--space-3);
+        }
+
+        .btn--mode-active {
+            background: var(--gray-800);
+            color: var(--white);
+        }
+
+        /* UTILITY */
+        .hidden { display: none !important; }
+        .text-mono { font-family: var(--font-mono); }
+
+        /* RESPONSIVE */
+        @media (max-width: 768px) {
+            .container {
+                padding: var(--space-4);
+                padding-top: calc(60px + var(--space-4));
+            }
+
+            .live-banner {
+                flex-direction: column;
+                gap: var(--space-2);
+                padding: var(--space-2) var(--space-4);
+            }
+
+            .live-banner__timer { font-size: 1.25rem; }
+            .page-header__top { flex-direction: column; gap: var(--space-3); }
+            .action-buttons { flex-direction: column; }
+            .btn--override, .btn--confirm, .btn--escalate { width: 100%; }
+            .submit-row { flex-direction: column; gap: var(--space-3); align-items: stretch; }
+        }
+    </style>
 </head>
 <body>
 
-<!-- LOADING OVERLAY -->
-<div id="loadingOverlay">
-  <div class="spinner"></div>
-  Loading rejection record…
-</div>
-
-<!-- TOPBAR -->
-<div class="topbar">
-  <div class="topbar-inner">
-    <div class="topbar-left">
-      <div class="fas-logo">F·A·S</div>
-      <div class="topbar-sep"></div>
-      <div class="breadcrumb">
-        <a href="/dashboard/main.html">Dashboard</a>
-        <span class="breadcrumb-sep">/</span>
-        <a href="/dashboard/main.html">Rejections</a>
-        <span class="breadcrumb-sep">/</span>
-        <span class="breadcrumb-cur" id="breadcrumbCaseId">—</span>
-      </div>
-    </div>
-    <div class="topbar-right">
-      <span class="topbar-user" id="topbarUser">—</span>
-      <span class="topbar-role" id="topbarRole">Reviewer</span>
-    </div>
-  </div>
-</div>
-
-<div class="toast-wrap" id="toastWrap"></div>
-
-<div class="layout">
-<div class="main-col">
-
-  <!-- HEADER CARD -->
-  <div class="card header-card">
-    <div class="card-header">
-      <span class="card-label">Rejection Detail</span>
-      <div style="display:flex;align-items:center;gap:10px">
-        <span class="status-badge status-pending" id="statusBadge">Pending</span>
-        <span class="risk-badge risk-red" id="riskBadge"><span class="risk-dot"></span> — RISK</span>
-      </div>
-    </div>
-    <div class="card-body" style="padding:0;display:grid;grid-template-columns:1fr 1fr 1fr">
-      <div class="hf">
-        <div class="hf-label">Candidate ID</div>
-        <div class="hf-value" id="candidateId">—</div>
-        <div class="hf-sub">Anonymized identifier</div>
-      </div>
-      <div class="hf">
-        <div class="hf-label">Position</div>
-        <div class="hf-value" style="font-size:12px" id="positionTitle">—</div>
-        <div class="hf-sub" id="requisitionId">—</div>
-      </div>
-      <div class="hf">
-        <div class="hf-label">ATS Rejection Time</div>
-        <div class="hf-value" id="rejectionDate">—</div>
-        <div class="hf-sub" id="rejectionTime">—</div>
-      </div>
-      <div class="hf" style="border-top:1px solid rgba(255,255,255,0.06)">
-        <div class="hf-label">Time in Pending</div>
-        <div class="hf-value time-warn" id="timeInPending">—</div>
-        <div class="hf-sub">Threshold: 6h · Escalation at 4h</div>
-      </div>
-      <div class="hf" style="border-top:1px solid rgba(255,255,255,0.06)">
-        <div class="hf-label">Assigned Reviewer</div>
-        <div style="margin-top:4px">
-          <div class="reviewer-chip" id="reviewerChip">
-            <div class="reviewer-avatar" id="reviewerAvatar">—</div>
-            <span class="reviewer-name" id="reviewerName">—<span class="reviewer-role" id="reviewerRole"></span></span>
-          </div>
-        </div>
-      </div>
-      <div class="hf" style="border-top:1px solid rgba(255,255,255,0.06)">
-        <div class="hf-label">Confidence Score</div>
-        <div class="confidence-wrap" style="margin-top:6px">
-          <div class="confidence-bar-outer">
-            <div class="confidence-bar-inner" style="width:0%" id="confidenceBarInner"></div>
-          </div>
-          <span class="confidence-val" id="confidenceVal">—</span>
-        </div>
-        <div class="hf-sub" style="margin-top:4px" id="confidenceSub">—</div>
-      </div>
-    </div>
-  </div>
-
-  <!-- ATS SOURCE -->
-  <div class="card">
-    <div class="card-header">
-      <span class="card-label">ATS Source Panel</span>
-      <span style="font-family:var(--mono);font-size:10px;color:var(--gray-400)" id="atsInterceptMeta">Intercepted —</span>
-    </div>
-    <div class="card-body" style="display:flex;flex-direction:column;gap:14px">
-      <div class="kv-grid">
-        <div class="kv-row">
-          <div class="kv-key">ATS Platform</div>
-          <div class="kv-val mono" id="atsPlatform">—</div>
-        </div>
-        <div class="kv-row">
-          <div class="kv-key">Rejection Timestamp</div>
-          <div class="kv-val mono" id="rejectionTimestampISO">—</div>
-        </div>
-        <div class="kv-row">
-          <div class="kv-key">Normalized Category</div>
-          <div class="kv-val"><span style="font-weight:600;color:var(--gray-800)" id="normalizedCategory">—</span></div>
-        </div>
-      </div>
-      <div>
-        <div style="font-family:var(--mono);font-size:9px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:var(--gray-400);margin-bottom:6px">Raw Rejection Reason (exact ATS output)</div>
-        <div class="raw-reason" id="rawRejectionReason">—</div>
-      </div>
-    </div>
-  </div>
-
-  <!-- 7 LANES -->
-  <div class="card">
-    <div class="card-header">
-      <span class="card-label">Forensic Audit Results — 7 Compliance Lanes</span>
-      <span style="font-family:var(--mono);font-size:10px;color:var(--gray-400)" id="lanesFlagCount">—</span>
-    </div>
-    <div class="card-body" style="padding:0">
-      <table class="lanes-table">
-        <thead>
-          <tr>
-            <th style="width:28px"></th>
-            <th>Lane</th>
-            <th style="width:100px">Status</th>
-            <th>Detail</th>
-            <th style="width:24px"></th>
-          </tr>
-        </thead>
-        <tbody id="lanesBody">
-
-          <tr class="lane-row" onclick="toggleLane(1)">
-            <td class="lane-num">01</td>
-            <td><div class="lane-name">Age Proxy Signals</div></td>
-            <td><span class="lane-status ls-flag">⚠ FLAG</span></td>
-            <td><div class="lane-detail">Graduation date inference detects class of 2001 — triggers 40+ age proxy signal</div></td>
-            <td class="lane-expand"><span class="lane-expand-icon">›</span></td>
-          </tr>
-          <tr class="lane-detail-row" id="lane-detail-1">
-            <td class="lane-detail-cell" colspan="5">
-              <div class="lane-detail-inner">
-                <div class="lane-detail-field">
-                  <div class="ldf-label">Baseline Metric</div>
-                  <div class="ldf-value">Graduation year 2001 inferred from resume. Candidates in this cohort are statistically 40–45 years old. Rejection rate for this age band is 2.3x the baseline for this job family.</div>
-                </div>
-                <div class="lane-detail-field">
-                  <div class="ldf-label">Historical Pattern</div>
-                  <div class="ldf-value">Sr. Operations Manager (NYC, 10+ yrs): 67% of rejections in last 90 days involve candidates whose inferred age exceeds 40. Baseline rejection rate for under-40 cohort: 31%.</div>
-                </div>
-                <div class="lane-detail-field">
-                  <div class="ldf-label">Regulatory Citation</div>
-                  <div class="ldf-cite">ADEA § 623(a)(1) — prohibits employment discrimination based on age against individuals 40+. NYC Admin Code § 8-107(1)(a) — local reinforcement. EEOC Enforcement Guidance on Age Discrimination (2022).</div>
-                </div>
-              </div>
-            </td>
-          </tr>
-
-          <tr class="lane-row" onclick="toggleLane(2)">
-            <td class="lane-num">02</td>
-            <td><div class="lane-name">Employment Gap Penalties</div></td>
-            <td><span class="lane-status ls-pass">✓ PASS</span></td>
-            <td><div class="lane-detail">No employment gaps detected exceeding 6-month threshold</div></td>
-            <td class="lane-expand"><span class="lane-expand-icon">›</span></td>
-          </tr>
-          <tr class="lane-detail-row" id="lane-detail-2">
-            <td class="lane-detail-cell" colspan="5">
-              <div class="lane-detail-inner">
-                <div class="lane-detail-field">
-                  <div class="ldf-label">Baseline Metric</div>
-                  <div class="ldf-value">No gaps exceeding 6 months detected in candidate employment history. Continuous employment from 2001–2026.</div>
-                </div>
-                <div class="lane-detail-field">
-                  <div class="ldf-label">Historical Pattern</div>
-                  <div class="ldf-value">This job family has no documented pattern of gap-based rejections. Lane passes clean.</div>
-                </div>
-                <div class="lane-detail-field">
-                  <div class="ldf-label">Regulatory Citation</div>
-                  <div class="ldf-cite">No applicable citation — lane passed.</div>
-                </div>
-              </div>
-            </td>
-          </tr>
-
-          <tr class="lane-row" onclick="toggleLane(3)">
-            <td class="lane-num">03</td>
-            <td><div class="lane-name">Disparate Impact Patterns</div></td>
-            <td><span class="lane-status ls-flag">⚠ FLAG</span></td>
-            <td><div class="lane-detail">Baseline variance exceeded — rejection rate for this cohort is 41% above threshold</div></td>
-            <td class="lane-expand"><span class="lane-expand-icon">›</span></td>
-          </tr>
-          <tr class="lane-detail-row" id="lane-detail-3">
-            <td class="lane-detail-cell" colspan="5">
-              <div class="lane-detail-inner">
-                <div class="lane-detail-field">
-                  <div class="ldf-label">Baseline Metric</div>
-                  <div class="ldf-value">4/5ths rule applied: selection rate for protected cohort is 34% vs. 81% for majority cohort. Ratio 0.42 — below the 0.80 threshold. Statistically significant disparity (p &lt; 0.01).</div>
-                </div>
-                <div class="lane-detail-field">
-                  <div class="ldf-label">Historical Pattern</div>
-                  <div class="ldf-value">Sr. Operations Manager rejections over 90 days: 73% involve candidates in the 40+ / 10+ yrs experience cohort. Pattern has persisted across 3 consecutive baseline cycles.</div>
-                </div>
-                <div class="lane-detail-field">
-                  <div class="ldf-label">Regulatory Citation</div>
-                  <div class="ldf-cite">EEOC Uniform Guidelines § 60-3.4(D) — 4/5ths rule for adverse impact. Title VII § 703(k) — disparate impact theory. NYC LL144 Bias Audit Section 3.2.</div>
-                </div>
-              </div>
-            </td>
-          </tr>
-
-          <tr class="lane-row" onclick="toggleLane(4)">
-            <td class="lane-num">04</td>
-            <td><div class="lane-name">Keyword Mismatch Flags</div></td>
-            <td><span class="lane-status ls-pass">✓ PASS</span></td>
-            <td><div class="lane-detail">Resume keywords align with JD requirements — no artificial mismatch detected</div></td>
-            <td class="lane-expand"><span class="lane-expand-icon">›</span></td>
-          </tr>
-          <tr class="lane-detail-row" id="lane-detail-4">
-            <td class="lane-detail-cell" colspan="5">
-              <div class="lane-detail-inner">
-                <div class="lane-detail-field"><div class="ldf-label">Baseline Metric</div><div class="ldf-value">JD keyword match score: 84%. Threshold: 70%. Lane passes with margin.</div></div>
-                <div class="lane-detail-field"><div class="ldf-label">Historical Pattern</div><div class="ldf-value">No keyword inflation pattern detected for this job family. Match scores are consistent with accepted candidates.</div></div>
-                <div class="lane-detail-field"><div class="ldf-label">Regulatory Citation</div><div class="ldf-cite">No applicable citation — lane passed.</div></div>
-              </div>
-            </td>
-          </tr>
-
-          <tr class="lane-row" onclick="toggleLane(5)">
-            <td class="lane-num">05</td>
-            <td><div class="lane-name">Legal Framework Triggers</div></td>
-            <td><span class="lane-status ls-flag">⚠ FLAG</span></td>
-            <td><div class="lane-detail">Violations detected: NYC LL144, Colorado SB205, Title VII (disparate impact)</div></td>
-            <td class="lane-expand"><span class="lane-expand-icon">›</span></td>
-          </tr>
-          <tr class="lane-detail-row" id="lane-detail-5">
-            <td class="lane-detail-cell" colspan="5">
-              <div class="lane-detail-inner">
-                <div class="lane-detail-field"><div class="ldf-label">Baseline Metric</div><div class="ldf-value">Three active regulatory frameworks triggered by combination of age proxy signal (Lane 1) and disparate impact pattern (Lane 3). Cross-lane compound risk score: 0.78 (HIGH).</div></div>
-                <div class="lane-detail-field"><div class="ldf-label">Triggered Frameworks</div><div class="ldf-value">NYC Local Law 144 — AEDT bias audit trigger. Colorado SB205 — algorithmic discrimination prohibition. Title VII § 703(k) — disparate impact. EEOC — adverse impact documentation required.</div></div>
-                <div class="lane-detail-field"><div class="ldf-label">Regulatory Citations</div><div class="ldf-cite">NYC LL144 § 2(b); SB205 § 24-34-402.3(2)(a); 42 U.S.C. § 2000e-2(k); 29 C.F.R. § 1607.4(D).</div></div>
-              </div>
-            </td>
-          </tr>
-
-          <tr class="lane-row" onclick="toggleLane(6)">
-            <td class="lane-num">06</td>
-            <td><div class="lane-name">OFCCP Compliance</div></td>
-            <td><span class="lane-status ls-pass">✓ PASS</span></td>
-            <td><div class="lane-detail">Organization not flagged as federal contractor — OFCCP obligations not triggered</div></td>
-            <td class="lane-expand"><span class="lane-expand-icon">›</span></td>
-          </tr>
-          <tr class="lane-detail-row" id="lane-detail-6">
-            <td class="lane-detail-cell" colspan="5">
-              <div class="lane-detail-inner">
-                <div class="lane-detail-field"><div class="ldf-label">Baseline Metric</div><div class="ldf-value">Organization is not a federal contractor or subcontractor. OFCCP Affirmative Action Plan requirements not applicable to this rejection event.</div></div>
-                <div class="lane-detail-field"><div class="ldf-label">Historical Pattern</div><div class="ldf-value">OFCCP lane has passed on all 847 intercepts processed to date. No federal contract relationship detected.</div></div>
-                <div class="lane-detail-field"><div class="ldf-label">Regulatory Citation</div><div class="ldf-cite">41 C.F.R. § 60-1.5 — OFCCP exemptions for non-contractor employers. Lane passes — no action required.</div></div>
-              </div>
-            </td>
-          </tr>
-
-          <tr class="lane-row" onclick="toggleLane(7)">
-            <td class="lane-num">07</td>
-            <td><div class="lane-name">Decision Integrity</div></td>
-            <td><span class="lane-status ls-pass">✓ PASS</span></td>
-            <td><div class="lane-detail">ATS decision chain integrity verified — no data corruption or unauthorized modification detected</div></td>
-            <td class="lane-expand"><span class="lane-expand-icon">›</span></td>
-          </tr>
-          <tr class="lane-detail-row" id="lane-detail-7">
-            <td class="lane-detail-cell" colspan="5">
-              <div class="lane-detail-inner">
-                <div class="lane-detail-field"><div class="ldf-label">Baseline Metric</div><div class="ldf-value">Decision chain hash verified. No tampering, override, or unauthorized modification detected between ATS output and F.A.S. intercept. Data integrity score: 100%.</div></div>
-                <div class="lane-detail-field"><div class="ldf-label">Historical Pattern</div><div class="ldf-value">Decision integrity has passed on 100% of intercepts. No integrity events recorded in this deployment.</div></div>
-                <div class="lane-detail-field"><div class="ldf-label">Regulatory Citation</div><div class="ldf-cite">NYC LL144 § 2(c) — audit trail integrity requirement. EU AI Act Art. 12 — logging obligations for high-risk AI systems.</div></div>
-              </div>
-            </td>
-          </tr>
-
-        </tbody>
-      </table>
-    </div>
-  </div>
-
-  <!-- COHORT CONTEXT -->
-  <div class="card">
-    <div class="card-header">
-      <span class="card-label">Cohort Context at Intercept</span>
-      <span style="font-family:var(--mono);font-size:10px;color:var(--gray-400)">Baseline v1.0 · Active since Feb 14, 2026</span>
-    </div>
-    <div class="card-body">
-      <div class="cohort-grid">
-        <div class="cohort-stat">
-          <div class="cs-label">Active Baseline</div>
-          <div class="cs-value" style="font-size:14px">Baseline v1.0</div>
-          <div class="cs-sub">Activated Feb 14, 2026 · 90-day calibration window</div>
-        </div>
-        <div class="cohort-stat">
-          <div class="cs-label">Historical Rejection Rate</div>
-          <div class="cs-value warn">73%</div>
-          <div class="cs-sub">This cohort · Last 90 days · ⚠ Above 4/5ths threshold</div>
-        </div>
-        <div class="cohort-stat" style="grid-column:1/-1">
-          <div class="cs-label">Cohort Definition</div>
-          <div style="font-family:var(--mono);font-size:11px;color:var(--gray-700);margin-top:4px;line-height:1.6">"Senior Operations Manager · 10+ years experience requirement · NYC-based · Workday ATS · REQ series 0400–0499"</div>
-        </div>
-      </div>
-      <div style="margin-top:16px">
-        <div style="font-family:var(--mono);font-size:9px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:var(--gray-400);margin-bottom:10px">Protected Class Distribution (Anonymized Aggregate)</div>
-        <div class="dist-bars">
-          <div class="dist-row">
-            <div class="dist-label">40+ age cohort</div>
-            <div class="dist-bar-outer"><div class="dist-bar-inner" style="width:73%;background:var(--red-2)"></div></div>
-            <div class="dist-pct">73%</div>
-          </div>
-          <div class="dist-row">
-            <div class="dist-label">Gender — Female</div>
-            <div class="dist-bar-outer"><div class="dist-bar-inner" style="width:38%"></div></div>
-            <div class="dist-pct">38%</div>
-          </div>
-          <div class="dist-row">
-            <div class="dist-label">Minority status</div>
-            <div class="dist-bar-outer"><div class="dist-bar-inner" style="width:44%"></div></div>
-            <div class="dist-pct">44%</div>
-          </div>
-          <div class="dist-row">
-            <div class="dist-label">Disability disclosed</div>
-            <div class="dist-bar-outer"><div class="dist-bar-inner" style="width:9%"></div></div>
-            <div class="dist-pct">9%</div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- CANDIDATE HISTORY -->
-  <div class="card">
-    <div class="card-header">
-      <span class="card-label">Historical Candidate Pattern</span>
-      <span class="repeat-flag">⚠ Repeat Applicant</span>
-    </div>
-    <div class="card-body">
-      <table class="history-table">
-        <thead>
-          <tr>
-            <th>Application Date</th>
-            <th>Requisition</th>
-            <th>Position</th>
-            <th>ATS Outcome</th>
-            <th>F.A.S. Decision</th>
-            <th>Override</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td class="mono">Jan 12, 2026</td>
-            <td class="mono">REQ-2026-0201</td>
-            <td>Operations Manager</td>
-            <td><span class="lane-status ls-flag" style="font-size:9px">Rejected</span></td>
-            <td><span class="lane-status ls-pass" style="font-size:9px">Approved</span></td>
-            <td class="mono" style="color:var(--gray-400)">—</td>
-          </tr>
-          <tr>
-            <td class="mono">Mar 3, 2026</td>
-            <td class="mono">REQ-2026-0318</td>
-            <td>Sr. Operations Manager</td>
-            <td><span class="lane-status ls-flag" style="font-size:9px">Rejected</span></td>
-            <td><span class="lane-status ls-flag" style="font-size:9px">Escalated</span></td>
-            <td class="mono">J. Alvarez (CCO) · Mar 4, 2026 · "Candidate qualified; ATS threshold incorrect"</td>
-          </tr>
-          <tr>
-            <td class="mono">Apr 29, 2026</td>
-            <td class="mono" id="currentReqId">—</td>
-            <td id="currentJobTitle">—</td>
-            <td><span class="lane-status ls-flag" style="font-size:9px">Rejected</span></td>
-            <td><span class="status-badge status-escalated" style="font-size:9px" id="currentFasDecision">Pending</span></td>
-            <td class="mono" style="color:var(--gray-400)">In review</td>
-          </tr>
-        </tbody>
-      </table>
-      <div style="margin-top:12px;padding:10px 12px;background:var(--yellow-pale);border:1px solid rgba(217,119,6,0.2);border-radius:var(--r);font-size:11px;color:var(--yellow)">
-        <strong>⚠ Repeat Applicant Signal:</strong> This candidate has applied 3 times in 109 days. Repeat applicants with prior escalations or overrides create an elevated compliance signal — pattern requires documented justification if rejected again.
-      </div>
-    </div>
-  </div>
-
-  <!-- HUMAN REVIEW FORM -->
-  <div class="card">
-    <div class="card-header">
-      <span class="card-label">Human Review — Required Action</span>
-      <span style="font-family:var(--mono);font-size:10px;color:var(--red-2)" id="reviewDeadlineLabel">⚠ Decision required within 6 hours of intercept</span>
-    </div>
-    <div class="card-body">
-      <div class="review-form">
-
-        <div class="form-field">
-          <label class="form-label">Justification Category <span>*</span></label>
-          <div class="form-hint">Select the primary basis for your decision</div>
-          <select class="form-select" id="justCategory">
-            <option value="">Select justification…</option>
-            <option>Job-related requirement — candidate lacks specific skill/credential</option>
-            <option>Credential mismatch — qualification standard not met</option>
-            <option>Experience threshold — insufficient demonstrated capability</option>
-            <option>Comparative assessment — selected candidate better qualified on same criteria</option>
-            <option>Business necessity — requirement validated by job analysis</option>
-          </select>
-        </div>
-
-        <div class="form-field">
-          <label class="form-label">Supporting Context <span>*</span></label>
-          <div class="form-hint">Provide specific, documentable context. This text becomes part of the court-ready audit record.</div>
-          <textarea class="form-textarea" id="justText" placeholder="Provide additional context for your decision. Be specific — reference the requirement, the candidate's qualifications, and the basis for your conclusion…"></textarea>
-        </div>
-
-        <div class="form-field">
-          <label class="form-label">Reviewer Confidence <span>*</span></label>
-          <div class="form-hint">1 = Uncertain / close call &nbsp;·&nbsp; 5 = Highly confident</div>
-          <div class="rating-wrap" id="ratingWrap">
-            <button class="rating-btn" onclick="setRating(1)" data-r="1">1</button>
-            <button class="rating-btn" onclick="setRating(2)" data-r="2">2</button>
-            <button class="rating-btn" onclick="setRating(3)" data-r="3">3</button>
-            <button class="rating-btn" onclick="setRating(4)" data-r="4">4</button>
-            <button class="rating-btn" onclick="setRating(5)" data-r="5">5</button>
-          </div>
-          <div class="rating-labels">
-            <span class="rating-label">Uncertain</span>
-            <span class="rating-label">Highly Confident</span>
-          </div>
-        </div>
-
-        <div class="action-row">
-          <button class="action-btn btn-approve" onclick="takeAction('approve')">✓ Approve</button>
-          <button class="action-btn btn-override" onclick="takeAction('override')">↺ Override</button>
-          <button class="action-btn btn-escalate" onclick="takeAction('escalate')">↑ Escalate</button>
-        </div>
-
-        <div class="escalate-panel" id="escalatePanel">
-          <div class="ep-title">Escalation Chain</div>
-          <div class="ep-chain">
-            <div class="ep-tier">
-              <span class="ep-name">M. Richardson</span><span class="ep-role">HR Lead</span>
-              <span class="ep-arrow">→</span>
-              <span class="ep-name">J. Alvarez</span><span class="ep-role">Chief Compliance Officer</span>
+    <!-- ============================================
+         STICKY LIVE BANNER
+         ============================================ -->
+    <div class="live-banner" id="liveBanner">
+        <div class="live-banner__left">
+            <span class="live-banner__badge">
+                <span>●</span> Live Interception
+            </span>
+            <div class="live-banner__timer">
+                <span class="live-banner__timer-icon">⏱</span>
+                <span id="countdown">3.0s</span>
             </div>
-            <div class="ep-tier" style="padding-left:24px">
-              <span class="ep-arrow">→</span>
-              <span class="ep-name">C. Washington</span><span class="ep-role">General Counsel (if unresolved)</span>
+        </div>
+        <div class="live-banner__actions">
+            <button class="btn btn--sm btn--secondary" onclick="requestExtension()">
+                ⏸ Request 30s Extension
+            </button>
+            <button class="btn btn--sm btn--danger" onclick="forceFinalize()">
+                ⚠ Force Finalize
+            </button>
+        </div>
+    </div>
+
+    <!-- ============================================
+         MAIN CONTAINER
+         ============================================ -->
+    <div class="container">
+
+        <!-- PAGE HEADER -->
+        <div class="page-header">
+            <div class="page-header__top">
+                <div>
+                    <h1 class="page-header__title">Rejection Detail</h1>
+                    <p class="page-header__subtitle">Forensic audit record for single candidate rejection</p>
+                </div>
+                <button class="btn btn--ghost" onclick="revealPII()">
+                    👁 Reveal PII
+                </button>
             </div>
-          </div>
-          <textarea class="form-textarea" id="escalateReason" style="min-height:60px;margin-top:4px" placeholder="Escalation reason (auto-populated from flag summary — edit if needed)&#10;&#10;3 lanes flagged: Age Proxy (Lane 1), Disparate Impact (Lane 3), Legal Framework Triggers (Lane 5). Repeat applicant with prior override. High-risk — requires Compliance Officer review."></textarea>
-          <div style="margin-top:8px;font-size:10px;color:var(--red);font-family:var(--mono)">Submitting will notify J. Alvarez immediately and log this elevation event with timestamp.</div>
+            <div class="candidate-meta">
+                <div class="meta-item">
+                    <span class="meta-item__label">Candidate ID</span>
+                    <span class="meta-item__value" id="candidateId">—</span>
+                </div>
+                <div class="meta-item">
+                    <span class="meta-item__label">Applied Role</span>
+                    <span class="meta-item__value">Sr. Financial Analyst</span>
+                </div>
+                <div class="meta-item">
+                    <span class="meta-item__label">Application Date</span>
+                    <span class="meta-item__value">2026-05-04</span>
+                </div>
+                <div class="meta-item">
+                    <span class="meta-item__label">Rejection Timestamp</span>
+                    <span class="meta-item__value">2026-05-06 09:41:22 UTC</span>
+                </div>
+                <div class="meta-item">
+                    <span class="meta-item__label">ATS Source</span>
+                    <span class="meta-item__value">Workday AI v4.2</span>
+                </div>
+                <div class="meta-item">
+                    <span class="meta-item__label">F.A.S. Intercept</span>
+                    <span class="meta-item__value">2026-05-06 09:41:22.847 UTC</span>
+                </div>
+            </div>
         </div>
 
-      </div>
+        <!-- COMPOSITE RISK SCORE -->
+        <div class="risk-summary">
+            <div class="risk-summary__header">
+                <span class="risk-summary__title">Composite Bias Risk Score</span>
+                <div class="risk-summary__score">
+                    <span class="risk-score__number risk-score__number--orange" id="compositeScore">74</span>
+                    <span class="risk-score__label risk-score__label--orange">High Risk</span>
+                </div>
+            </div>
+            <div class="risk-bar">
+                <div class="risk-bar__fill risk-bar__fill--orange" id="riskBar"></div>
+            </div>
+            <div class="risk-legend">
+                <span>0 Low</span>
+                <span>25</span>
+                <span>50 Moderate</span>
+                <span>75</span>
+                <span>100 Critical</span>
+            </div>
+        </div>
+
+        <!-- FORENSIC LANES -->
+        <div class="lanes-section">
+            <div class="lanes-section__header">
+                <span class="lanes-section__title">Forensic Audit Lanes</span>
+                <span class="lanes-section__count">3 of 7 triggered</span>
+            </div>
+
+            <!-- LANE 1: Age Proxy Signals — CLEAN -->
+            <div class="lane lane--clean">
+                <div class="lane__header" onclick="toggleLane(this)">
+                    <div class="lane__left">
+                        <div class="lane__icon lane__icon--clean">🎂</div>
+                        <span class="lane__name">Age Proxy Signals</span>
+                    </div>
+                    <div class="lane__right">
+                        <span class="lane__status lane__status--clean">✓ Clean</span>
+                        <span class="lane__risk">12/100</span>
+                        <span class="lane__chevron">▼</span>
+                    </div>
+                </div>
+                <div class="lane__content">
+                    <div class="lane__details">
+                        <div class="detail-row">
+                            <span class="detail-row__label">Graduation Year</span>
+                            <span class="detail-row__value">2015 (inferred age: ~31)</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="detail-row__label">Rule Checked</span>
+                            <span class="detail-row__value">Inferred age > 40 triggers proxy flag</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="detail-row__label">Result</span>
+                            <span class="detail-row__value">No age proxy detected</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- LANE 2: Employment Gap Penalties — TRIGGERED -->
+            <div class="lane lane--triggered">
+                <div class="lane__header" onclick="toggleLane(this)">
+                    <div class="lane__left">
+                        <div class="lane__icon lane__icon--triggered">📅</div>
+                        <span class="lane__name">Employment Gap Penalties</span>
+                    </div>
+                    <div class="lane__right">
+                        <span class="lane__status lane__status--triggered">⚠ Triggered</span>
+                        <span class="lane__risk lane__risk--orange">72/100</span>
+                        <span class="lane__chevron lane__chevron--open">▼</span>
+                    </div>
+                </div>
+                <div class="lane__content lane__content--open">
+                    <div class="lane__details">
+                        <div class="detail-row">
+                            <span class="detail-row__label">Gap Duration</span>
+                            <span class="detail-row__value detail-row__value--highlight">14 months</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="detail-row__label">Gap Period</span>
+                            <span class="detail-row__value">March 2023 – May 2024</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="detail-row__label">Rule Triggered</span>
+                            <span class="detail-row__value">Gap > 12 months triggers automatic penalty (score +0.35)</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="detail-row__label">ATS Penalty</span>
+                            <span class="detail-row__value">-0.42 to overall ranking</span>
+                        </div>
+                    </div>
+
+                    <div class="stat-context">
+                        <p class="stat-context__text" id="gapStatText">
+                            <strong>67%</strong> of rejections in the last 90 days at <strong class="stat-org">—</strong> involve candidates whose employment gap exceeds 12 months. This threshold was set on <strong>2026-01-15</strong> and has not been validated against business necessity.
+                        </p>
+                        <div class="stat-context__meta">
+                            <label class="stat-toggle">
+                                <input type="checkbox" onchange="toggleBaseline(this, 'gapStatText')">
+                                <span class="stat-toggle__slider"></span>
+                                <span>Industry benchmark</span>
+                            </label>
+                            <span class="baseline-freshness">Baseline refreshed: May 5, 2026</span>
+                        </div>
+                    </div>
+
+                    <button class="evidence-toggle" onclick="toggleEvidence(this)">
+                        <span class="evidence-toggle__icon">▶</span>
+                        <span>View Evidence Panel</span>
+                    </button>
+
+                    <div class="evidence-panel">
+                        <div class="evidence-grid">
+                            <div class="evidence-card">
+                                <div class="evidence-card__header evidence-card__header--ats">
+                                    🤖 ATS SAW
+                                </div>
+                                <div class="evidence-card__body">
+                                    <pre>Employment History (parsed):
+  - Company: Deloitte, 2019-2023
+  - Gap detected: 2023-03 to 2024-05
+  - Duration: 14 months
+  - Explanation field: [EMPTY]
+  - Structured data: No gap_reason provided
+
+Scoring Impact:
+  - Base gap penalty: -0.35
+  - No explanation multiplier: ×1.2
+  - Final penalty: -0.42</pre>
+                                </div>
+                            </div>
+                            <div class="evidence-card">
+                                <div class="evidence-card__header evidence-card__header--human">
+                                    👤 HUMAN SEES
+                                </div>
+                                <div class="evidence-card__body evidence-card__body--human">
+                                    <pre>Full Resume Context:
+  - Cover Letter, Page 2: "I stepped away
+    from the workforce to provide full-time
+    care for my mother during her cancer
+    treatment at Shaukat Khanum."
+  - LinkedIn: Endorsed for project management
+    during caregiving period (3 volunteer roles)
+  - Reference available from Dr. A. Khan
+
+Human Assessment:
+  - Gap is documented and justified
+  - Candidate maintained skills via volunteer work
+  - 14 months is not predictive of performance</pre>
+                                    <div class="reviewer-notes">
+                                        <div class="reviewer-notes__label">Reviewer Notes</div>
+                                        <select class="note-template" onchange="insertTemplate(this, 'gapNotes')">
+                                            <option value="">Select template...</option>
+                                            <option value="Candidate meets all stated requirements">Candidate meets all stated requirements</option>
+                                            <option value="Signal is proxy for protected class (caregiving)">Signal is proxy for protected class (caregiving)</option>
+                                            <option value="Additional context not visible to ATS">Additional context not visible to ATS</option>
+                                        </select>
+                                        <textarea class="note-textarea" id="gapNotes" placeholder="Add your analysis..." oninput="autosaveNotes(this)"></textarea>
+                                        <div class="note-meta">
+                                            <span class="note-save-status" id="gapSaveStatus"></span>
+                                            <span>Last edited: <span id="gapLastEdit">—</span></span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- LANE 3: Disparate Impact Patterns — CLEAN -->
+            <div class="lane lane--clean">
+                <div class="lane__header" onclick="toggleLane(this)">
+                    <div class="lane__left">
+                        <div class="lane__icon lane__icon--clean">📊</div>
+                        <span class="lane__name">Disparate Impact Patterns</span>
+                    </div>
+                    <div class="lane__right">
+                        <span class="lane__status lane__status--clean">✓ Clean</span>
+                        <span class="lane__risk">8/100</span>
+                        <span class="lane__chevron">▼</span>
+                    </div>
+                </div>
+                <div class="lane__content">
+                    <div class="lane__details">
+                        <div class="detail-row">
+                            <span class="detail-row__label">4/5 Rule Check</span>
+                            <span class="detail-row__value">Selection rate: 82% (above 80% threshold)</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="detail-row__label">Protected Class</span>
+                            <span class="detail-row__value">No statistically significant disparity detected</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- LANE 4: Keyword Mismatches — TRIGGERED -->
+            <div class="lane lane--triggered">
+                <div class="lane__header" onclick="toggleLane(this)">
+                    <div class="lane__left">
+                        <div class="lane__icon lane__icon--triggered">🔤</div>
+                        <span class="lane__name">Keyword Mismatches</span>
+                    </div>
+                    <div class="lane__right">
+                        <span class="lane__status lane__status--triggered">⚠ Triggered</span>
+                        <span class="lane__risk lane__risk--orange">58/100</span>
+                        <span class="lane__chevron lane__chevron--open">▼</span>
+                    </div>
+                </div>
+                <div class="lane__content lane__content--open">
+                    <div class="lane__details">
+                        <div class="detail-row">
+                            <span class="detail-row__label">Required Keyword</span>
+                            <span class="detail-row__value detail-row__value--highlight">"SAP" (exact match)</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="detail-row__label">Candidate Resume</span>
+                            <span class="detail-row__value">"SAP S/4HANA", "SAP ECC 6.0", "SAP BW/4HANA"</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="detail-row__label">Match Result</span>
+                            <span class="detail-row__value">FAIL — substring/variant matching disabled</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="detail-row__label">ATS Score Impact</span>
+                            <span class="detail-row__value">-0.28 to ranking (required skill missing)</span>
+                        </div>
+                    </div>
+
+                    <div class="stat-context">
+                        <p class="stat-context__text" id="kwStatText">
+                            <strong>41%</strong> of rejections in the last 90 days at <strong class="stat-org">—</strong> involve keyword false negatives where candidates listed skill variants but the ATS required exact string matches.
+                        </p>
+                        <div class="stat-context__meta">
+                            <label class="stat-toggle">
+                                <input type="checkbox" onchange="toggleBaseline(this, 'kwStatText')">
+                                <span class="stat-toggle__slider"></span>
+                                <span>Industry benchmark</span>
+                            </label>
+                            <span class="baseline-freshness">Baseline refreshed: May 5, 2026</span>
+                        </div>
+                    </div>
+
+                    <button class="evidence-toggle" onclick="toggleEvidence(this)">
+                        <span class="evidence-toggle__icon">▶</span>
+                        <span>View Evidence Panel</span>
+                    </button>
+
+                    <div class="evidence-panel">
+                        <div class="evidence-grid">
+                            <div class="evidence-card">
+                                <div class="evidence-card__header evidence-card__header--ats">
+                                    🤖 ATS SAW
+                                </div>
+                                <div class="evidence-card__body">
+                                    <pre>Keyword Scan (Job Req ID: 2847-FA):
+  Required: ["SAP", "Excel", "Power BI"]
+
+  Resume Parsed:
+    - "SAP S/4HANA" → MATCH: NO (exact only)
+    - "SAP ECC 6.0" → MATCH: NO (exact only)
+    - "SAP BW/4HANA" → MATCH: NO (exact only)
+    - "Excel" → MATCH: YES
+    - "Power BI" → MATCH: YES
+
+  Skill Coverage: 2/3 (66.7%)
+  Minimum threshold: 75%
+  Result: FAIL</pre>
+                                </div>
+                            </div>
+                            <div class="evidence-card">
+                                <div class="evidence-card__header evidence-card__header--human">
+                                    👤 HUMAN SEES
+                                </div>
+                                <div class="evidence-card__body evidence-card__body--human">
+                                    <pre>Human Readable Assessment:
+  - Candidate has 8 years SAP experience
+  - S/4HANA is the current SAP ERP platform
+  - ECC 6.0 is the legacy platform (still relevant)
+  - BW/4HANA is the analytics platform
+
+  All three indicate deeper SAP expertise
+  than a generic "SAP" keyword would suggest.
+
+  Recommendation: Override keyword penalty.</pre>
+                                    <div class="reviewer-notes">
+                                        <div class="reviewer-notes__label">Reviewer Notes</div>
+                                        <select class="note-template" onchange="insertTemplate(this, 'keywordNotes')">
+                                            <option value="">Select template...</option>
+                                            <option value="Candidate meets all stated requirements">Candidate meets all stated requirements</option>
+                                            <option value="Signal is proxy for protected class">Signal is proxy for protected class</option>
+                                            <option value="Additional context not visible to ATS">Additional context not visible to ATS</option>
+                                        </select>
+                                        <textarea class="note-textarea" id="keywordNotes" placeholder="Add your analysis..." oninput="autosaveNotes(this)"></textarea>
+                                        <div class="note-meta">
+                                            <span class="note-save-status" id="keywordSaveStatus"></span>
+                                            <span>Last edited: <span id="keywordLastEdit">—</span></span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- LANE 5: Legal Framework Triggers — CRITICAL -->
+            <div class="lane lane--critical">
+                <div class="lane__header" onclick="toggleLane(this)">
+                    <div class="lane__left">
+                        <div class="lane__icon lane__icon--critical">⚖️</div>
+                        <span class="lane__name">Legal Framework Triggers</span>
+                    </div>
+                    <div class="lane__right">
+                        <span class="lane__status lane__status--critical">🔴 Critical</span>
+                        <span class="lane__risk lane__risk--red">91/100</span>
+                        <span class="lane__chevron lane__chevron--open">▼</span>
+                    </div>
+                </div>
+                <div class="lane__content lane__content--open">
+                    <div class="legal-alert">
+                        <div class="legal-alert__header">
+                            <span>⚠</span> NYCLL144 §20-a — Automated Employment Decision Tool
+                        </div>
+                        <p class="legal-alert__text">
+                            This rejection was generated using an Automated Employment Decision Tool (AEDT). Under New York City Local Law 144, a bias audit must be completed annually, and candidates have the right to request an alternative review process. This rejection triggers mandatory documentation requirements.
+                        </p>
+                        <div class="legal-alert__action">
+                            <a href="#" class="btn btn--link">View NYCLL144 Compliance Checklist →</a>
+                        </div>
+                    </div>
+
+                    <div class="lane__details">
+                        <div class="detail-row">
+                            <span class="detail-row__label">Regulation</span>
+                            <span class="detail-row__value detail-row__value--highlight">NYCLL144 §20-a</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="detail-row__label">Trigger Condition</span>
+                            <span class="detail-row__value">AEDT used for hiring decision + disparate impact signal detected</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="detail-row__label">Required Action</span>
+                            <span class="detail-row__value">Bias audit documentation mandatory before rejection finalization</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="detail-row__label">Penalty</span>
+                            <span class="detail-row__value">$500-$1,500 per violation (NYC Commission on Human Rights)</span>
+                        </div>
+                    </div>
+
+                    <button class="evidence-toggle" onclick="toggleEvidence(this)">
+                        <span class="evidence-toggle__icon">▶</span>
+                        <span>View Evidence Panel</span>
+                    </button>
+
+                    <div class="evidence-panel">
+                        <div class="evidence-grid">
+                            <div class="evidence-card">
+                                <div class="evidence-card__header evidence-card__header--ats">
+                                    🤖 ATS SAW
+                                </div>
+                                <div class="evidence-card__body">
+                                    <pre>Legal Compliance Check (ATS):
+  - NYCLL144 audit: NOT CONFIGURED
+  - Bias audit date: N/A
+  - Alternative review offered: NO
+  - Notice provided: NO
+
+  AEDT Classification:
+    - Tool: Workday AI v4.2
+    - Decision type: Ranking + Rejection
+    - Scope: Full candidate pool
+    - Last audit: NEVER</pre>
+                                </div>
+                            </div>
+                            <div class="evidence-card">
+                                <div class="evidence-card__header evidence-card__header--human">
+                                    👤 HUMAN SEES
+                                </div>
+                                <div class="evidence-card__body evidence-card__body--human">
+                                    <pre>Compliance Officer Assessment:
+  - Organization has NOT completed required
+    annual bias audit for Workday AI
+  - Candidate was NOT given required notice
+    of AEDT use before application
+  - No alternative review process offered
+
+  Immediate Actions Required:
+    1. Halt rejection until audit complete
+    2. Notify candidate of AEDT use retroactively
+    3. Offer alternative human review
+    4. Document all steps for CCHR defense</pre>
+                                    <div class="reviewer-notes">
+                                        <div class="reviewer-notes__label">Reviewer Notes</div>
+                                        <select class="note-template" onchange="insertTemplate(this, 'legalNotes')">
+                                            <option value="">Select template...</option>
+                                            <option value="Candidate meets all stated requirements">Candidate meets all stated requirements</option>
+                                            <option value="Signal is proxy for protected class">Signal is proxy for protected class</option>
+                                            <option value="Additional context not visible to ATS">Additional context not visible to ATS</option>
+                                        </select>
+                                        <textarea class="note-textarea" id="legalNotes" placeholder="Add your analysis..." oninput="autosaveNotes(this)"></textarea>
+                                        <div class="note-meta">
+                                            <span class="note-save-status" id="legalSaveStatus"></span>
+                                            <span>Last edited: <span id="legalLastEdit">—</span></span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- LANE 6: Resume Format Penalties — CLEAN -->
+            <div class="lane lane--clean">
+                <div class="lane__header" onclick="toggleLane(this)">
+                    <div class="lane__left">
+                        <div class="lane__icon lane__icon--clean">📄</div>
+                        <span class="lane__name">Resume Format Penalties</span>
+                    </div>
+                    <div class="lane__right">
+                        <span class="lane__status lane__status--clean">✓ Clean</span>
+                        <span class="lane__risk">3/100</span>
+                        <span class="lane__chevron">▼</span>
+                    </div>
+                </div>
+                <div class="lane__content">
+                    <div class="lane__details">
+                        <div class="detail-row">
+                            <span class="detail-row__label">Parse Quality</span>
+                            <span class="detail-row__value">98% extraction accuracy</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="detail-row__label">Format</span>
+                            <span class="detail-row__value">Standard PDF — no parsing penalties applied</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- LANE 7: Source Channel Bias — CLEAN -->
+            <div class="lane lane--clean">
+                <div class="lane__header" onclick="toggleLane(this)">
+                    <div class="lane__left">
+                        <div class="lane__icon lane__icon--clean">🔗</div>
+                        <span class="lane__name">Source Channel Bias</span>
+                    </div>
+                    <div class="lane__right">
+                        <span class="lane__status lane__status--clean">✓ Clean</span>
+                        <span class="lane__risk">5/100</span>
+                        <span class="lane__chevron">▼</span>
+                    </div>
+                </div>
+                <div class="lane__content">
+                    <div class="lane__details">
+                        <div class="detail-row">
+                            <span class="detail-row__label">Application Source</span>
+                            <span class="detail-row__value">Company careers portal (direct)</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="detail-row__label">Source Penalty</span>
+                            <span class="detail-row__value">None — internal referral and direct apply weighted equally</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- MINI AUDIT TRAIL -->
+        <div class="audit-section">
+            <div class="audit-section__header">
+                <span class="audit-section__title">Review Audit Trail</span>
+                <a href="#" class="audit-section__link">View Full Audit →</a>
+            </div>
+            <div class="audit-log" id="auditLog">
+                <div class="audit-entry">
+                    <span class="audit-entry__time">09:41:22</span>
+                    <span class="audit-entry__action"><strong>F.A.S. Intercept</strong> — Rejection flagged for human review (composite risk: 74)</span>
+                </div>
+                <div class="audit-entry">
+                    <span class="audit-entry__time">09:41:23</span>
+                    <span class="audit-entry__action"><strong class="reviewer-name">—</strong> opened detail view — PII masked</span>
+                </div>
+                <div class="audit-entry">
+                    <span class="audit-entry__time">09:41:45</span>
+                    <span class="audit-entry__action"><strong class="reviewer-name">—</strong> expanded Lane 2 (Employment Gap)</span>
+                </div>
+                <div class="audit-entry">
+                    <span class="audit-entry__time">09:42:01</span>
+                    <span class="audit-entry__action"><strong class="reviewer-name">—</strong> added note to Lane 2 evidence panel</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- ACTION PANEL -->
+        <div class="action-panel" id="actionPanel">
+            <div class="action-panel__header">Action Required</div>
+
+            <div class="action-buttons" id="liveActions">
+                <button class="btn btn--override" onclick="takeAction('override', event)">
+                    ↩ Override Rejection
+                </button>
+                <button class="btn btn--confirm" onclick="takeAction('confirm', event)">
+                    ✓ Confirm Rejection
+                </button>
+                <button class="btn btn--escalate" onclick="takeAction('escalate', event)">
+                    ⬆ Escalate to Legal
+                </button>
+            </div>
+
+            <div class="action-buttons hidden" id="postHocActions">
+                <button class="btn btn--override" onclick="takeAction('reversal', event)">
+                    ↩ Recommend Reversal
+                </button>
+                <button class="btn btn--escalate" onclick="takeAction('flag', event)">
+                    🚩 Flag for Legal
+                </button>
+                <button class="btn btn--secondary" onclick="takeAction('report', event)">
+                    📋 Generate Report
+                </button>
+            </div>
+
+            <div class="justification-field">
+                <label class="justification-field__label">
+                    Justification
+                    <span class="justification-field__required" id="justificationRequired">*</span>
+                </label>
+                <div class="justification-field__templates">
+                    <span class="template-chip" onclick="selectTemplate(this)">Candidate meets all stated requirements</span>
+                    <span class="template-chip" onclick="selectTemplate(this)">Signal is proxy for protected class</span>
+                    <span class="template-chip" onclick="selectTemplate(this)">Additional context not visible to ATS</span>
+                    <span class="template-chip" onclick="selectTemplate(this)">Business necessity validated</span>
+                </div>
+                <textarea
+                    class="justification-textarea"
+                    id="justificationText"
+                    placeholder="Provide detailed justification for your decision..."
+                    oninput="validateJustification()"
+                ></textarea>
+            </div>
+
+            <div class="submit-row">
+                <span class="submit-row__hint" id="submitHint">Justification required for Override and Escalate</span>
+                <button class="btn btn--submit" id="submitBtn" onclick="submitAction()" disabled>
+                    Submit Decision
+                </button>
+            </div>
+        </div>
     </div>
-  </div>
 
-  <!-- AUDIT TRAIL -->
-  <div class="card">
-    <div class="card-header">
-      <span class="card-label">Audit Trail Log (Read-Only)</span>
-      <span style="font-family:var(--mono);font-size:10px;color:var(--gray-400)" id="trailMeta">— events</span>
+    <!-- MODE TOGGLE (FOR DEMO) -->
+    <div class="mode-toggle">
+        <span class="mode-toggle__label">Demo Mode</span>
+        <div class="mode-toggle__buttons">
+            <button class="btn btn--sm btn--mode btn--mode-active" id="liveModeBtn" onclick="setMode('live')">
+                Live
+            </button>
+            <button class="btn btn--sm btn--mode" id="postHocModeBtn" onclick="setMode('posthoc')">
+                Post-Hoc
+            </button>
+        </div>
     </div>
-    <div class="card-body">
-      <div class="trail-list" id="trailList">
-        <!-- populated by renderAuditTrail() or left as static fallback -->
-        <div class="trail-item">
-          <div class="trail-dot done">📥</div>
-          <div class="trail-content">
-            <div class="trail-event">Rejection intercepted from ATS</div>
-            <div class="trail-meta" id="trailInterceptTime">—</div>
-            <div class="trail-detail">ATS rejection payload received. 7-lane forensic audit initiated automatically.</div>
-          </div>
-        </div>
-        <div class="trail-item">
-          <div class="trail-dot done">🔍</div>
-          <div class="trail-content">
-            <div class="trail-event">Forensic audit completed</div>
-            <div class="trail-meta" id="trailAuditTime">—</div>
-            <div class="trail-detail" id="trailAuditDetail">7 lanes evaluated. Risk score computed. Reviewer assigned.</div>
-          </div>
-        </div>
-        <div class="trail-item">
-          <div class="trail-dot active">⏳</div>
-          <div class="trail-content">
-            <div class="trail-event">Awaiting reviewer decision</div>
-            <div class="trail-meta" id="trailElapsed">In progress</div>
-            <div class="trail-detail" id="trailDeadlineDetail">Case is open. No decision recorded. Auto-escalates to Compliance Officer if no action by deadline.</div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
 
-  <!-- FOOTER -->
-  <div class="detail-footer">
-    <div class="case-id" id="footerCaseId">F.A.S. ID: <span id="caseIdDisplay">—</span> · Baseline v1.0 · Intercepted <span id="footerInterceptTime">—</span></div>
-    <div class="footer-actions">
-      <button class="footer-btn gold" onclick="exportDoc('pdf')">⬇ Export PDF</button>
-      <button class="footer-btn" onclick="exportDoc('json')">{ } Export JSON</button>
-      <button class="footer-btn" onclick="window.print()">🖨 Print Report</button>
-    </div>
-  </div>
+    <script>
+        // ============================================
+        // CONFIG
+        // ============================================
+        const FAS_CONFIG = {
+          mode: 'demo',
+          org: 'KPMG Pakistan',
+          reviewer: 'U.H.',
+          reviewWindow: 3.0,
+          candidateId: 'CAND-2847'
+        };
 
-</div><!-- /main-col -->
+        // ============================================
+        // GLOBAL STATE
+        // ============================================
+        let currentMode = 'live';
+        let timeRemaining = FAS_CONFIG.reviewWindow;
+        let countdownInterval = null;
+        let selectedAction = null;
+        let piiRevealed = false;
 
-<div class="side-col">
+        // ============================================
+        // COUNTDOWN TIMER (LIVE MODE)
+        // ============================================
+        function startCountdown() {
+            if (countdownInterval) clearInterval(countdownInterval);
 
-  <!-- ELEVATION INDICATOR -->
-  <div class="card elevation-card">
-    <div class="card-header">
-      <span class="card-label">Scoped Elevation Indicator</span>
-    </div>
-    <div class="elev-body">
-      <div class="elev-row">
-        <div class="elev-label">Current Access Level</div>
-        <div class="elev-value">Full Forensic Detail</div>
-        <div class="elev-value mono">Scoped to this rejection only</div>
-      </div>
-      <div class="elev-row">
-        <div class="elev-label">Elevation Trigger</div>
-        <div class="elev-value" style="color:var(--yellow-2)" id="elevTrigger">—</div>
-      </div>
-      <div class="elev-row">
-        <div class="elev-label">Assigned Tier</div>
-        <div class="elev-value" id="elevTier">J. Alvarez — CCO</div>
-      </div>
-      <div class="revert-notice">⏱ Access returns to summary view upon case resolution or 24h expiry — whichever occurs first.</div>
-    </div>
-  </div>
+            countdownInterval = setInterval(() => {
+                timeRemaining -= 0.1;
 
-  <!-- QUICK STATS -->
-  <div class="card">
-    <div class="card-body" style="display:flex;flex-direction:column;gap:12px">
-      <div class="side-section-title">Case Quick Reference</div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
-        <div style="background:var(--gray-50);border:1px solid var(--gray-200);border-radius:var(--r);padding:10px 12px;text-align:center">
-          <div style="font-family:var(--mono);font-size:18px;font-weight:600;color:var(--red)" id="statLanesFlagged">—</div>
-          <div style="font-size:10px;color:var(--gray-400);margin-top:2px;font-family:var(--mono)">Lanes Flagged</div>
-        </div>
-        <div style="background:var(--gray-50);border:1px solid var(--gray-200);border-radius:var(--r);padding:10px 12px;text-align:center">
-          <div style="font-family:var(--mono);font-size:18px;font-weight:600;color:var(--navy-2)">3</div>
-          <div style="font-size:10px;color:var(--gray-400);margin-top:2px;font-family:var(--mono)">Prior Applications</div>
-        </div>
-        <div style="background:var(--gray-50);border:1px solid var(--gray-200);border-radius:var(--r);padding:10px 12px;text-align:center">
-          <div style="font-family:var(--mono);font-size:18px;font-weight:600;color:var(--yellow)" id="statConfidence">—</div>
-          <div style="font-size:10px;color:var(--gray-400);margin-top:2px;font-family:var(--mono)">Confidence</div>
-        </div>
-        <div style="background:var(--gray-50);border:1px solid var(--gray-200);border-radius:var(--r);padding:10px 12px;text-align:center">
-          <div style="font-family:var(--mono);font-size:18px;font-weight:600;color:var(--red)">73%</div>
-          <div style="font-size:10px;color:var(--gray-400);margin-top:2px;font-family:var(--mono)">Cohort Rej. Rate</div>
-        </div>
-      </div>
-    </div>
-  </div>
+                if (timeRemaining <= 0) {
+                    timeRemaining = 0;
+                    clearInterval(countdownInterval);
+                    autoFinalize();
+                }
 
-  <!-- DEADLINE TIMER -->
-  <div class="card" style="border-color:rgba(220,38,38,0.2);background:var(--red-pale)">
-    <div class="card-body" style="text-align:center;padding:16px">
-      <div style="font-family:var(--mono);font-size:9px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;color:var(--red);margin-bottom:8px">Decision Deadline</div>
-      <div style="font-family:var(--mono);font-size:32px;font-weight:600;color:var(--red)" id="timerDisplay">—:——:——</div>
-      <div style="font-size:11px;color:var(--red);margin-top:4px;opacity:.7">remaining before auto-escalation</div>
-      <div style="margin-top:10px;font-size:10px;color:var(--red);font-family:var(--mono);opacity:.6" id="timerDeadlineLabel">—</div>
-    </div>
-  </div>
+                updateCountdownDisplay();
+            }, 100);
+        }
 
-  <!-- REGULATORY FLAGS -->
-  <div class="card">
-    <div class="card-body">
-      <div class="side-section-title">Active Regulatory Flags</div>
-      <div style="display:flex;flex-direction:column;gap:6px">
-        <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 10px;background:var(--red-pale);border:1px solid rgba(220,38,38,0.15);border-radius:var(--r)">
-          <span style="font-family:var(--mono);font-size:10px;font-weight:600;color:var(--red)">NYC LL144</span>
-          <span style="font-family:var(--mono);font-size:9px;color:var(--red);background:rgba(220,38,38,0.1);padding:2px 6px;border-radius:2px">TRIGGERED</span>
-        </div>
-        <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 10px;background:var(--yellow-pale);border:1px solid rgba(217,119,6,0.15);border-radius:var(--r)">
-          <span style="font-family:var(--mono);font-size:10px;font-weight:600;color:var(--yellow)">Colorado SB205</span>
-          <span style="font-family:var(--mono);font-size:9px;color:var(--yellow);background:rgba(217,119,6,0.1);padding:2px 6px;border-radius:2px">TRIGGERED</span>
-        </div>
-        <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 10px;background:var(--yellow-pale);border:1px solid rgba(217,119,6,0.15);border-radius:var(--r)">
-          <span style="font-family:var(--mono);font-size:10px;font-weight:600;color:var(--yellow)">Title VII / EEOC</span>
-          <span style="font-family:var(--mono);font-size:9px;color:var(--yellow);background:rgba(217,119,6,0.1);padding:2px 6px;border-radius:2px">TRIGGERED</span>
-        </div>
-        <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 10px;background:var(--green-pale);border:1px solid rgba(22,163,74,0.15);border-radius:var(--r)">
-          <span style="font-family:var(--mono);font-size:10px;font-weight:600;color:var(--green)">EU AI Act</span>
-          <span style="font-family:var(--mono);font-size:9px;color:var(--green);background:rgba(22,163,74,0.1);padding:2px 6px;border-radius:2px">CLEAR</span>
-        </div>
-        <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 10px;background:var(--green-pale);border:1px solid rgba(22,163,74,0.15);border-radius:var(--r)">
-          <span style="font-family:var(--mono);font-size:10px;font-weight:600;color:var(--green)">OFCCP</span>
-          <span style="font-family:var(--mono);font-size:9px;color:var(--green);background:rgba(22,163,74,0.1);padding:2px 6px;border-radius:2px">CLEAR</span>
-        </div>
-      </div>
-    </div>
-  </div>
+        function updateCountdownDisplay() {
+            const display = document.getElementById('countdown');
+            const banner = document.getElementById('liveBanner');
 
-</div><!-- /side-col -->
-</div><!-- /layout -->
+            display.textContent = timeRemaining.toFixed(1) + 's';
 
-<script>
-// ── LANE TOGGLE ───────────────────────────────────────
-function toggleLane(n) {
-  const row = document.getElementById('lane-detail-'+n);
-  const laneRows = document.querySelectorAll('.lane-row');
-  const icon = laneRows[n-1].querySelector('.lane-expand-icon');
-  const isOpen = row.classList.contains('open');
-  row.classList.toggle('open', !isOpen);
-  laneRows[n-1].classList.toggle('expanded', !isOpen);
-  icon.style.transform = isOpen ? '' : 'rotate(90deg)';
-}
+            if (timeRemaining <= 1.0) {
+                banner.classList.add('critical');
+            } else {
+                banner.classList.remove('critical');
+            }
+        }
 
-// ── RATING ────────────────────────────────────────────
-let selectedRating = 0;
-function setRating(n) {
-  selectedRating = n;
-  document.querySelectorAll('.rating-btn').forEach(btn => {
-    btn.classList.toggle('selected', parseInt(btn.dataset.r) === n);
-  });
-}
+        function autoFinalize() {
+            alert('⏱ TIME EXPIRED — Rejection has been automatically finalized.\n\nThis action has been logged to the audit trail.');
+            document.getElementById('submitBtn').disabled = true;
+            document.getElementById('submitBtn').textContent = 'Window Closed';
+        }
 
-// ── ACTIONS ───────────────────────────────────────────
-function takeAction(type) {
-  const cat = document.getElementById('justCategory').value;
-  const text = document.getElementById('justText').value.trim();
-  if (!cat) { toast('Select a justification category before proceeding.','warn'); return; }
-  if (!text) { toast('Supporting context is required for all decisions.','warn'); return; }
-  if (!selectedRating) { toast('Select your confidence rating (1–5) before proceeding.','warn'); return; }
-  const ep = document.getElementById('escalatePanel');
-  if (type === 'escalate') {
-    ep.classList.toggle('open');
-    if (ep.classList.contains('open')) toast('Escalation chain activated. Complete the escalation reason and confirm.','warn');
-    return;
-  }
-  const labels = {approve:'Rejection approved — candidate will be notified.',override:'Rejection overridden — candidate advances to next stage.'};
-  toast(labels[type], 'success');
-  setTimeout(() => {
-    document.querySelector('.review-form').innerHTML = `
-      <div style="text-align:center;padding:32px 20px">
-        <div style="font-size:32px;margin-bottom:12px">${type==='approve'?'✓':'↺'}</div>
-        <div style="font-family:var(--mono);font-size:14px;font-weight:600;color:var(--navy-2);margin-bottom:6px">Decision Recorded</div>
-        <div style="font-size:12px;color:var(--gray-500)">${labels[type]}</div>
-        <div style="font-family:var(--mono);font-size:10px;color:var(--gray-400);margin-top:8px">Logged ${new Date().toLocaleTimeString()} · Confidence: ${selectedRating}/5</div>
-      </div>`;
-  }, 1200);
-}
+        function requestExtension() {
+            const reason = prompt('Reason for extension (required for audit trail):');
+            if (reason && reason.trim()) {
+                timeRemaining += 30;
+                updateCountdownDisplay();
+                logAudit('Extension requested: ' + reason.substring(0, 50));
+            }
+        }
 
-// ── TIMER ─────────────────────────────────────────────
-function startTimer(deadline) {
-  function tick() {
-    const now = new Date();
-    let diff = Math.max(0, Math.floor((deadline - now) / 1000));
-    const h = Math.floor(diff / 3600);
-    const m = Math.floor((diff % 3600) / 60);
-    const s = diff % 60;
-    const el = document.getElementById('timerDisplay');
-    el.textContent = `${h}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
-    if (diff === 0) { el.textContent = 'EXPIRED'; el.style.color = 'var(--red-2)'; return; }
-    if (diff < 3600)       el.style.color = 'var(--red-2)';
-    else if (diff < 10800) el.style.color = 'var(--yellow-2)';
-    else                   el.style.color = 'var(--green-2)';
-    setTimeout(tick, 1000);
-  }
-  tick();
-}
+        function forceFinalize() {
+            if (confirm('⚠ WARNING: This will force-finalize the rejection immediately.\n\nThis action is irreversible and will be logged. Continue?')) {
+                timeRemaining = 0;
+                clearInterval(countdownInterval);
+                updateCountdownDisplay();
+                autoFinalize();
+            }
+        }
 
-// ── EXPORT ────────────────────────────────────────────
-function exportDoc(fmt) {
-  const id = document.getElementById('caseIdDisplay').textContent;
-  toast(`Generating court-ready ${fmt.toUpperCase()} export for ${id}…`, 'success');
-}
+        // ============================================
+        // LANE TOGGLE
+        // ============================================
+        function toggleLane(header) {
+            const lane = header.parentElement;
+            const content = lane.querySelector('.lane__content');
+            const chevron = header.querySelector('.lane__chevron');
 
-// ── TOAST ─────────────────────────────────────────────
-function toast(msg, type='success') {
-  const wrap = document.getElementById('toastWrap');
-  const el = document.createElement('div');
-  el.className = `toast toast-${type}`;
-  const icons = {success:'✓',warn:'⚠',error:'✕'};
-  el.innerHTML = `<span>${icons[type]||'ℹ'}</span> ${msg}`;
-  wrap.appendChild(el);
-  setTimeout(()=>el.remove(), 4000);
-}
+            if (content.classList.contains('lane__content--open')) {
+                content.classList.remove('lane__content--open');
+                chevron.classList.remove('lane__chevron--open');
+            } else {
+                content.classList.add('lane__content--open');
+                chevron.classList.add('lane__chevron--open');
+            }
+        }
 
-// ── HELPERS ───────────────────────────────────────────
-function fmtDate(iso) {
-  return new Date(iso).toLocaleDateString('en-US', {month:'short', day:'numeric', year:'numeric'});
-}
-function fmtTime(iso) {
-  return new Date(iso).toLocaleTimeString('en-US', {hour:'numeric', minute:'2-digit', second:'2-digit', timeZoneName:'short'});
-}
-function fmtDateTime(iso) {
-  return new Date(iso).toLocaleString('en-US', {month:'numeric', day:'numeric', year:'numeric', hour:'numeric', minute:'2-digit', second:'2-digit', timeZoneName:'short'});
-}
+        // ============================================
+        // EVIDENCE PANEL TOGGLE
+        // ============================================
+        function toggleEvidence(button) {
+            const laneContent = button.closest('.lane__content');
+            const panel = laneContent.querySelector('.evidence-panel');
+            const icon = button.querySelector('.evidence-toggle__icon');
 
-// ── POPULATE PAGE ─────────────────────────────────────
-function populatePage(data) {
-  const audit    = Array.isArray(data.audits)    ? data.audits[0]    : null;
-  const override = Array.isArray(data.overrides) ? data.overrides[0] : null;
-  const rejectedAt = new Date(data.created_at);
+            if (panel.classList.contains('evidence-panel--open')) {
+                panel.classList.remove('evidence-panel--open');
+                icon.classList.remove('evidence-toggle__icon--open');
+                button.querySelector('span:last-child').textContent = 'View Evidence Panel';
+            } else {
+                panel.classList.add('evidence-panel--open');
+                icon.classList.add('evidence-toggle__icon--open');
+                button.querySelector('span:last-child').textContent = 'Hide Evidence Panel';
+            }
+        }
 
-  // Title + breadcrumb
-  const displayId = data.candidate_id || data.rejection_id;
-  document.title = `Rejection Detail — ${displayId} | F.A.S. Dashboard`;
-  document.getElementById('breadcrumbCaseId').textContent = displayId;
+        // ============================================
+        // BASELINE TOGGLE
+        // ============================================
+        function toggleBaseline(checkbox, statId) {
+            const statText = document.getElementById(statId);
+            const orgEl = statText.querySelector('.stat-org');
 
-  // Header fields
-  document.getElementById('candidateId').textContent    = data.candidate_id || data.rejection_id;
-  document.getElementById('positionTitle').textContent  = data.job_title || '—';
-  document.getElementById('requisitionId').textContent  = data.requisition_id || data.rejection_id;
-  document.getElementById('rejectionDate').textContent  = fmtDate(data.created_at);
-  document.getElementById('rejectionTime').textContent  = fmtTime(data.created_at);
+            if (checkbox.checked) {
+                if (statId === 'gapStatText') {
+                    statText.innerHTML = '<strong>41%</strong> of rejections across <strong>all F.A.S. beta clients</strong> involve this signal pattern. Industry average threshold: validated against 150+ organizations.';
+                } else {
+                    statText.innerHTML = '<strong>38%</strong> of rejections across <strong>all F.A.S. beta clients</strong> involve keyword false negatives. Industry average exact-match rejection rate: validated against 150+ organizations.';
+                }
+            } else {
+                if (statId === 'gapStatText') {
+                    statText.innerHTML = '<strong>67%</strong> of rejections in the last 90 days at <strong class="stat-org">' + FAS_CONFIG.org + '</strong> involve candidates whose employment gap exceeds 12 months. This threshold was set on <strong>2026-01-15</strong> and has not been validated against business necessity.';
+                } else {
+                    statText.innerHTML = '<strong>41%</strong> of rejections in the last 90 days at <strong class="stat-org">' + FAS_CONFIG.org + '</strong> involve keyword false negatives where candidates listed skill variants but the ATS required exact string matches.';
+                }
+            }
+        }
 
-  // Time in Pending
-  const now = new Date();
-  const elapsedMs = now - rejectedAt;
-  const elapsedH  = Math.floor(elapsedMs / 3600000);
-  const elapsedM  = Math.floor((elapsedMs % 3600000) / 60000);
-  const tipEl = document.getElementById('timeInPending');
-  tipEl.textContent = `${elapsedH}h ${String(elapsedM).padStart(2,'0')}m`;
-  tipEl.className = 'hf-value ' + (elapsedH >= 6 ? 'time-crit' : elapsedH >= 4 ? 'time-warn' : 'time-ok');
+        // ============================================
+        // REVIEWER NOTES
+        // ============================================
+        function insertTemplate(select, textareaId) {
+            const textarea = document.getElementById(textareaId);
+            if (select.value) {
+                textarea.value = select.value + '\n\n';
+                textarea.focus();
+                autosaveNotes(textarea);
+            }
+        }
 
-  // Reviewer
-  if (data.reviewer_name) {
-    const parts    = data.reviewer_name.trim().split(' ');
-    const initials = parts.map(p => p[0]).join('').substring(0,2).toUpperCase();
-    document.getElementById('reviewerAvatar').textContent = initials;
-    document.getElementById('reviewerName').childNodes[0].textContent = data.reviewer_name;
-    document.getElementById('reviewerRole').textContent = data.reviewer_role ? ' ' + data.reviewer_role : '';
-    document.getElementById('topbarUser').textContent = data.reviewer_name;
-    document.getElementById('topbarRole').textContent = data.reviewer_role || 'Reviewer';
-  }
+        function autosaveNotes(textarea) {
+            const id = textarea.id;
+            const statusEl = document.getElementById(id.replace('Notes', 'SaveStatus'));
+            const timeEl = document.getElementById(id.replace('Notes', 'LastEdit'));
 
-  // Confidence
-  const conf = data.confidence_score ?? audit?.confidence_score ?? null;
-  if (conf !== null) {
-    document.getElementById('confidenceBarInner').style.width = conf + '%';
-    document.getElementById('confidenceVal').textContent = conf + '%';
-    document.getElementById('confidenceSub').textContent = conf >= 70 ? 'High confidence — multi-lane flag' : conf >= 40 ? 'Medium confidence' : 'Low confidence';
-    document.getElementById('statConfidence').textContent = conf + '%';
-  }
+            statusEl.textContent = 'Saving...';
 
-  // Risk level (from joined audits row)
-  const risk = (audit?.risk_level || data.risk_level || 'red').toLowerCase();
-  const riskBadge = document.getElementById('riskBadge');
-  riskBadge.className = 'risk-badge risk-' + (risk === 'green' ? 'green' : risk === 'yellow' ? 'yellow' : 'red');
-  riskBadge.innerHTML = `<span class="risk-dot"></span> ${risk.toUpperCase()} RISK`;
+            setTimeout(() => {
+                statusEl.textContent = '✓ Saved';
+                const now = new Date();
+                timeEl.textContent = now.toLocaleTimeString('en-US', { hour12: false, hour: '2-digit', minute: '2-digit', second: '2-digit' });
 
-  // Lane flag count (from audit row if available, else count flagged lanes)
-  const flagCount = audit?.flag_count ?? 3;
-  document.getElementById('lanesFlagCount').textContent = `${flagCount} flag${flagCount !== 1 ? 's' : ''} detected`;
-  document.getElementById('statLanesFlagged').textContent = flagCount;
+                setTimeout(() => {
+                    statusEl.textContent = '';
+                }, 2000);
+            }, 500);
+        }
 
-  // Status
-  const status = override?.decision || data.status || 'pending';
-  const statusBadge = document.getElementById('statusBadge');
-  const statusMap = {pending:'status-pending', escalated:'status-escalated', approved:'status-approved', overridden:'status-overridden', review:'status-review'};
-  statusBadge.className = 'status-badge ' + (statusMap[status.toLowerCase()] || 'status-pending');
-  const statusLabel = status.charAt(0).toUpperCase() + status.slice(1);
-  statusBadge.textContent = status === 'escalated' ? '⚠ Escalated' : statusLabel;
+        // ============================================
+        // PII REVEAL
+        // ============================================
+        function revealPII() {
+            if (!piiRevealed) {
+                if (confirm('Revealing PII will be logged to the audit trail. Continue?')) {
+                    document.getElementById('candidateId').textContent = 'Ahmad R. (' + FAS_CONFIG.candidateId + ')';
+                    piiRevealed = true;
+                    logAudit('PII revealed by reviewer');
+                }
+            }
+        }
 
-  // ATS Source Panel
-  document.getElementById('atsPlatform').textContent          = data.ats_platform || 'ATS';
-  document.getElementById('rejectionTimestampISO').textContent = data.created_at;
-  document.getElementById('normalizedCategory').textContent   = data.normalized_category || '—';
-  document.getElementById('rawRejectionReason').textContent   = data.rejection_reason_from_ats || '—';
-  document.getElementById('atsInterceptMeta').textContent     = (data.ats_platform || 'ATS') + ' · Intercepted ' + fmtTime(data.created_at);
+        // ============================================
+        // ACTION SELECTION
+        // ============================================
+        function takeAction(action, evt) {
+            selectedAction = action;
 
-  // History table — current row
-  document.getElementById('currentReqId').textContent    = data.requisition_id || data.rejection_id;
-  document.getElementById('currentJobTitle').textContent = data.job_title || '—';
-  const fasDecisionEl = document.getElementById('currentFasDecision');
-  fasDecisionEl.textContent = statusLabel;
-  fasDecisionEl.className = 'status-badge ' + (statusMap[status.toLowerCase()] || 'status-pending') + ' ' + 'font-size:9px';
+            document.querySelectorAll('.btn--override, .btn--confirm, .btn--escalate').forEach(btn => {
+                btn.style.opacity = '0.6';
+                btn.style.boxShadow = 'none';
+            });
 
-  // Review deadline label
-  const deadlineTime = new Date(rejectedAt.getTime() + 6 * 3600 * 1000);
-  document.getElementById('reviewDeadlineLabel').textContent =
-    '⚠ Decision required before ' + deadlineTime.toLocaleTimeString('en-US', {hour:'numeric', minute:'2-digit', timeZoneName:'short'});
+            evt.target.style.opacity = '1';
+            evt.target.style.boxShadow = '0 0 0 3px rgba(59, 130, 246, 0.3)';
 
-  // Audit trail static timestamps
-  document.getElementById('trailInterceptTime').textContent = fmtDateTime(data.created_at) + ' · System';
-  document.getElementById('trailAuditTime').textContent     = fmtDateTime(new Date(rejectedAt.getTime() + 6000)) + ' · System';
-  document.getElementById('trailAuditDetail').textContent   = `7 lanes evaluated. ${flagCount} flag${flagCount !== 1 ? 's' : ''} detected. Risk score: ${conf !== null ? conf + '%' : '—'}. Reviewer assigned.`;
-  document.getElementById('trailElapsed').textContent       = `In progress · Elapsed: ${elapsedH}h ${String(elapsedM).padStart(2,'0')}m`;
-  document.getElementById('trailDeadlineDetail').textContent = `Case is open. No decision recorded. Deadline: 6h from intercept (${deadlineTime.toLocaleTimeString('en-US', {hour:'numeric', minute:'2-digit', timeZoneName:'short'})}). Auto-escalates to Compliance Officer if no action by deadline.`;
+            const requiredEl = document.getElementById('justificationRequired');
+            const hintEl = document.getElementById('submitHint');
 
-  // Footer
-  document.getElementById('caseIdDisplay').textContent    = data.rejection_id;
-  document.getElementById('footerInterceptTime').textContent = data.created_at;
+            if (action === 'confirm') {
+                requiredEl.style.display = 'none';
+                hintEl.textContent = 'Justification optional for Confirm';
+            } else {
+                requiredEl.style.display = 'inline';
+                hintEl.textContent = 'Justification required for ' + action.charAt(0).toUpperCase() + action.slice(1);
+            }
 
-  // Elevation indicator
-  document.getElementById('elevTrigger').textContent =
-    elapsedH >= 4 ? `Escalated to Compliance Officer at ${elapsedH}.${Math.floor(elapsedM / 6)}h` : 'Within normal review window';
+            validateJustification();
+        }
 
-  // Timer deadline label
-  document.getElementById('timerDeadlineLabel').textContent =
-    deadlineTime.toLocaleTimeString('en-US', {hour:'numeric', minute:'2-digit', timeZoneName:'short'}) + ' · ' + fmtDate(data.created_at);
+        // ============================================
+        // JUSTIFICATION VALIDATION
+        // ============================================
+        function validateJustification() {
+            const textarea = document.getElementById('justificationText');
+            const submitBtn = document.getElementById('submitBtn');
 
-  // Start live countdown
-  startTimer(deadlineTime);
-}
+            if (!selectedAction) {
+                submitBtn.disabled = true;
+                return;
+            }
 
-// ── RENDER AUDIT TRAIL (dynamic) ──────────────────────
-function renderAuditTrail(events) {
-  if (!events || events.length === 0) return;
-  const list = document.getElementById('trailList');
-  const icons = {intercept:'📥', audit:'🔍', viewed:'👁', escalation:'⚠', decision:'✓', pending:'⏳'};
-  document.getElementById('trailMeta').textContent = `${events.length} event${events.length !== 1 ? 's' : ''} · Baseline v1.0`;
-  list.innerHTML = events.map((e, i) => {
-    const isLast = i === events.length - 1;
-    const dotClass = isLast ? 'active' : 'done';
-    const icon = icons[e.event_type] || '•';
-    return `
-      <div class="trail-item">
-        <div class="trail-dot ${dotClass}">${icon}</div>
-        <div class="trail-content">
-          <div class="trail-event">${e.event_type || 'Event'}</div>
-          <div class="trail-meta">${fmtDateTime(e.created_at)} · ${e.actor || 'System'}</div>
-          <div class="trail-detail">${e.description || ''}</div>
-        </div>
-      </div>`;
-  }).join('');
-}
+            if (selectedAction === 'confirm') {
+                submitBtn.disabled = false;
+            } else {
+                submitBtn.disabled = textarea.value.trim().length < 10;
+            }
+        }
 
-// ── SHOW ERROR ────────────────────────────────────────
-function showError(msg) {
-  const overlay = document.getElementById('loadingOverlay');
-  overlay.innerHTML = `
-    <div style="text-align:center;font-family:'IBM Plex Mono',monospace;padding:40px">
-      <div style="font-size:24px;margin-bottom:12px;color:#dc2626">✕</div>
-      <div style="color:#dc2626;margin-bottom:16px">${msg}</div>
-      <a href="/dashboard/main.html" style="color:#2e7de0;font-size:11px">← Back to Dashboard</a>
-    </div>`;
-}
+        function selectTemplate(chip) {
+            const textarea = document.getElementById('justificationText');
+            const currentText = textarea.value;
 
-// ── PAGE INIT ─────────────────────────────────────────
-async function initPage() {
-  const params = new URLSearchParams(window.location.search);
-  const rejectionId = params.get('id');
+            if (chip.classList.contains('template-chip--active')) {
+                chip.classList.remove('template-chip--active');
+            } else {
+                document.querySelectorAll('.template-chip').forEach(c => c.classList.remove('template-chip--active'));
+                chip.classList.add('template-chip--active');
+                textarea.value = currentText + (currentText ? '\n\n' : '') + chip.textContent + ': ';
+                textarea.focus();
+                validateJustification();
+            }
+        }
 
-  if (!rejectionId) {
-    showError('No rejection ID specified.<br><small style="opacity:.6">Expected: ?id=&lt;rejection_id&gt;</small>');
-    return;
-  }
+        // ============================================
+        // SUBMIT ACTION
+        // ============================================
+        function submitAction() {
+            if (!selectedAction) {
+                alert('Please select an action first.');
+                return;
+            }
 
-  // Fetch rejection record with joined audit + override rows
-  const { data, error } = await supabaseClient
-    .from('rejections')
-    .select('*, audits(*), overrides(*)')
-    .eq('rejection_id', rejectionId)
-    .single();
+            const justification = document.getElementById('justificationText').value;
 
-  if (error || !data) {
-    showError('Rejection record not found for ID: ' + rejectionId);
-    return;
-  }
+            if (selectedAction !== 'confirm' && justification.trim().length < 10) {
+                alert('Please provide a detailed justification (minimum 10 characters).');
+                return;
+            }
 
-  // Populate all dynamic fields
-  populatePage(data);
+            const actionNames = {
+                'override': 'Override Rejection',
+                'confirm': 'Confirm Rejection',
+                'escalate': 'Escalate to Legal',
+                'reversal': 'Recommend Reversal',
+                'flag': 'Flag for Legal',
+                'report': 'Generate Report'
+            };
 
-  // Try audit_events table (spec schema); fall back silently if it doesn't exist yet
-  try {
-    const { data: trail, error: trailErr } = await supabaseClient
-      .from('audit_events')
-      .select('*')
-      .eq('case_id', rejectionId)
-      .order('created_at', { ascending: true });
-    if (!trailErr && trail && trail.length > 0) {
-      renderAuditTrail(trail);
-    }
-  } catch (_) { /* table not yet created — static trail shown */ }
+            if (confirm('Submit "' + actionNames[selectedAction] + '"?\n\nThis action will be logged to the audit trail and cannot be undone.')) {
+                logAudit('Decision submitted: ' + actionNames[selectedAction]);
+                alert('✓ Decision submitted successfully.\n\nAction: ' + actionNames[selectedAction] + '\nTimestamp: ' + new Date().toISOString() + '\n\nRedirecting to rejection list...');
+            }
+        }
 
-  // Hide loading overlay
-  document.getElementById('loadingOverlay').style.display = 'none';
-}
+        // ============================================
+        // MODE TOGGLE (DEMO)
+        // ============================================
+        function setMode(mode) {
+            currentMode = mode;
 
-// Boot
-initPage();
-</script>
+            const liveBtn = document.getElementById('liveModeBtn');
+            const postHocBtn = document.getElementById('postHocModeBtn');
+            const liveActions = document.getElementById('liveActions');
+            const postHocActions = document.getElementById('postHocActions');
+            const banner = document.getElementById('liveBanner');
+
+            if (mode === 'live') {
+                liveBtn.classList.add('btn--mode-active');
+                postHocBtn.classList.remove('btn--mode-active');
+                liveActions.classList.remove('hidden');
+                postHocActions.classList.add('hidden');
+                banner.style.display = 'flex';
+                document.querySelector('.container').style.paddingTop = 'calc(60px + 1.5rem)';
+                startCountdown();
+            } else {
+                liveBtn.classList.remove('btn--mode-active');
+                postHocBtn.classList.add('btn--mode-active');
+                liveActions.classList.add('hidden');
+                postHocActions.classList.remove('hidden');
+                banner.style.display = 'none';
+                document.querySelector('.container').style.paddingTop = '1.5rem';
+                clearInterval(countdownInterval);
+            }
+
+            selectedAction = null;
+            document.querySelectorAll('.btn--override, .btn--confirm, .btn--escalate').forEach(btn => {
+                btn.style.opacity = '1';
+                btn.style.boxShadow = 'none';
+            });
+            validateJustification();
+        }
+
+        // ============================================
+        // AUDIT LOGGING
+        // ============================================
+        function logAudit(action) {
+            const auditLog = document.getElementById('auditLog');
+            const now = new Date();
+            const timeStr = now.toLocaleTimeString('en-US', { hour12: false, hour: '2-digit', minute: '2-digit', second: '2-digit' });
+
+            const entry = document.createElement('div');
+            entry.className = 'audit-entry';
+            entry.innerHTML = '<span class="audit-entry__time">' + timeStr + '</span><span class="audit-entry__action"><strong>Reviewer ' + FAS_CONFIG.reviewer + '</strong> — ' + action + '</span>';
+
+            auditLog.insertBefore(entry, auditLog.firstChild);
+        }
+
+        // ============================================
+        // INITIALIZATION
+        // ============================================
+        document.addEventListener('DOMContentLoaded', function() {
+            // Populate config values in DOM
+            document.getElementById('candidateId').textContent = FAS_CONFIG.candidateId;
+            document.querySelectorAll('.stat-org').forEach(el => { el.textContent = FAS_CONFIG.org; });
+            document.querySelectorAll('.reviewer-name').forEach(el => { el.textContent = 'Reviewer ' + FAS_CONFIG.reviewer; });
+
+            startCountdown();
+
+            // Auto-expand triggered and critical lanes on load
+            document.querySelectorAll('.lane--triggered .lane__content, .lane--critical .lane__content').forEach(content => {
+                content.classList.add('lane__content--open');
+            });
+
+            document.querySelectorAll('.lane--triggered .lane__chevron, .lane--critical .lane__chevron').forEach(chevron => {
+                chevron.classList.add('lane__chevron--open');
+            });
+        });
+    </script>
 </body>
 </html>
