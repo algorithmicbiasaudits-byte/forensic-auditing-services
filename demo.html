@@ -107,76 +107,6 @@
 </head>
 <body>
 
-<!-- PASSWORD GATE OVERLAY -->
-<div id="fas-gate" style="
-  position: fixed; inset: 0; z-index: 9999;
-  background: #1a3a6b;
-  display: flex; align-items: center; justify-content: center;
-  font-family: 'DM Sans', sans-serif;
-">
-  <div style="text-align: center; width: 100%; max-width: 380px; padding: 0 24px;">
-    <div style="font-family: 'Playfair Display', serif; font-size: 22px; color: #ffffff; margin-bottom: 6px; letter-spacing: 0.02em;">
-      F.A.S. <span style="color: #b8872e;">Forensic Auditing</span>
-    </div>
-    <div style="font-size: 11px; color: rgba(255,255,255,0.4); letter-spacing: 2px; text-transform: uppercase; margin-bottom: 40px;">
-      Restricted Demo Access
-    </div>
-    <input
-      id="fas-gate-input"
-      type="password"
-      placeholder="Enter access code"
-      autocomplete="off"
-      style="
-        width: 100%; padding: 14px 18px;
-        background: rgba(255,255,255,0.07);
-        border: 1px solid rgba(184,135,46,0.4);
-        border-radius: 4px; outline: none;
-        font-family: 'DM Sans', sans-serif; font-size: 15px;
-        color: #ffffff; margin-bottom: 12px;
-        transition: border-color 0.2s;
-      "
-      onkeydown="if(event.key==='Enter')fasCheckPassword()"
-      onfocus="this.style.borderColor='#b8872e'"
-      onblur="this.style.borderColor='rgba(184,135,46,0.4)'"
-    >
-    <div id="fas-gate-error" style="
-      color: #b8872e; font-size: 13px; min-height: 20px;
-      margin-bottom: 10px; letter-spacing: 0.02em;
-    "></div>
-    <button
-      onclick="fasCheckPassword()"
-      style="
-        width: 100%; padding: 14px;
-        background: #b8872e; color: #1a3a6b;
-        border: none; border-radius: 4px; cursor: pointer;
-        font-family: 'DM Sans', sans-serif; font-size: 15px; font-weight: 600;
-        letter-spacing: 0.03em; transition: background 0.2s;
-      "
-      onmouseover="this.style.background='#d4a843'"
-      onmouseout="this.style.background='#b8872e'"
-    >Access Demo</button>
-  </div>
-</div>
-
-<script>
-  (function() {
-    if (sessionStorage.getItem('fas-demo-auth') === '1') {
-      document.getElementById('fas-gate').style.display = 'none';
-    }
-  })();
-  function fasCheckPassword() {
-    var input = document.getElementById('fas-gate-input');
-    var error = document.getElementById('fas-gate-error');
-    if (input.value === 'nTS5&%QGIdjuYKIL') {
-      sessionStorage.setItem('fas-demo-auth', '1');
-      document.getElementById('fas-gate').style.display = 'none';
-    } else {
-      error.textContent = 'Invalid access code';
-      input.value = '';
-      input.focus();
-    }
-  }
-</script>
 
 <header>
   <a href="index.html" class="logo">Forensic Auditing Services <span>(F.A.S.)</span></a>
@@ -265,7 +195,7 @@
         <div class="lane-icon red">!</div>
         <div class="lane-content">
           <div class="lane-title" style="color:#fc8181;">Legal Framework Triggers</div>
-          <div class="lane-detail">NYC LL144: Automated employment decision tool used without bias audit disclosure. Colorado SB205: Gap-based rejection without human review violates individualized assessment requirement. EU AI Act: High-risk AI system decision without human oversight. OFCCP: Federal contractors must document adverse impact analysis and maintain records of all selection decisions under the Internet Applicant Rule.</div>
+          <div class="lane-detail">NYC LL144: Automated employment decision tool used without bias audit disclosure. Colorado SB205 (enforcement paused, pending court ruling & SB 26-189 legislative replacement): Gap-based rejection without human review violates individualized assessment requirement. EU AI Act: High-risk AI system decision without human oversight. OFCCP: Federal contractors must document adverse impact analysis and maintain records of all selection decisions under the Internet Applicant Rule.</div>
         </div>
       </div>
       <div class="analysis-lane" id="lane-5">
@@ -422,7 +352,6 @@ Compliance Officer notification sent.
       </div>
       <p style="margin-bottom:8px;">This is F.A.S. Every rejection. Every time. Before it becomes liability.</p>
       <a href="index.html#waitlist" class="btn-cta">Apply for Beta Access →</a>
-      <div style="margin-top:16px; font-size:12px; color:rgba(255,255,255,0.35);">Only 4 spots · Applications close May 9, 2026 at 11:59 PM ET</div>
     </div>
     <div class="nav-buttons">
       <button class="btn-back" onclick="goToStep(1)" style="border-color:rgba(201,168,76,0.3); color:var(--gold);">↺ Run Demo Again</button>
@@ -437,10 +366,10 @@ Compliance Officer notification sent.
   <div style="font-family: 'DM Mono', monospace; font-size: 11px; letter-spacing: 2px; color: rgba(255,255,255,0.35); margin-bottom: 16px;">REGULATORY DEADLINES</div>
   <div style="display: flex; gap: 2px; flex-wrap: wrap;">
 
-    <!-- Colorado SB205 -->
+    <!-- Colorado SB205 - FEDERAL STAY (April 27, 2026) -->
     <div style="flex: 1; min-width: 280px; background: #111d45; padding: 24px 28px; border-left: 3px solid #e53e3e;">
-      <div style="font-family: 'Courier New', monospace; font-size: 10px; letter-spacing: 2px; color: #fc8181; margin-bottom: 12px;">⚠ COLORADO SB205 AUTO-ENFORCEMENT</div>
-      <div style="display: flex; gap: 16px; align-items: flex-end; margin-bottom: 8px;">
+      <div style="font-family: 'Courier New', monospace; font-size: 10px; letter-spacing: 2px; color: #fc8181; margin-bottom: 12px;">⚠ COLORADO SB205 — ENFORCEMENT PAUSED</div>
+      <div style="display: flex; gap: 16px; align-items: flex-end; margin-bottom: 12px;">
         <div style="text-align: center;">
           <div id="co-days" style="font-family: 'Courier New', monospace; font-size: 36px; font-weight: bold; color: #C9A84C; line-height: 1;">00</div>
           <div style="font-size: 9px; color: rgba(255,255,255,0.3); letter-spacing: 2px; margin-top: 4px;">DAYS</div>
@@ -461,7 +390,10 @@ Compliance Officer notification sent.
           <div style="font-size: 9px; color: rgba(255,255,255,0.3); letter-spacing: 2px; margin-top: 4px;">SEC</div>
         </div>
       </div>
-      <div style="font-size: 12px; color: rgba(255,255,255,0.4);">June 30, 2026 · Every Colorado employer using AI hiring is exposed</div>
+      <div style="font-size: 11px; color: rgba(255,255,255,0.6); line-height: 1.4; margin-bottom: 8px;">
+        <strong>Federal stay issued April 27, 2026</strong> (xAI v. Weiser). AG will not enforce pending rulemaking. <strong>SB 26-189 replacement bill pending</strong> (legislature vote deadline May 13).
+      </div>
+      <div style="font-size: 11px; color: rgba(255,255,255,0.4);">Countdown to original date: June 30, 2026 · Status: Paused pending court/legislative action</div>
     </div>
 
     <!-- EU AI Act -->
