@@ -778,6 +778,7 @@
   );
 
   let currentUser = null;
+  let currentCustomerId = null;
 
   async function init() {
     const { data: { session } } = await supabaseClient.auth.getSession();
@@ -791,18 +792,23 @@
 
     const { data } = await supabaseClient
       .from('customers')
-      .select('company_name')
+      .select('customer_id, company_name')
       .eq('contact_email', currentUser.email)
       .single();
-    if (data) document.getElementById('org-name').textContent = data.company_name;
+    if (data) {
+      currentCustomerId = data.customer_id;
+      document.getElementById('org-name').textContent = data.company_name;
+    }
 
     await loadSettings();
   }
 
   async function loadSettings() {
+    if (!currentCustomerId) return;
     const { data } = await supabaseClient
       .from('org_settings')
       .select('*')
+      .eq('customer_id', currentCustomerId)
       .single();
 
     if (!data) return;
@@ -836,6 +842,7 @@
 
     if (section === 'contractor') {
       payload = {
+        customer_id: currentCustomerId,
         is_federal_contractor: document.getElementById('toggle-contractor').checked,
         contract_value: document.getElementById('contract-value').value || null,
         employee_count: document.getElementById('employee-count').value || null,
@@ -846,6 +853,7 @@
       };
     } else if (section === 'jurisdictions') {
       payload = {
+        customer_id: currentCustomerId,
         j_nycll144: document.getElementById('j-nycll144').checked,
         j_cosb189: document.getElementById('j-cosb189').checked,
         j_ilhb3773: document.getElementById('j-ilhb3773').checked,
@@ -855,6 +863,7 @@
       };
     } else if (section === 'alerts') {
       payload = {
+        customer_id: currentCustomerId,
         alert_fourfifths: document.getElementById('alert-fourfifths').checked,
         alert_aap: document.getElementById('alert-aap').checked,
         alert_deadlines: document.getElementById('alert-deadlines').checked,
@@ -864,7 +873,7 @@
 
     const { error } = await supabaseClient
       .from('org_settings')
-      .upsert(payload, { onConflict: 'org_id' });
+      .upsert(payload, { onConflict: 'customer_id' });
 
     showToast(error ? '✗ Save failed — ' + error.message : '✓ Settings saved');
   }
