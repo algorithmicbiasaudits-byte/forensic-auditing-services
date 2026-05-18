@@ -1,0 +1,910 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>F.A.S. Dashboard — Settings</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #f8fafc;
+      color: #1e293b;
+      min-height: 100vh;
+    }
+
+    .topnav {
+      background: #ffffff;
+      padding: 0 32px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      height: 56px;
+      border-bottom: 1px solid #e2e8f0;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 100;
+    }
+
+    .topnav-left { display: flex; align-items: center; gap: 24px; }
+    .nav-logo { font-size: 16px; font-weight: 700; color: #0a1628; letter-spacing: 2px; }
+    .nav-logo span { color: #b8872e; }
+    .nav-divider { width: 1px; height: 20px; background: #e2e8f0; }
+    .nav-org { font-size: 12px; color: #64748b; font-family: monospace; letter-spacing: 1px; }
+    .topnav-right { display: flex; align-items: center; gap: 20px; }
+    .nav-user { font-size: 12px; color: #64748b; }
+    .nav-user span { color: #1e293b; font-weight: 500; }
+    .nav-role { font-family: monospace; font-size: 10px; letter-spacing: 1px; padding: 4px 10px; border-radius: 2px; background: rgba(184,135,46,0.1); color: #b8872e; border: 1px solid rgba(184,135,46,0.25); }
+    .nav-logout { font-size: 12px; color: #94a3b8; cursor: pointer; text-decoration: none; transition: color 0.2s; }
+    .nav-logout:hover { color: #1e293b; }
+
+    .sidebar {
+      position: fixed;
+      top: 56px; left: 0; bottom: 0;
+      width: 220px;
+      background: white;
+      border-right: 1px solid #e8e8e8;
+      padding: 24px 0;
+      overflow-y: auto;
+      z-index: 90;
+    }
+
+    .sidebar-section-label {
+      font-family: monospace;
+      font-size: 9px;
+      letter-spacing: 2px;
+      color: #bbb;
+      text-transform: uppercase;
+      padding: 8px 12px 6px 28px;
+    }
+
+    .sidebar-link {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 12px 10px 28px;
+      font-size: 13px;
+      color: #555;
+      text-decoration: none;
+      transition: all 0.15s;
+      margin-bottom: 2px;
+    }
+
+    .sidebar-link:hover { background: #f5f8ff; color: #0a1628; }
+    .sidebar-link.active { background: rgba(184,135,46,0.08); color: #b8872e; font-weight: 600; border-left: 3px solid #b8872e; }
+    .sidebar-link .icon { font-size: 15px; width: 20px; text-align: center; }
+
+    .main-content {
+      margin-left: 220px;
+      margin-top: 56px;
+      padding: 32px;
+    }
+
+    .page-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 28px;
+    }
+
+    .page-title { font-size: 22px; font-weight: 700; color: #1e293b; margin-bottom: 4px; }
+    .page-subtitle { font-size: 13px; color: #888; }
+
+    .settings-layout {
+      display: grid;
+      grid-template-columns: 200px 1fr;
+      gap: 24px;
+      align-items: start;
+    }
+
+    .settings-nav {
+      background: white;
+      border: 1px solid #e8e8e8;
+      border-radius: 4px;
+      overflow: hidden;
+      position: sticky;
+      top: 80px;
+    }
+
+    .settings-nav-item {
+      display: block;
+      padding: 12px 16px;
+      font-size: 13px;
+      color: #555;
+      text-decoration: none;
+      border-bottom: 1px solid #f0f0f0;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+
+    .settings-nav-item:last-child { border-bottom: none; }
+    .settings-nav-item:hover { background: #f8fafc; color: #1e293b; }
+    .settings-nav-item.active { background: rgba(184,135,46,0.06); color: #b8872e; font-weight: 600; border-left: 3px solid #b8872e; }
+
+    .settings-sections { display: flex; flex-direction: column; gap: 24px; }
+
+    .settings-section {
+      background: white;
+      border: 1px solid #e8e8e8;
+      border-radius: 4px;
+      overflow: hidden;
+    }
+
+    .section-header {
+      padding: 16px 24px;
+      border-bottom: 1px solid #e8e8e8;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .section-title {
+      font-size: 15px;
+      font-weight: 600;
+      color: #1e293b;
+    }
+
+    .section-subtitle {
+      font-size: 12px;
+      color: #888;
+      margin-top: 2px;
+    }
+
+    .section-body { padding: 24px; }
+
+    .setting-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      padding: 16px 0;
+      border-bottom: 1px solid #f0f0f0;
+      gap: 24px;
+    }
+
+    .setting-row:last-child { border-bottom: none; padding-bottom: 0; }
+    .setting-row:first-child { padding-top: 0; }
+
+    .setting-label { font-size: 14px; font-weight: 500; color: #1e293b; margin-bottom: 4px; }
+    .setting-desc { font-size: 12px; color: #888; line-height: 1.6; max-width: 480px; }
+
+    .toggle-wrap { display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
+
+    .toggle {
+      position: relative;
+      width: 44px;
+      height: 24px;
+      cursor: pointer;
+    }
+
+    .toggle input { opacity: 0; width: 0; height: 0; position: absolute; }
+
+    .toggle-track {
+      position: absolute;
+      inset: 0;
+      background: #e2e8f0;
+      border-radius: 12px;
+      transition: background 0.2s;
+    }
+
+    .toggle input:checked + .toggle-track { background: #b8872e; }
+
+    .toggle-thumb {
+      position: absolute;
+      top: 3px; left: 3px;
+      width: 18px; height: 18px;
+      background: white;
+      border-radius: 50%;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+      transition: left 0.2s;
+    }
+
+    .toggle input:checked ~ .toggle-thumb { left: 23px; }
+
+    .toggle-label { font-size: 12px; color: #888; font-family: monospace; }
+
+    .input-field {
+      width: 100%;
+      padding: 9px 12px;
+      border: 1px solid #e2e8f0;
+      border-radius: 4px;
+      font-size: 13px;
+      color: #1e293b;
+      background: white;
+      transition: border 0.2s;
+      outline: none;
+      font-family: inherit;
+    }
+
+    .input-field:focus { border-color: #b8872e; }
+
+    .input-field.mono { font-family: monospace; }
+
+    .input-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-top: 12px;
+    }
+
+    .input-group label {
+      display: block;
+      font-family: monospace;
+      font-size: 10px;
+      letter-spacing: 1px;
+      color: #888;
+      margin-bottom: 6px;
+    }
+
+    .select-field {
+      width: 100%;
+      padding: 9px 12px;
+      border: 1px solid #e2e8f0;
+      border-radius: 4px;
+      font-size: 13px;
+      color: #1e293b;
+      background: white;
+      outline: none;
+      cursor: pointer;
+      transition: border 0.2s;
+    }
+
+    .select-field:focus { border-color: #b8872e; }
+
+    .jurisdiction-list { display: flex; flex-direction: column; gap: 0; }
+
+    .jurisdiction-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 14px 0;
+      border-bottom: 1px solid #f0f0f0;
+      gap: 16px;
+    }
+
+    .jurisdiction-row:last-child { border-bottom: none; }
+
+    .j-info { display: flex; align-items: center; gap: 12px; flex: 1; }
+    .j-emoji { font-size: 18px; width: 24px; text-align: center; }
+
+    .j-name { font-size: 13px; font-weight: 500; color: #1e293b; }
+    .j-citation { font-size: 11px; color: #888; font-family: monospace; }
+
+    .j-status-badge {
+      font-family: monospace;
+      font-size: 10px;
+      letter-spacing: 1px;
+      padding: 3px 9px;
+      border-radius: 2px;
+      white-space: nowrap;
+    }
+
+    .j-status-badge.active { background: #f0fdf4; color: #16a34a; border: 1px solid #bbf7d0; }
+    .j-status-badge.building { background: #fefce8; color: #ca8a04; border: 1px solid #fde68a; }
+    .j-status-badge.delayed { background: #fef2f2; color: #dc2626; border: 1px solid #fecaca; }
+
+    .j-note { font-size: 11px; color: #94a3b8; margin-top: 2px; }
+
+    .j-controls { display: flex; align-items: center; gap: 12px; flex-shrink: 0; }
+
+    .j-always-on {
+      font-size: 11px;
+      color: #888;
+      font-family: monospace;
+      font-style: italic;
+    }
+
+    .save-bar {
+      display: flex;
+      justify-content: flex-end;
+      gap: 12px;
+      padding: 16px 24px;
+      border-top: 1px solid #e8e8e8;
+      background: #f8fafc;
+    }
+
+    .btn-primary {
+      background: #0a1628;
+      color: white;
+      font-size: 13px;
+      font-weight: 500;
+      padding: 9px 18px;
+      border: none;
+      border-radius: 3px;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .btn-primary:hover { background: #162440; }
+
+    .btn-outline {
+      background: white;
+      color: #64748b;
+      font-size: 13px;
+      font-weight: 500;
+      padding: 9px 18px;
+      border: 1px solid #e2e8f0;
+      border-radius: 3px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .btn-outline:hover { background: #f1f5f9; color: #1e293b; }
+
+    .info-callout {
+      background: rgba(184,135,46,0.06);
+      border: 1px solid rgba(184,135,46,0.2);
+      border-radius: 4px;
+      padding: 12px 16px;
+      font-size: 12px;
+      color: #555;
+      line-height: 1.7;
+      margin-bottom: 20px;
+    }
+
+    .info-callout strong { color: #b8872e; }
+
+    .threshold-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      margin-top: 12px;
+    }
+
+    .toast {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      background: #1e293b;
+      color: white;
+      padding: 12px 20px;
+      border-radius: 4px;
+      font-size: 13px;
+      opacity: 0;
+      transform: translateY(8px);
+      transition: all 0.25s;
+      z-index: 999;
+      pointer-events: none;
+    }
+
+    .toast.show { opacity: 1; transform: translateY(0); }
+
+    @media (max-width: 900px) {
+      .sidebar { display: none; }
+      .main-content { margin-left: 0; }
+      .settings-layout { grid-template-columns: 1fr; }
+      .settings-nav { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- TOP NAV -->
+<nav class="topnav">
+  <div class="topnav-left">
+    <div class="nav-logo">F<span>.</span>A<span>.</span>S<span>.</span></div>
+    <div class="nav-divider"></div>
+    <div class="nav-org" id="org-name">Loading...</div>
+  </div>
+  <div class="topnav-right">
+    <div class="nav-user">Signed in as <span id="user-email">—</span></div>
+    <div class="nav-role">COMPLIANCE OFFICER</div>
+    <a class="nav-logout" onclick="handleLogout()">Sign Out</a>
+  </div>
+</nav>
+
+<!-- SIDEBAR -->
+<aside class="sidebar">
+  <div class="sidebar-section-label">MAIN</div>
+  <a href="main.html" class="sidebar-link"><span class="icon">📊</span> Dashboard</a>
+  <a href="rejections.html" class="sidebar-link"><span class="icon">🚨</span> Rejections</a>
+  <a href="reports.html" class="sidebar-link"><span class="icon">📋</span> Reports</a>
+
+  <div class="sidebar-section-label">COMPLIANCE</div>
+  <a href="audit-trail.html" class="sidebar-link"><span class="icon">🔒</span> Audit Trail</a>
+  <a href="reviewers.html" class="sidebar-link"><span class="icon">👥</span> Reviewers</a>
+
+  <div class="sidebar-section-label">SYSTEM</div>
+  <a href="settings.html" class="sidebar-link active"><span class="icon">⚙️</span> Settings</a>
+</aside>
+
+<!-- MAIN CONTENT -->
+<div class="main-content">
+
+  <div class="page-header">
+    <div>
+      <div class="page-title">Settings</div>
+      <div class="page-subtitle">Compliance configuration, jurisdiction activation, and alert preferences</div>
+    </div>
+  </div>
+
+  <div class="settings-layout">
+
+    <!-- Settings Nav -->
+    <div class="settings-nav">
+      <a class="settings-nav-item active" onclick="scrollTo('section-contractor')">🏛️ Federal Contractor</a>
+      <a class="settings-nav-item" onclick="scrollTo('section-jurisdictions')">⚖️ Jurisdictions</a>
+      <a class="settings-nav-item" onclick="scrollTo('section-alerts')">🔔 Alerts</a>
+    </div>
+
+    <div class="settings-sections">
+
+      <!-- ── SECTION 1: FEDERAL CONTRACTOR STATUS ── -->
+      <div class="settings-section" id="section-contractor">
+        <div class="section-header">
+          <div>
+            <div class="section-title">🏛️ Federal Contractor Status</div>
+            <div class="section-subtitle">OFCCP obligations apply only to qualifying federal contractors and subcontractors</div>
+          </div>
+        </div>
+        <div class="section-body">
+
+          <div class="info-callout">
+            <strong>OFCCP thresholds:</strong> Section 503 (disability) applies at $50K+ contracts · VEVRAA (veterans) applies at $150K+ contracts · AAP required at $50K+ with 50+ employees. Activate only if your organization meets these thresholds.
+          </div>
+
+          <div class="setting-row">
+            <div>
+              <div class="setting-label">Federal Contractor Status</div>
+              <div class="setting-desc">Enable if your organization holds federal contracts or subcontracts. Activates OFCCP compliance tracking, AAP alerts, and Internet Applicant Rule logging.</div>
+            </div>
+            <div class="toggle-wrap">
+              <label class="toggle">
+                <input type="checkbox" id="toggle-contractor" onchange="onContractorToggle()">
+                <div class="toggle-track"></div>
+                <div class="toggle-thumb"></div>
+              </label>
+              <span class="toggle-label" id="contractor-label">OFF</span>
+            </div>
+          </div>
+
+          <div id="contractor-details" style="display:none;">
+            <div class="setting-row">
+              <div>
+                <div class="setting-label">Contract Thresholds</div>
+                <div class="setting-desc">Enter your largest federal contract and subcontract values. Used to determine which OFCCP obligations apply.</div>
+              </div>
+            </div>
+            <div class="threshold-grid">
+              <div class="input-group">
+                <label>LARGEST CONTRACT ($)</label>
+                <input type="number" class="input-field mono" id="contract-value" placeholder="e.g. 250000">
+              </div>
+              <div class="input-group">
+                <label>EMPLOYEE COUNT</label>
+                <input type="number" class="input-field mono" id="employee-count" placeholder="e.g. 120">
+              </div>
+              <div class="input-group">
+                <label>AAP EXPIRATION DATE</label>
+                <input type="date" class="input-field mono" id="aap-expiration">
+              </div>
+            </div>
+
+            <div class="setting-row" style="margin-top:16px;">
+              <div>
+                <div class="setting-label">VEVRAA Hiring Benchmark</div>
+                <div class="setting-desc">Current OFCCP benchmark: <strong>5.1%</strong> (effective July 2025). F.A.S. will alert when your hiring rate for protected veterans falls below this threshold.</div>
+              </div>
+              <div class="toggle-wrap">
+                <label class="toggle">
+                  <input type="checkbox" id="toggle-vevraa" checked>
+                  <div class="toggle-track"></div>
+                  <div class="toggle-thumb"></div>
+                </label>
+                <span class="toggle-label">5.1%</span>
+              </div>
+            </div>
+
+            <div class="setting-row">
+              <div>
+                <div class="setting-label">Vendor Audit Access Clause</div>
+                <div class="setting-desc">Track whether AI vendor contracts include the OFCCP-required audit access clause. F.A.S. will flag vendors missing this clause.</div>
+              </div>
+              <div class="toggle-wrap">
+                <label class="toggle">
+                  <input type="checkbox" id="toggle-vendor-audit" checked>
+                  <div class="toggle-track"></div>
+                  <div class="toggle-thumb"></div>
+                </label>
+                <span class="toggle-label" id="vendor-audit-label">ON</span>
+              </div>
+            </div>
+
+            <div class="setting-row">
+              <div>
+                <div class="setting-label">Self-ID Invitation Method</div>
+                <div class="setting-desc">How does your organization collect disability and veteran self-identification? Required under Section 503 and VEVRAA at both pre-offer and post-offer stages.</div>
+              </div>
+              <div style="width:200px; flex-shrink:0;">
+                <select class="select-field" id="self-id-method">
+                  <option value="electronic">Electronic form</option>
+                  <option value="paper">Paper form</option>
+                  <option value="ats">ATS-integrated</option>
+                  <option value="hybrid">Hybrid</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+        </div>
+        <div class="save-bar">
+          <button class="btn-outline" onclick="resetSection('contractor')">Reset</button>
+          <button class="btn-primary" onclick="saveSection('contractor')">Save Contractor Settings</button>
+        </div>
+      </div>
+
+      <!-- ── SECTION 2: JURISDICTION CONFIGURATION ── -->
+      <div class="settings-section" id="section-jurisdictions">
+        <div class="section-header">
+          <div>
+            <div class="section-title">⚖️ Jurisdiction Configuration</div>
+            <div class="section-subtitle">Enable the frameworks that apply to your organization. UGESP is always active.</div>
+          </div>
+        </div>
+        <div class="section-body">
+
+          <div class="jurisdiction-list">
+
+            <!-- UGESP — always on -->
+            <div class="jurisdiction-row">
+              <div class="j-info">
+                <div class="j-emoji">⚖️</div>
+                <div>
+                  <div class="j-name">EEOC UGESP</div>
+                  <div class="j-citation">29 C.F.R. Part 1607 — Uniform Guidelines on Employee Selection Procedures</div>
+                  <div class="j-note">4/5ths rule · job-relatedness · 2-year applicant flow retention</div>
+                </div>
+              </div>
+              <div class="j-controls">
+                <span class="j-status-badge active">● ACTIVE</span>
+                <span class="j-always-on">Always on</span>
+              </div>
+            </div>
+
+            <!-- NYC LL144 -->
+            <div class="jurisdiction-row">
+              <div class="j-info">
+                <div class="j-emoji">🗽</div>
+                <div>
+                  <div class="j-name">NYC Local Law 144</div>
+                  <div class="j-citation">NYC Admin. Code §20-870 — Automated Employment Decision Tools</div>
+                  <div class="j-note">Annual bias audit · 10-day candidate notice · $500–$1,500/day penalty</div>
+                </div>
+              </div>
+              <div class="j-controls">
+                <span class="j-status-badge active">● ACTIVE</span>
+                <label class="toggle">
+                  <input type="checkbox" id="j-nycll144" checked>
+                  <div class="toggle-track"></div>
+                  <div class="toggle-thumb"></div>
+                </label>
+              </div>
+            </div>
+
+            <!-- CO SB 189 -->
+            <div class="jurisdiction-row">
+              <div class="j-info">
+                <div class="j-emoji">🏔️</div>
+                <div>
+                  <div class="j-name">Colorado SB 189</div>
+                  <div class="j-citation">C.R.S. §6-1-1801 et seq. — ADMT Act (replaces SB 205)</div>
+                  <div class="j-note">Signed May 14, 2026 · Effective Jan 1, 2027 · Pre-use notice + 30-day disclosure · SB 205 NEVER takes effect</div>
+                </div>
+              </div>
+              <div class="j-controls">
+                <span class="j-status-badge delayed">⚠ JAN 2027</span>
+                <label class="toggle">
+                  <input type="checkbox" id="j-cosb189" checked>
+                  <div class="toggle-track"></div>
+                  <div class="toggle-thumb"></div>
+                </label>
+              </div>
+            </div>
+
+            <!-- IL HB 3773 -->
+            <div class="jurisdiction-row">
+              <div class="j-info">
+                <div class="j-emoji">🌾</div>
+                <div>
+                  <div class="j-name">Illinois HB 3773</div>
+                  <div class="j-citation">Pub. Act 103-0795 — AI Video Interview Act (expanded)</div>
+                  <div class="j-note">Active Jan 1, 2026 · Strict liability · Zip code proxy ban · 4-year retention</div>
+                </div>
+              </div>
+              <div class="j-controls">
+                <span class="j-status-badge active">● ACTIVE</span>
+                <label class="toggle">
+                  <input type="checkbox" id="j-ilhb3773" checked>
+                  <div class="toggle-track"></div>
+                  <div class="toggle-thumb"></div>
+                </label>
+              </div>
+            </div>
+
+            <!-- CA AB-1018 -->
+            <div class="jurisdiction-row">
+              <div class="j-info">
+                <div class="j-emoji">🌉</div>
+                <div>
+                  <div class="j-name">California AB-1018</div>
+                  <div class="j-citation">AB-1018 (2025) — Automated Decision Systems Accountability Act</div>
+                  <div class="j-note">Effective Jan 1, 2027 · Bias impact assessment · Human appeal mechanism · 4-year retention</div>
+                </div>
+              </div>
+              <div class="j-controls">
+                <span class="j-status-badge building">◑ BUILDING</span>
+                <label class="toggle">
+                  <input type="checkbox" id="j-caab1018">
+                  <div class="toggle-track"></div>
+                  <div class="toggle-thumb"></div>
+                </label>
+              </div>
+            </div>
+
+            <!-- OFCCP -->
+            <div class="jurisdiction-row">
+              <div class="j-info">
+                <div class="j-emoji">🏛️</div>
+                <div>
+                  <div class="j-name">OFCCP</div>
+                  <div class="j-citation">41 C.F.R. Parts 60-1, 60-300, 60-741 — Federal Contractor Compliance</div>
+                  <div class="j-note">Federal contractors only · AAP · VEVRAA 5.1% benchmark · Internet Applicant Rule</div>
+                </div>
+              </div>
+              <div class="j-controls">
+                <span class="j-status-badge active">● ACTIVE</span>
+                <label class="toggle">
+                  <input type="checkbox" id="j-ofccp">
+                  <div class="toggle-track"></div>
+                  <div class="toggle-thumb"></div>
+                </label>
+              </div>
+            </div>
+
+            <!-- EU AI Act -->
+            <div class="jurisdiction-row">
+              <div class="j-info">
+                <div class="j-emoji">🇪🇺</div>
+                <div>
+                  <div class="j-name">EU AI Act</div>
+                  <div class="j-citation">Regulation (EU) 2024/1689 — High-Risk Employment AI</div>
+                  <div class="j-note">High-risk employment AI effective Aug 2, 2026 · Conformity assessment · Up to €35M or 7% global turnover</div>
+                </div>
+              </div>
+              <div class="j-controls">
+                <span class="j-status-badge building">◑ AUG 2026</span>
+                <label class="toggle">
+                  <input type="checkbox" id="j-euaiact">
+                  <div class="toggle-track"></div>
+                  <div class="toggle-thumb"></div>
+                </label>
+              </div>
+            </div>
+
+          </div>
+        </div>
+        <div class="save-bar">
+          <button class="btn-outline" onclick="resetSection('jurisdictions')">Reset</button>
+          <button class="btn-primary" onclick="saveSection('jurisdictions')">Save Jurisdiction Settings</button>
+        </div>
+      </div>
+
+      <!-- ── SECTION 3: COMPLIANCE ALERTS ── -->
+      <div class="settings-section" id="section-alerts">
+        <div class="section-header">
+          <div>
+            <div class="section-title">🔔 Compliance Alerts</div>
+            <div class="section-subtitle">Configure when and how F.A.S. notifies your compliance team</div>
+          </div>
+        </div>
+        <div class="section-body">
+
+          <div class="setting-row">
+            <div>
+              <div class="setting-label">4/5ths Threshold Breach Alert</div>
+              <div class="setting-desc">Send an alert when any protected class selection rate drops below 80% of the highest-rated group. Required under UGESP for all covered employers.</div>
+            </div>
+            <div class="toggle-wrap">
+              <label class="toggle">
+                <input type="checkbox" id="alert-fourfifths" checked>
+                <div class="toggle-track"></div>
+                <div class="toggle-thumb"></div>
+              </label>
+              <span class="toggle-label" id="alert-fourfifths-label">ON</span>
+            </div>
+          </div>
+
+          <div class="setting-row">
+            <div>
+              <div class="setting-label">AAP Expiration Warning</div>
+              <div class="setting-desc">Alert 60 days before your Affirmative Action Plan expires. Only applies if Federal Contractor Status is active. Late AAP renewal is a common OFCCP audit finding.</div>
+            </div>
+            <div class="toggle-wrap">
+              <label class="toggle">
+                <input type="checkbox" id="alert-aap" checked>
+                <div class="toggle-track"></div>
+                <div class="toggle-thumb"></div>
+              </label>
+              <span class="toggle-label" id="alert-aap-label">ON</span>
+            </div>
+          </div>
+
+          <div class="setting-row">
+            <div>
+              <div class="setting-label">Jurisdiction Effective Date Reminders</div>
+              <div class="setting-desc">Send reminders 90 days and 30 days before an enabled jurisdiction becomes effective. Covers upcoming deadlines: CO SB 189 (Jan 1, 2027), CA AB-1018 (Jan 1, 2027), EU AI Act (Aug 2, 2026).</div>
+            </div>
+            <div class="toggle-wrap">
+              <label class="toggle">
+                <input type="checkbox" id="alert-deadlines" checked>
+                <div class="toggle-track"></div>
+                <div class="toggle-thumb"></div>
+              </label>
+              <span class="toggle-label" id="alert-deadlines-label">ON</span>
+            </div>
+          </div>
+
+          <div class="setting-row">
+            <div>
+              <div class="setting-label">Alert Delivery Email</div>
+              <div class="setting-desc">Compliance alerts will be sent to this address. Defaults to the account contact email.</div>
+            </div>
+            <div style="width:280px; flex-shrink:0;">
+              <input type="email" class="input-field" id="alert-email" placeholder="compliance@yourcompany.com">
+            </div>
+          </div>
+
+        </div>
+        <div class="save-bar">
+          <button class="btn-outline" onclick="resetSection('alerts')">Reset</button>
+          <button class="btn-primary" onclick="saveSection('alerts')">Save Alert Settings</button>
+        </div>
+      </div>
+
+    </div><!-- end settings-sections -->
+  </div><!-- end settings-layout -->
+
+</div><!-- end main-content -->
+
+<div class="toast" id="toast"></div>
+
+<script>
+  const { createClient } = supabase;
+  const supabaseClient = createClient(
+    'https://znjvjofsfvxccmidfpgy.supabase.co',
+    'sb_publishable_9eXyp1KWa4g_uvM4TCliBg_XAwwSuwD'
+  );
+
+  let currentUser = null;
+
+  async function init() {
+    const { data: { session } } = await supabaseClient.auth.getSession();
+    if (!session) {
+      window.location.href = '/dashboard/login.html';
+      return;
+    }
+    currentUser = session.user;
+    document.getElementById('user-email').textContent = currentUser.email;
+    document.getElementById('alert-email').value = currentUser.email;
+
+    const { data } = await supabaseClient
+      .from('customers')
+      .select('company_name')
+      .eq('contact_email', currentUser.email)
+      .single();
+    if (data) document.getElementById('org-name').textContent = data.company_name;
+
+    await loadSettings();
+  }
+
+  async function loadSettings() {
+    const { data } = await supabaseClient
+      .from('org_settings')
+      .select('*')
+      .single();
+
+    if (!data) return;
+
+    if (data.is_federal_contractor !== undefined) {
+      document.getElementById('toggle-contractor').checked = data.is_federal_contractor;
+      document.getElementById('contractor-label').textContent = data.is_federal_contractor ? 'ON' : 'OFF';
+      document.getElementById('contractor-details').style.display = data.is_federal_contractor ? 'block' : 'none';
+    }
+    if (data.contract_value) document.getElementById('contract-value').value = data.contract_value;
+    if (data.employee_count) document.getElementById('employee-count').value = data.employee_count;
+    if (data.aap_expiration) document.getElementById('aap-expiration').value = data.aap_expiration;
+    if (data.self_id_method) document.getElementById('self-id-method').value = data.self_id_method;
+    if (data.alert_email) document.getElementById('alert-email').value = data.alert_email;
+
+    const jKeys = ['nycll144', 'cosb189', 'ilhb3773', 'caab1018', 'ofccp', 'euaiact'];
+    jKeys.forEach(k => {
+      const el = document.getElementById('j-' + k);
+      if (el && data['j_' + k] !== undefined) el.checked = data['j_' + k];
+    });
+  }
+
+  function onContractorToggle() {
+    const on = document.getElementById('toggle-contractor').checked;
+    document.getElementById('contractor-label').textContent = on ? 'ON' : 'OFF';
+    document.getElementById('contractor-details').style.display = on ? 'block' : 'none';
+  }
+
+  async function saveSection(section) {
+    let payload = {};
+
+    if (section === 'contractor') {
+      payload = {
+        is_federal_contractor: document.getElementById('toggle-contractor').checked,
+        contract_value: document.getElementById('contract-value').value || null,
+        employee_count: document.getElementById('employee-count').value || null,
+        aap_expiration: document.getElementById('aap-expiration').value || null,
+        vevraa_tracking: document.getElementById('toggle-vevraa').checked,
+        vendor_audit_clause: document.getElementById('toggle-vendor-audit').checked,
+        self_id_method: document.getElementById('self-id-method').value,
+      };
+    } else if (section === 'jurisdictions') {
+      payload = {
+        j_nycll144: document.getElementById('j-nycll144').checked,
+        j_cosb189: document.getElementById('j-cosb189').checked,
+        j_ilhb3773: document.getElementById('j-ilhb3773').checked,
+        j_caab1018: document.getElementById('j-caab1018').checked,
+        j_ofccp: document.getElementById('j-ofccp').checked,
+        j_euaiact: document.getElementById('j-euaiact').checked,
+      };
+    } else if (section === 'alerts') {
+      payload = {
+        alert_fourfifths: document.getElementById('alert-fourfifths').checked,
+        alert_aap: document.getElementById('alert-aap').checked,
+        alert_deadlines: document.getElementById('alert-deadlines').checked,
+        alert_email: document.getElementById('alert-email').value,
+      };
+    }
+
+    const { error } = await supabaseClient
+      .from('org_settings')
+      .upsert(payload, { onConflict: 'org_id' });
+
+    showToast(error ? '✗ Save failed — ' + error.message : '✓ Settings saved');
+  }
+
+  function resetSection(section) {
+    loadSettings();
+    showToast('Settings reset to saved values');
+  }
+
+  function showToast(msg) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 2800);
+  }
+
+  function scrollTo(id) {
+    document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    document.querySelectorAll('.settings-nav-item').forEach(el => el.classList.remove('active'));
+    event.target.classList.add('active');
+  }
+
+  async function handleLogout() {
+    await supabaseClient.auth.signOut();
+    window.location.href = '/dashboard/login.html';
+  }
+
+  // sync toggle labels
+  ['alert-fourfifths','alert-aap','alert-deadlines'].forEach(id => {
+    document.getElementById(id)?.addEventListener('change', function() {
+      const lbl = document.getElementById(id + '-label');
+      if (lbl) lbl.textContent = this.checked ? 'ON' : 'OFF';
+    });
+  });
+
+  document.getElementById('toggle-vendor-audit')?.addEventListener('change', function() {
+    document.getElementById('vendor-audit-label').textContent = this.checked ? 'ON' : 'OFF';
+  });
+
+  init();
+</script>
+</body>
+</html>

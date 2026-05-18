@@ -500,6 +500,113 @@
       gap: 5px;
     }
 
+    /* ── JURISDICTION STATUS WIDGET ── */
+    .jurisdiction-widget {
+      background: white;
+      border: 1px solid #e8e8e8;
+      border-radius: 4px;
+      overflow: hidden;
+      margin-bottom: 28px;
+    }
+
+    .jurisdiction-widget-header {
+      padding: 12px 20px;
+      border-bottom: 1px solid #e8e8e8;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .jurisdiction-widget-header .title {
+      font-size: 13px;
+      font-weight: 600;
+      color: #1e293b;
+    }
+
+    .jurisdiction-widget-header .subtitle {
+      font-size: 11px;
+      color: #888;
+      font-family: monospace;
+    }
+
+    .jurisdiction-cards {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 0;
+    }
+
+    .jurisdiction-card {
+      padding: 14px 16px;
+      border-right: 1px solid #f0f0f0;
+      position: relative;
+    }
+
+    .jurisdiction-card:last-child { border-right: none; }
+
+    .j-icon { font-size: 16px; margin-bottom: 6px; }
+
+    .j-label {
+      font-family: monospace;
+      font-size: 10px;
+      letter-spacing: 1px;
+      color: #555;
+      margin-bottom: 4px;
+      font-weight: 600;
+    }
+
+    .j-status {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 10px;
+      font-family: monospace;
+    }
+
+    .j-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+
+    .j-dot.active { background: #16a34a; }
+    .j-dot.building { background: #d97706; animation: pulse 2s infinite; }
+    .j-dot.delayed { background: #dc2626; animation: pulse 1.5s infinite; }
+
+    .j-status.active { color: #16a34a; }
+    .j-status.building { color: #d97706; }
+    .j-status.delayed { color: #dc2626; }
+
+    .j-effective {
+      font-size: 10px;
+      color: #aaa;
+      font-family: monospace;
+      margin-top: 3px;
+    }
+
+    .quick-actions {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 28px;
+    }
+
+    .quick-action-btn {
+      background: white;
+      border: 1px solid #e2e8f0;
+      border-radius: 4px;
+      padding: 10px 16px;
+      font-size: 12px;
+      font-weight: 500;
+      color: #1e293b;
+      cursor: pointer;
+      transition: all 0.15s;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .quick-action-btn:hover { background: #f8fafc; border-color: #b8872e; color: #b8872e; }
+
     /* ── LOADING ── */
     .loading {
       text-align: center;
@@ -620,6 +727,66 @@
       <div class="stat-num" id="stat-overrides">—</div>
       <div class="stat-sub">Documented decisions</div>
     </div>
+  </div>
+
+  <!-- JURISDICTION STATUS WIDGET -->
+  <div class="jurisdiction-widget">
+    <div class="jurisdiction-widget-header">
+      <div class="title">Jurisdiction Compliance Status</div>
+      <div class="subtitle">7 FRAMEWORKS · LAST VERIFIED MAY 2026</div>
+    </div>
+    <div class="jurisdiction-cards">
+      <div class="jurisdiction-card">
+        <div class="j-icon">⚖️</div>
+        <div class="j-label">UGESP</div>
+        <div class="j-status active"><div class="j-dot active"></div>Active</div>
+        <div class="j-effective">29 C.F.R. § 1607</div>
+      </div>
+      <div class="jurisdiction-card">
+        <div class="j-icon">🗽</div>
+        <div class="j-label">NYC LL144</div>
+        <div class="j-status active"><div class="j-dot active"></div>Active</div>
+        <div class="j-effective">Since Jul 2023</div>
+      </div>
+      <div class="jurisdiction-card">
+        <div class="j-icon">🏔️</div>
+        <div class="j-label">CO SB 189</div>
+        <div class="j-status delayed"><div class="j-dot delayed"></div>Jan 1, 2027</div>
+        <div class="j-effective">SB 205 repealed</div>
+      </div>
+      <div class="jurisdiction-card">
+        <div class="j-icon">🌾</div>
+        <div class="j-label">IL HB 3773</div>
+        <div class="j-status active"><div class="j-dot active"></div>Active</div>
+        <div class="j-effective">Since Jan 2026</div>
+      </div>
+      <div class="jurisdiction-card">
+        <div class="j-icon">🌉</div>
+        <div class="j-label">CA AB-1018</div>
+        <div class="j-status building"><div class="j-dot building"></div>Building</div>
+        <div class="j-effective">Jan 1, 2027</div>
+      </div>
+      <div class="jurisdiction-card">
+        <div class="j-icon">🏛️</div>
+        <div class="j-label">OFCCP</div>
+        <div class="j-status active"><div class="j-dot active"></div>Active</div>
+        <div class="j-effective">Contractors only</div>
+      </div>
+      <div class="jurisdiction-card">
+        <div class="j-icon">🇪🇺</div>
+        <div class="j-label">EU AI Act</div>
+        <div class="j-status building"><div class="j-dot building"></div>Building</div>
+        <div class="j-effective">Aug 2, 2026</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- QUICK ACTIONS -->
+  <div class="quick-actions">
+    <button class="quick-action-btn" onclick="showView('reports')">📋 Run UGESP 4/5ths Check</button>
+    <button class="quick-action-btn" onclick="showView('reports')">🏛️ Generate OFCCP Package</button>
+    <button class="quick-action-btn" onclick="showView('reports')">🗽 NYC LL144 Annual Audit</button>
+    <button class="quick-action-btn" onclick="window.location.href='settings.html'">⚙️ Jurisdiction Settings</button>
   </div>
 
   <!-- REJECTION FEED -->

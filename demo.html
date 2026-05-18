@@ -195,7 +195,7 @@
         <div class="lane-icon red">!</div>
         <div class="lane-content">
           <div class="lane-title" style="color:#fc8181;">Legal Framework Triggers</div>
-          <div class="lane-detail">NYC LL144: Automated employment decision tool used without bias audit disclosure. Colorado SB205 (enforcement paused, pending court ruling & SB 26-189 legislative replacement): Gap-based rejection without human review violates individualized assessment requirement. EU AI Act: High-risk AI system decision without human oversight. OFCCP: Federal contractors must document adverse impact analysis and maintain records of all selection decisions under the Internet Applicant Rule.</div>
+          <div class="lane-detail">NYC LL144: Automated employment decision tool used without bias audit disclosure. Colorado SB 189 (signed May 14, 2026, effective January 1, 2027): Gap-based rejection without pre-use notice violates SB 189 consumer disclosure requirements — SB 205 was fully repealed and never took effect. EU AI Act: High-risk AI system decision without human oversight (effective August 2, 2026). OFCCP: Federal contractors must document adverse impact analysis and maintain records of all selection decisions under the Internet Applicant Rule.</div>
         </div>
       </div>
       <div class="analysis-lane" id="lane-5">
@@ -234,7 +234,7 @@ FINDINGS:
 <span class="highlight-red">✗ Age proxy discrimination</span> — overqualified + experience ceiling signals
 <span class="highlight-red">✗ Proxy discrimination detected</span> — employment gap language
 <span class="highlight-red">✗ Disparate impact risk</span> — 4/5ths rule threshold exceeded
-<span class="highlight-red">✗ Legal triggers</span> — NYC LL144, Colorado SB205, EU AI Act, OFCCP Federal Contractor Rule
+<span class="highlight-red">✗ Legal triggers</span> — NYC LL144, Colorado SB 189, EU AI Act, OFCCP Federal Contractor Rule
 <span class="highlight-yellow">~ Keyword mismatch</span> — ATS reason inconsistent with skills
 <span class="highlight-yellow">~ Gap analysis incomplete</span> — context not captured
 
@@ -346,7 +346,7 @@ Compliance Officer notification sent.
         <div class="summary-card"><div class="s-label">RISK LEVEL</div><div class="s-value red">HIGH — RED</div></div>
         <div class="summary-card"><div class="s-label">DECISION</div><div class="s-value gold" id="outcome-decision">Escalated</div></div>
         <div class="summary-card"><div class="s-label">AUDIT TRAIL</div><div class="s-value green">Logged ✓</div></div>
-        <div class="summary-card"><div class="s-label">LEGAL FRAMEWORKS</div><div class="s-value" style="color:rgba(255,255,255,0.8); font-size:13px;">NYC LL144 · CO SB205 · EU AI Act</div></div>
+        <div class="summary-card"><div class="s-label">LEGAL FRAMEWORKS</div><div class="s-value" style="color:rgba(255,255,255,0.8); font-size:13px;">NYC LL144 · CO SB 189 · EU AI Act · OFCCP</div></div>
         <div class="summary-card"><div class="s-label">REVIEW TIME</div><div class="s-value green">4 min 32 sec</div></div>
         <div class="summary-card"><div class="s-label">COMPLIANCE STATUS</div><div class="s-value green">Protected ✓</div></div>
       </div>
@@ -366,9 +366,9 @@ Compliance Officer notification sent.
   <div style="font-family: 'DM Mono', monospace; font-size: 11px; letter-spacing: 2px; color: rgba(255,255,255,0.35); margin-bottom: 16px;">REGULATORY DEADLINES</div>
   <div style="display: flex; gap: 2px; flex-wrap: wrap;">
 
-    <!-- Colorado SB205 - FEDERAL STAY (April 27, 2026) -->
-    <div style="flex: 1; min-width: 280px; background: #111d45; padding: 24px 28px; border-left: 3px solid #e53e3e;">
-      <div style="font-family: 'Courier New', monospace; font-size: 10px; letter-spacing: 2px; color: #fc8181; margin-bottom: 12px;">⚠ COLORADO SB205 — ENFORCEMENT PAUSED</div>
+    <!-- Colorado SB189 - effective Jan 1, 2027 -->
+    <div style="flex: 1; min-width: 280px; background: #111d45; padding: 24px 28px; border-left: 3px solid #d69e2e;">
+      <div style="font-family: 'Courier New', monospace; font-size: 10px; letter-spacing: 2px; color: #f6e05e; margin-bottom: 12px;">⚠ COLORADO SB 189 — EFFECTIVE JAN 1, 2027</div>
       <div style="display: flex; gap: 16px; align-items: flex-end; margin-bottom: 12px;">
         <div style="text-align: center;">
           <div id="co-days" style="font-family: 'Courier New', monospace; font-size: 36px; font-weight: bold; color: #C9A84C; line-height: 1;">00</div>
@@ -391,9 +391,9 @@ Compliance Officer notification sent.
         </div>
       </div>
       <div style="font-size: 11px; color: rgba(255,255,255,0.6); line-height: 1.4; margin-bottom: 8px;">
-        <strong>Federal stay issued April 27, 2026</strong> (xAI v. Weiser). AG will not enforce pending rulemaking. <strong>SB 26-189 replacement bill pending</strong> (legislature vote deadline May 13).
+        <strong>SB 189 signed May 14, 2026</strong> by Governor Polis. Fully replaces SB 205 — SB 205 NEVER takes effect. Notice-only framework: pre-use consumer notice + 30-day post-decision disclosure. Annual impact assessments and duty-of-care provisions removed.
       </div>
-      <div style="font-size: 11px; color: rgba(255,255,255,0.4);">Countdown to original date: June 30, 2026 · Status: Paused pending court/legislative action</div>
+      <div style="font-size: 11px; color: rgba(255,255,255,0.4);">Countdown to SB 189 effective date: January 1, 2027 · Citation: C.R.S. §6-1-1801 et seq.</div>
     </div>
 
     <!-- EU AI Act -->
@@ -475,7 +475,7 @@ Compliance Officer notification sent.
 
   function updateRegulatoryCountdowns() {
     const now = new Date().getTime();
-    const coDeadline = new Date('2026-06-30T06:00:00Z').getTime(); // midnight MDT = UTC-6
+    const coDeadline = new Date('2027-01-01T07:00:00Z').getTime(); // midnight MST = UTC-7
     const euDeadline = new Date('2026-08-01T22:00:00Z').getTime(); // midnight CEST = UTC+2
     function getUnits(diff) {
       if (diff <= 0) return { days: '00', hours: '00', minutes: '00', seconds: '00' };
