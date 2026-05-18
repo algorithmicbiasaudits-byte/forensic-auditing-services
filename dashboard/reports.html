@@ -244,10 +244,28 @@
     <div class="report-card active-report" data-report="bias-audit" onclick="selectReportType(this, 'bias-audit')">
       <div class="report-icon">⚖️</div>
       <div class="report-title">Bias Audit Summary</div>
-      <div class="report-desc">Demographic impact analysis across all AI-influenced rejection decisions. Required for Colorado SB 205 and NYC 144 annual filings.</div>
+      <div class="report-desc">Demographic impact analysis across all AI-influenced rejection decisions. Required for NYC LL144 annual filing and CO SB 189 post-decision disclosure.</div>
       <div class="report-meta">
         <span>Last run: <span id="lastRunBias">Never</span></span>
         <span class="report-status ready" id="statusBias">Ready</span>
+      </div>
+    </div>
+    <div class="report-card" data-report="ugesp-report" onclick="selectReportType(this, 'ugesp-report')">
+      <div class="report-icon">⚖️</div>
+      <div class="report-title">EEOC UGESP Compliance Report</div>
+      <div class="report-desc">4/5ths rule analysis by protected class, job-relatedness documentation status, validation study tracking, and 2-year applicant flow data. Applies to all covered employers.</div>
+      <div class="report-meta">
+        <span>Last run: <span id="lastRunUgesp">Never</span></span>
+        <span class="report-status ready" id="statusUgesp">Ready</span>
+      </div>
+    </div>
+    <div class="report-card" data-report="ofccp-package" onclick="selectReportType(this, 'ofccp-package')">
+      <div class="report-icon">🏛️</div>
+      <div class="report-title">OFCCP Compliance Package</div>
+      <div class="report-desc">Federal contractor audit package: AAP status, VEVRAA hiring benchmark (5.1%), self-ID invitation rates, Internet Applicant Rule logs, and vendor audit access clause verification.</div>
+      <div class="report-meta">
+        <span>Last run: <span id="lastRunOfccp">Never</span></span>
+        <span class="report-status pending" id="statusOfccp">Contractors Only</span>
       </div>
     </div>
     <div class="report-card" data-report="regulatory-package" onclick="selectReportType(this, 'regulatory-package')">
@@ -284,6 +302,10 @@
           <option value="highRisk">High Risk Rate</option>
           <option value="overrides">Override Rate</option>
           <option value="compliance">Compliance Score</option>
+          <option value="ugesp_fourfifths">UGESP 4/5ths Pass Rate</option>
+          <option value="ugesp_jobrelated">UGESP Job-Relatedness Docs</option>
+          <option value="ofccp_selfid">OFCCP Self-ID Rate</option>
+          <option value="ofccp_vevraa">OFCCP VEVRAA Benchmark</option>
         </select>
       </div>
     </div>

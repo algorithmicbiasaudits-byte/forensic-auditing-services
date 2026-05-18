@@ -504,6 +504,19 @@
       </select>
     </div>
     <div class="filter-group">
+      <span class="filter-label">Jurisdiction</span>
+      <select class="filter-select" id="filter-jurisdiction" onchange="filterTable()">
+        <option value="">All</option>
+        <option value="ugesp">UGESP</option>
+        <option value="nycll144">NYC LL144</option>
+        <option value="cosb189">CO SB 189</option>
+        <option value="ilhb3773">IL HB 3773</option>
+        <option value="caab1018">CA AB-1018</option>
+        <option value="ofccp">OFCCP</option>
+        <option value="euaiact">EU AI Act</option>
+      </select>
+    </div>
+    <div class="filter-group">
       <span class="filter-label">Date</span>
       <input type="date" class="filter-input" style="width:150px;" onchange="filterTable()">
     </div>
@@ -532,6 +545,8 @@
             <th>ATS</th>
             <th>Risk</th>
             <th>Lanes Triggered</th>
+            <th>Jurisdiction</th>
+            <th>Compliance Status</th>
             <th>Status</th>
             <th>Audit Hash</th>
             <th></th>
@@ -546,6 +561,8 @@
             <td class="ts-cell">Workday</td>
             <td><span class="badge badge-risk-high">High</span></td>
             <td><div class="lane-badges"><span class="badge badge-lane">Age Proxy</span><span class="badge badge-lane">Gap Penalty</span></div></td>
+            <td class="ts-cell">NYC LL144 · UGESP</td>
+            <td><span class="badge badge-status-escalated">⚠ Debt Logged</span></td>
             <td><span class="badge badge-status-escalated">Escalated</span></td>
             <td><span class="hash-cell" title="a3f9d2c1e8b74f56">a3f9d2c1…</span></td>
             <td><a href="/dashboard/audit-record-detail.html?id=FAS-2847" class="btn btn-secondary btn-sm">View →</a></td>
@@ -558,6 +575,8 @@
             <td class="ts-cell">Greenhouse</td>
             <td><span class="badge badge-risk-high">High</span></td>
             <td><div class="lane-badges"><span class="badge badge-lane">Disparate Impact</span><span class="badge badge-lane">KW Mismatch</span></div></td>
+            <td class="ts-cell">UGESP · IL HB 3773</td>
+            <td><span class="badge badge-status-escalated">⚠ Debt Logged</span></td>
             <td><span class="badge badge-status-escalated">Escalated</span></td>
             <td><span class="hash-cell" title="b7c4a1f2e9d83c47">b7c4a1f2…</span></td>
             <td><a href="/dashboard/audit-record-detail.html?id=FAS-2851" class="btn btn-secondary btn-sm">View →</a></td>
@@ -570,6 +589,8 @@
             <td class="ts-cell">Lever</td>
             <td><span class="badge badge-risk-high">High</span></td>
             <td><div class="lane-badges"><span class="badge badge-lane">Credential Inflation</span><span class="badge badge-lane">Disability</span></div></td>
+            <td class="ts-cell">UGESP · OFCCP</td>
+            <td><span class="badge badge-status-escalated">⚠ Debt Logged</span></td>
             <td><span class="badge badge-status-escalated">Escalated</span></td>
             <td><span class="hash-cell" title="c9e2b8d4f1a76e30">c9e2b8d4…</span></td>
             <td><a href="/dashboard/audit-record-detail.html?id=FAS-2853" class="btn btn-secondary btn-sm">View →</a></td>
@@ -582,6 +603,8 @@
             <td class="ts-cell">iCIMS</td>
             <td><span class="badge badge-risk-medium">Medium</span></td>
             <td><div class="lane-badges"><span class="badge badge-lane">KW Mismatch</span></div></td>
+            <td class="ts-cell">UGESP</td>
+            <td><span class="badge badge-status-pending">Pending Review</span></td>
             <td><span class="badge badge-status-pending">Pending</span></td>
             <td><span class="hash-cell" title="d1f3c7a9e2b85d41">d1f3c7a9…</span></td>
             <td><a href="/dashboard/audit-record-detail.html?id=FAS-2856" class="btn btn-secondary btn-sm">View →</a></td>
@@ -594,6 +617,8 @@
             <td class="ts-cell">Taleo</td>
             <td><span class="badge badge-risk-medium">Medium</span></td>
             <td><div class="lane-badges"><span class="badge badge-lane">Gap Penalty</span><span class="badge badge-lane">Legal Trigger</span></div></td>
+            <td class="ts-cell">NYC LL144 · IL HB 3773</td>
+            <td><span class="badge badge-status-pending">Pending Review</span></td>
             <td><span class="badge badge-status-pending">Pending</span></td>
             <td><span class="hash-cell" title="e5a8d2f4c6b91e72">e5a8d2f4…</span></td>
             <td><a href="/dashboard/audit-record-detail.html?id=FAS-2858" class="btn btn-secondary btn-sm">View →</a></td>
@@ -606,6 +631,8 @@
             <td class="ts-cell">Workday</td>
             <td><span class="badge badge-risk-medium">Medium</span></td>
             <td><div class="lane-badges"><span class="badge badge-lane">Age Proxy</span></div></td>
+            <td class="ts-cell">UGESP</td>
+            <td><span class="badge badge-status-pending">Pending Review</span></td>
             <td><span class="badge badge-status-pending">Pending</span></td>
             <td><span class="hash-cell" title="f2b6e9c3d7a04f85">f2b6e9c3…</span></td>
             <td><a href="/dashboard/audit-record-detail.html?id=FAS-2861" class="btn btn-secondary btn-sm">View →</a></td>
@@ -618,6 +645,8 @@
             <td class="ts-cell">Greenhouse</td>
             <td><span class="badge badge-risk-low">Low</span></td>
             <td><div class="lane-badges"><span class="badge badge-lane">Credential Inflation</span></div></td>
+            <td class="ts-cell">UGESP</td>
+            <td><span class="badge badge-status-pending">Pending Review</span></td>
             <td><span class="badge badge-status-pending">Pending</span></td>
             <td><span class="hash-cell" title="a8d4f1c2e5b76390">a8d4f1c2…</span></td>
             <td><a href="/dashboard/audit-record-detail.html?id=FAS-2863" class="btn btn-secondary btn-sm">View →</a></td>
@@ -630,6 +659,8 @@
             <td class="ts-cell">Workday</td>
             <td><span class="badge badge-risk-medium">Medium</span></td>
             <td><div class="lane-badges"><span class="badge badge-lane">Gap Penalty</span></div></td>
+            <td class="ts-cell">UGESP · NYC LL144</td>
+            <td><span class="badge badge-status-reviewed">✓ Clear</span></td>
             <td><span class="badge badge-status-reviewed">Reviewed</span></td>
             <td><span class="hash-cell" title="b9e7c3a1f4d28605">b9e7c3a1…</span></td>
             <td><a href="/dashboard/audit-record-detail.html?id=FAS-2831" class="btn btn-secondary btn-sm">View →</a></td>
@@ -642,6 +673,8 @@
             <td class="ts-cell">iCIMS</td>
             <td><span class="badge badge-risk-low">Low</span></td>
             <td><div class="lane-badges"><span class="badge badge-lane">KW Mismatch</span></div></td>
+            <td class="ts-cell">UGESP</td>
+            <td><span class="badge badge-status-reviewed">✓ Clear</span></td>
             <td><span class="badge badge-status-reviewed">Reviewed</span></td>
             <td><span class="hash-cell" title="c3f1a8e7d4b56920">c3f1a8e7…</span></td>
             <td><a href="/dashboard/audit-record-detail.html?id=FAS-2819" class="btn btn-secondary btn-sm">View →</a></td>
@@ -654,6 +687,8 @@
             <td class="ts-cell">Lever</td>
             <td><span class="badge badge-risk-medium">Medium</span></td>
             <td><div class="lane-badges"><span class="badge badge-lane">Disparate Impact</span></div></td>
+            <td class="ts-cell">UGESP · OFCCP</td>
+            <td><span class="badge badge-status-delegated">Delegated</span></td>
             <td><span class="badge badge-status-delegated">Delegated</span></td>
             <td><span class="hash-cell" title="d7a5c9f2e1b43807">d7a5c9f2…</span></td>
             <td><a href="/dashboard/audit-record-detail.html?id=FAS-2804" class="btn btn-secondary btn-sm">View →</a></td>
