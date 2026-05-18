@@ -496,8 +496,50 @@
     footer a { color: var(--gold); text-decoration: none; }
     footer a:hover { text-decoration: underline; }
 
+    /* ── Anchor Nav ── */
+    .anchor-nav {
+      position: sticky;
+      top: 0;
+      z-index: 99;
+      background: var(--navy-dark);
+      border-bottom: 1px solid rgba(184,135,46,0.25);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0;
+      padding: 0 48px;
+      overflow-x: auto;
+      scrollbar-width: none;
+    }
+    .anchor-nav::-webkit-scrollbar { display: none; }
+
+    .anchor-nav a {
+      color: rgba(255,255,255,0.55);
+      text-decoration: none;
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      padding: 14px 20px;
+      border-bottom: 2px solid transparent;
+      transition: color 0.2s, border-color 0.2s;
+      white-space: nowrap;
+    }
+    .anchor-nav a:hover,
+    .anchor-nav a.active {
+      color: var(--gold);
+      border-bottom-color: var(--gold);
+    }
+
+    /* offset scroll target so sticky nav doesn't cover headings */
+    #overview, #problem, #process, #features, #waitlist {
+      scroll-margin-top: 48px;
+    }
+
     @media (max-width: 768px) {
       header { flex-direction: column; padding: 20px; gap: 12px; }
+      .anchor-nav { justify-content: flex-start; padding: 0 16px; }
+      .anchor-nav a { padding: 12px 14px; font-size: 11px; }
       .hero { padding: 60px 24px; }
       .hero h1 { font-size: 32px; }
       .hero-lead { font-size: 15px; }
@@ -528,7 +570,14 @@
   </nav>
 </header>
 
-<section class="hero">
+<nav class="anchor-nav" id="anchor-nav">
+  <a href="#overview">Overview</a>
+  <a href="#process">How It Works</a>
+  <a href="#features">Features</a>
+  <a href="#waitlist">Get Started</a>
+</nav>
+
+<section class="hero" id="overview">
   <div class="hero-inner">
     <div class="eyebrow">Forensic Auditing Services</div>
     <h1>AI Hiring <em>Compliance</em><br>Before It Becomes Liability</h1>
@@ -553,7 +602,7 @@
   </div>
 </div>
 
-<section class="problem">
+<section class="problem" id="problem">
   <div class="section-label">The Compliance Gap</div>
   <h2>Your ATS Made a Decision.<br>Did Anyone Review It?</h2>
   <p>Companies using AI to screen candidates face a critical compliance gap. AI systems reject candidates in seconds — but compliance reviews happen weeks or months later, if at all. By then, the liability is done.</p>
@@ -571,7 +620,7 @@
   </div>
 </section>
 
-<section class="how" id="how">
+<section class="how" id="process">
   <div class="how-inner">
     <div class="how-header">
       <div class="section-label">The Process</div>
@@ -608,7 +657,7 @@
   </div>
 </section>
 
-<section class="features-section">
+<section class="features-section" id="features">
   <div class="features-inner">
     <div class="features-header">
       <div class="section-label" style="color: var(--gold);">Capabilities</div>
@@ -751,6 +800,27 @@
   </p>
   <p style="margin-top: 16px; font-size: 11px; color: rgba(255,255,255,0.25);">© 2026 ALS Consulting Services. All rights reserved.</p>
 </footer>
+
+<script>
+  (function() {
+    const sections = ['overview','problem','process','features','waitlist'];
+    const links = document.querySelectorAll('.anchor-nav a');
+
+    function setActive() {
+      let current = '';
+      sections.forEach(id => {
+        const el = document.getElementById(id);
+        if (el && window.scrollY >= el.offsetTop - 80) current = id;
+      });
+      links.forEach(a => {
+        a.classList.toggle('active', a.getAttribute('href') === '#' + current);
+      });
+    }
+
+    window.addEventListener('scroll', setActive, { passive: true });
+    setActive();
+  })();
+</script>
 
 </body>
 </html>
