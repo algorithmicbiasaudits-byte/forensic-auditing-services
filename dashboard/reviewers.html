@@ -1,0 +1,596 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Reviewers — FAS Dashboard</title>
+  <style>
+    :root {
+      --navy: #0a1628; --gold: #b8872e; --gold-light: #d4a040; --gold-bg: rgba(184,135,46,0.08);
+      --white: #ffffff; --text-primary: #1e293b; --text-secondary: #475569;
+      --text-muted: #64748b; --text-dim: #94a3b8; --border: #e2e8f0;
+      --bg-page: #f8fafc; --bg-card: #ffffff; --bg-sidebar: #ffffff;
+      --danger: #dc2626; --warning: #ca8a04; --success: #16a34a; --info: #2563eb;
+      --shadow-sm: 0 1px 2px 0 rgba(0,0,0,0.05);
+      --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.1);
+      --shadow-lg: 0 10px 15px -3px rgba(0,0,0,0.1);
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; font-size: 13px; color: var(--text-primary); background: var(--bg-page); line-height: 1.5; }
+    a { text-decoration: none; color: inherit; }
+    button { cursor: pointer; font-family: inherit; }
+
+    .topnav { position: fixed; top: 0; left: 0; right: 0; height: 56px; background: var(--white); border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; padding: 0 24px; z-index: 100; }
+    .topnav-left { display: flex; align-items: center; gap: 12px; }
+    .logo { font-size: 18px; font-weight: 700; color: var(--navy); letter-spacing: -0.5px; }
+    .topnav-divider { color: var(--text-dim); font-weight: 300; }
+    .topnav-title { font-size: 14px; font-weight: 500; color: var(--text-secondary); }
+    .topnav-right { display: flex; align-items: center; gap: 12px; }
+    .user-name { font-size: 13px; color: var(--text-secondary); }
+    .role-badge { font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; padding: 3px 10px; border-radius: 100px; background: var(--gold-bg); color: var(--gold); border: 1px solid rgba(184,135,46,0.15); }
+
+    .sidebar { position: fixed; top: 56px; left: 0; bottom: 0; width: 220px; background: var(--bg-sidebar); border-right: 1px solid var(--border); padding: 16px 0; overflow-y: auto; z-index: 90; }
+    .sidebar-section-label { font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-dim); padding: 16px 20px 8px; }
+    .sidebar-link { display: flex; align-items: center; gap: 10px; padding: 10px 16px; margin: 2px 12px; border-radius: 6px; font-size: 13px; color: var(--text-secondary); transition: all 0.15s ease; }
+    .sidebar-link:hover { background: var(--bg-page); color: var(--text-primary); }
+    .sidebar-link.active { background: var(--gold-bg); color: var(--gold); font-weight: 600; border-left: 3px solid var(--gold); padding-left: 13px; margin-left: 9px; }
+    .sidebar-link .icon { font-size: 16px; width: 20px; text-align: center; }
+    .badge-count { margin-left: auto; font-size: 10px; font-weight: 700; min-width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; border-radius: 100px; background: var(--danger); color: var(--white); }
+
+    .main-content { margin-left: 220px; margin-top: 56px; padding: 24px 28px; min-height: calc(100vh - 56px); }
+    .page-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 24px; }
+    .page-title { font-size: 20px; font-weight: 600; color: var(--text-primary); }
+    .page-subtitle { font-size: 13px; color: var(--text-muted); margin-top: 2px; }
+
+    .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 24px; }
+    .stat-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 8px; padding: 20px; box-shadow: var(--shadow-sm); }
+    .stat-value { font-size: 28px; font-weight: 700; color: var(--text-primary); line-height: 1; margin-bottom: 6px; }
+    .stat-label { font-size: 12px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.03em; }
+    .stat-delta { font-size: 11px; margin-top: 8px; font-weight: 500; }
+    .stat-delta.up { color: var(--success); } .stat-delta.down { color: var(--danger); }
+
+    .filter-bar { display: flex; align-items: center; justify-content: space-between; background: var(--bg-card); border: 1px solid var(--border); border-radius: 8px; padding: 12px 16px; margin-bottom: 20px; box-shadow: var(--shadow-sm); }
+    .filter-tabs { display: flex; gap: 4px; }
+    .filter-tab { padding: 6px 14px; border-radius: 6px; font-size: 12px; font-weight: 500; color: var(--text-secondary); background: transparent; border: none; transition: all 0.15s ease; display: flex; align-items: center; gap: 6px; }
+    .filter-tab:hover { background: var(--bg-page); }
+    .filter-tab.active { background: var(--navy); color: var(--white); }
+    .tab-count { font-size: 10px; font-weight: 600; padding: 1px 6px; border-radius: 100px; background: rgba(255,255,255,0.2); }
+    .filter-controls { display: flex; gap: 8px; align-items: center; }
+    .filter-select, .filter-input { padding: 6px 10px; border: 1px solid var(--border); border-radius: 6px; font-size: 12px; color: var(--text-primary); background: var(--white); outline: none; }
+    .filter-select:focus, .filter-input:focus { border-color: var(--gold); }
+    .btn-secondary { padding: 6px 14px; border: 1px solid var(--border); border-radius: 6px; background: var(--white); font-size: 12px; font-weight: 500; color: var(--text-secondary); }
+    .btn-secondary:hover { background: var(--bg-page); }
+    .btn-primary { padding: 6px 14px; border: none; border-radius: 6px; background: var(--gold); font-size: 12px; font-weight: 600; color: var(--white); }
+    .btn-primary:hover { background: var(--gold-light); }
+    .btn-danger { padding: 6px 14px; border: 1px solid var(--danger); border-radius: 6px; background: #fef2f2; font-size: 12px; font-weight: 600; color: var(--danger); }
+    .btn-danger:hover { background: #fecaca; }
+    .btn-icon { padding: 6px; border: 1px solid var(--border); border-radius: 6px; background: var(--white); font-size: 12px; }
+    .btn-icon:hover { background: var(--bg-page); }
+
+    .table-container { background: var(--bg-card); border: 1px solid var(--border); border-radius: 8px; box-shadow: var(--shadow-sm); overflow: hidden; }
+    .table-header { display: flex; align-items: center; justify-content: space-between; padding: 14px 20px; border-bottom: 1px solid var(--border); }
+    .table-title { font-size: 14px; font-weight: 600; }
+    .table-actions { display: flex; gap: 8px; }
+    .data-table { width: 100%; border-collapse: collapse; }
+    .data-table th { text-align: left; padding: 10px 20px; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.03em; color: var(--text-muted); background: var(--bg-page); border-bottom: 1px solid var(--border); }
+    .data-table td { padding: 12px 20px; font-size: 13px; border-bottom: 1px solid var(--border); color: var(--text-primary); }
+    .data-table tr:hover td { background: var(--bg-page); }
+    .data-table tr:last-child td { border-bottom: none; }
+    .mono { font-family: 'SF Mono', Monaco, 'Cascadia Code', Consolas, monospace; font-size: 11px; color: var(--text-secondary); }
+
+    .role-badge-table { font-size: 10px; font-weight: 600; padding: 2px 8px; border-radius: 100px; text-transform: uppercase; letter-spacing: 0.03em; display: inline-block; }
+    .role-admin { background: #fef2f2; color: var(--danger); border: 1px solid #fecaca; }
+    .role-officer { background: #fefce8; color: var(--warning); border: 1px solid #fde68a; }
+    .role-reviewer { background: #f0fdf4; color: var(--success); border: 1px solid #bbf7d0; }
+    .role-viewer { background: #eff6ff; color: var(--info); border: 1px solid #bfdbfe; }
+
+    .status-dot { width: 6px; height: 6px; border-radius: 50%; display: inline-block; margin-right: 6px; }
+    .status-active { background: var(--success); }
+    .status-inactive { background: var(--text-dim); }
+    .status-pending { background: var(--warning); }
+
+    .pagination { display: flex; align-items: center; justify-content: center; gap: 12px; padding: 14px 20px; border-top: 1px solid var(--border); }
+    .pagination button { padding: 6px 14px; border: 1px solid var(--border); border-radius: 6px; background: var(--white); font-size: 12px; }
+    .pagination button:hover:not(:disabled) { background: var(--bg-page); }
+    .pagination button:disabled { opacity: 0.4; cursor: not-allowed; }
+    .pagination span { font-size: 12px; color: var(--text-muted); }
+
+    .empty-state { text-align: center; padding: 48px 20px; }
+    .empty-state-icon { font-size: 40px; margin-bottom: 12px; }
+    .empty-state-title { font-size: 14px; font-weight: 600; color: var(--text-secondary); margin-bottom: 6px; }
+    .empty-state-desc { font-size: 12px; color: var(--text-dim); }
+
+    .modal-overlay { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(10,22,40,0.5); z-index: 200; align-items: center; justify-content: center; }
+    .modal-overlay.show { display: flex; }
+    .modal { background: var(--white); border-radius: 12px; width: 480px; max-width: 90vw; box-shadow: var(--shadow-lg); overflow: hidden; }
+    .modal-header { padding: 20px 24px; border-bottom: 1px solid var(--border); }
+    .modal-title { font-size: 16px; font-weight: 600; color: var(--text-primary); }
+    .modal-body { padding: 20px 24px; }
+    .form-group { margin-bottom: 16px; }
+    .form-label { display: block; font-size: 12px; font-weight: 600; color: var(--text-secondary); margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.03em; }
+    .form-input, .form-select { width: 100%; padding: 8px 12px; border: 1px solid var(--border); border-radius: 6px; font-size: 13px; color: var(--text-primary); background: var(--white); outline: none; }
+    .form-input:focus, .form-select:focus { border-color: var(--gold); }
+    .modal-footer { display: flex; justify-content: flex-end; gap: 8px; padding: 16px 24px; border-top: 1px solid var(--border); background: var(--bg-page); }
+
+    .audit-panel { background: var(--bg-card); border: 1px solid var(--border); border-radius: 8px; box-shadow: var(--shadow-sm); margin-top: 24px; overflow: hidden; }
+    .audit-panel-header { padding: 14px 20px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
+    .audit-panel-title { font-size: 14px; font-weight: 600; }
+    .audit-entry { padding: 12px 20px; border-bottom: 1px solid var(--border); display: flex; align-items: flex-start; gap: 12px; }
+    .audit-entry:last-child { border-bottom: none; }
+    .audit-icon { font-size: 16px; width: 24px; text-align: center; flex-shrink: 0; }
+    .audit-content { flex: 1; }
+    .audit-action { font-size: 13px; font-weight: 500; color: var(--text-primary); }
+    .audit-meta { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
+    .audit-hash { font-family: 'SF Mono', monospace; font-size: 10px; color: var(--text-dim); margin-top: 4px; }
+
+    @media (max-width: 768px) {
+      .sidebar { width: 100%; position: relative; top: 0; }
+      .main-content { margin-left: 0; }
+      .stats-grid { grid-template-columns: repeat(2, 1fr); }
+      .filter-bar { flex-direction: column; gap: 12px; align-items: stretch; }
+      .modal { width: 95vw; }
+    }
+  </style>
+<base target="_blank">
+</head>
+<body>
+
+<div class="modal-overlay" id="reviewerModal">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title" id="modalTitle">Add Reviewer</div>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label class="form-label">Full Name</label>
+        <input type="text" class="form-input" id="reviewerName" placeholder="e.g. Sarah Chen">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Email Address</label>
+        <input type="email" class="form-input" id="reviewerEmail" placeholder="sarah.chen@company.com">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Role</label>
+        <select class="form-select" id="reviewerRole">
+          <option value="compliance_officer">Compliance Officer</option>
+          <option value="senior_reviewer">Senior Reviewer</option>
+          <option value="reviewer">Reviewer</option>
+          <option value="viewer">Viewer (Read-Only)</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Status</label>
+        <select class="form-select" id="reviewerStatus">
+          <option value="active">Active</option>
+          <option value="inactive">Inactive</option>
+        </select>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-secondary" onclick="closeModal()">Cancel</button>
+      <button class="btn-primary" onclick="saveReviewer()">Save Reviewer</button>
+    </div>
+  </div>
+</div>
+
+<nav class="topnav">
+  <div class="topnav-left">
+    <span class="logo">FAS</span>
+    <span class="topnav-divider">|</span>
+    <span class="topnav-title">Reviewers</span>
+  </div>
+  <div class="topnav-right">
+    <span class="user-name" id="userName">—</span>
+    <span class="role-badge" id="userRole">—</span>
+  </div>
+</nav>
+
+<aside class="sidebar">
+  <div class="sidebar-section-label">MAIN</div>
+  <a href="main.html" class="sidebar-link"><span class="icon">📊</span> Dashboard</a>
+  <a href="rejections.html" class="sidebar-link"><span class="icon">🚨</span> Rejections</a>
+  <a href="reports.html" class="sidebar-link"><span class="icon">📋</span> Reports</a>
+
+  <div class="sidebar-section-label">COMPLIANCE</div>
+  <a href="audit-trail.html" class="sidebar-link"><span class="icon">🔒</span> Audit Trail</a>
+  <a href="reviewers.html" class="sidebar-link active"><span class="icon">👥</span> Reviewers</a>
+
+  <div class="sidebar-section-label">SYSTEM</div>
+  <a href="settings.html" class="sidebar-link"><span class="icon">⚙️</span> Settings</a>
+</aside>
+
+<main class="main-content">
+
+  <div class="page-header">
+    <div>
+      <div class="page-title">Reviewer Management</div>
+      <div class="page-subtitle">Manage compliance officers and audit permissions</div>
+    </div>
+    <button class="btn-primary" onclick="openModal()">+ Add Reviewer</button>
+  </div>
+
+  <div class="stats-grid">
+    <div class="stat-card">
+      <div class="stat-value" id="statTotal">—</div>
+      <div class="stat-label">Total Reviewers</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value" id="statActive">—</div>
+      <div class="stat-label">Active</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value" id="statPending">—</div>
+      <div class="stat-label">Pending Invite</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value" id="statActions">—</div>
+      <div class="stat-label">Actions (24h)</div>
+    </div>
+  </div>
+
+  <div class="filter-bar">
+    <div class="filter-tabs">
+      <button class="filter-tab active" onclick="setTab(this, 'all')">All <span class="tab-count" id="tabAll">0</span></button>
+      <button class="filter-tab" onclick="setTab(this, 'active')">Active <span class="tab-count" id="tabActive">0</span></button>
+      <button class="filter-tab" onclick="setTab(this, 'inactive')">Inactive <span class="tab-count" id="tabInactive">0</span></button>
+    </div>
+    <div class="filter-controls">
+      <input type="text" class="filter-input" id="searchInput" placeholder="Search by name or email..." oninput="applyFilters()">
+      <button class="btn-secondary" onclick="clearFilters()">Clear</button>
+    </div>
+  </div>
+
+  <div class="table-container">
+    <div class="table-header">
+      <div class="table-title">Reviewers</div>
+      <div class="table-actions">
+        <button class="btn-secondary" onclick="refreshData()">🔄 Refresh</button>
+      </div>
+    </div>
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Reviewer</th>
+          <th>Role</th>
+          <th>Status</th>
+          <th>Last Active</th>
+          <th>Decisions</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody id="tableBody"></tbody>
+    </table>
+    <div class="pagination" id="pagination"></div>
+  </div>
+
+  <div class="audit-panel">
+    <div class="audit-panel-header">
+      <div class="audit-panel-title">🔍 Reviewer Audit Log</div>
+      <span style="font-size: 11px; color: var(--text-muted);">Immutable — Every action recorded</span>
+    </div>
+    <div id="auditLogBody"></div>
+  </div>
+
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+  const { createClient } = supabase;
+  const supabaseClient = createClient(
+    'https://znjvjofsfvxccmidfpgy.supabase.co',
+    'sb_publishable_9eXyp1KWa4g_uvM4TCliBg_XAwwSuwD'
+  );
+
+  let allReviewers = [];
+  let filteredReviewers = [];
+  let activeTab = 'all';
+  let currentPage = 1;
+  const PER_PAGE = 10;
+  let customerId = null;
+  let editingId = null;
+
+  async function init() {
+    const { data: { session } } = await supabaseClient.auth.getSession();
+    if (!session) { window.location.href = 'login.html'; return; }
+    injectUserInfo(session.user);
+    await resolveCustomer(session.user.email);
+    await loadReviewers();
+    await loadAuditLog();
+  }
+
+  function injectUserInfo(user) {
+    document.getElementById('userName').textContent = user.user_metadata?.name || user.email;
+    document.getElementById('userRole').textContent = user.user_metadata?.role || 'Reviewer';
+  }
+
+  async function resolveCustomer(email) {
+    const { data: customer } = await supabaseClient
+      .from('customers')
+      .select('id, company_name')
+      .eq('contact_email', email)
+      .single();
+    if (customer) customerId = customer.id;
+  }
+
+  async function loadReviewers() {
+    const { data: users, error } = await supabaseClient
+      .from('users')
+      .select('*')
+      .eq('customer_id', customerId)
+      .order('created_at', { ascending: false });
+
+    if (error) {
+      console.error('Error loading reviewers:', error);
+      renderEmptyState('Error loading reviewers.');
+      return;
+    }
+
+    allReviewers = users || [];
+    computeStats(allReviewers);
+    updateTabCounts(allReviewers);
+    applyFilters();
+  }
+
+  function computeStats(reviewers) {
+    const total = reviewers.length;
+    const active = reviewers.filter(r => r.status === 'active').length;
+    const pending = reviewers.filter(r => r.status === 'pending').length;
+    const actions = reviewers.reduce((sum, r) => sum + (r.decision_count || 0), 0);
+
+    document.getElementById('statTotal').textContent = total;
+    document.getElementById('statActive').textContent = active;
+    document.getElementById('statPending').textContent = pending;
+    document.getElementById('statActions').textContent = actions;
+  }
+
+  function updateTabCounts(reviewers) {
+    document.getElementById('tabAll').textContent = reviewers.length;
+    document.getElementById('tabActive').textContent = reviewers.filter(r => r.status === 'active').length;
+    document.getElementById('tabInactive').textContent = reviewers.filter(r => r.status === 'inactive').length;
+  }
+
+  function setTab(el, tab) {
+    document.querySelectorAll('.filter-tab').forEach(t => t.classList.remove('active'));
+    el.classList.add('active');
+    activeTab = tab;
+    currentPage = 1;
+    applyFilters();
+  }
+
+  function applyFilters() {
+    const search = document.getElementById('searchInput').value.toLowerCase().trim();
+    let filtered = [...allReviewers];
+
+    if (activeTab !== 'all') {
+      filtered = filtered.filter(r => r.status === activeTab);
+    }
+
+    if (search) {
+      filtered = filtered.filter(r =>
+        (r.name?.toLowerCase().includes(search)) ||
+        (r.email?.toLowerCase().includes(search))
+      );
+    }
+
+    filteredReviewers = filtered;
+    currentPage = 1;
+    renderTable(paginate(filtered, currentPage));
+    renderPagination(filtered.length);
+  }
+
+  function clearFilters() {
+    document.getElementById('searchInput').value = '';
+    activeTab = 'all';
+    document.querySelectorAll('.filter-tab').forEach(t => t.classList.remove('active'));
+    document.querySelector('.filter-tab').classList.add('active');
+    applyFilters();
+  }
+
+  function paginate(records, page) {
+    const start = (page - 1) * PER_PAGE;
+    return records.slice(start, start + PER_PAGE);
+  }
+
+  function renderTable(reviewers) {
+    const tbody = document.getElementById('tableBody');
+    if (!reviewers || reviewers.length === 0) {
+      tbody.innerHTML = `<tr><td colspan="6"><div class="empty-state"><div class="empty-state-icon">👤</div><div class="empty-state-title">No reviewers found</div><div class="empty-state-desc">Add a reviewer to get started.</div></div></td></tr>`;
+      return;
+    }
+
+    tbody.innerHTML = reviewers.map(r => {
+      const roleClass = r.role === 'admin' ? 'role-admin' : r.role === 'compliance_officer' ? 'role-officer' : r.role === 'senior_reviewer' ? 'role-reviewer' : 'role-viewer';
+      const roleLabel = r.role === 'admin' ? 'Admin' : r.role === 'compliance_officer' ? 'Officer' : r.role === 'senior_reviewer' ? 'Senior' : 'Viewer';
+      const statusClass = r.status === 'active' ? 'status-active' : r.status === 'pending' ? 'status-pending' : 'status-inactive';
+      const statusLabel = r.status === 'active' ? 'Active' : r.status === 'pending' ? 'Pending' : 'Inactive';
+
+      return `<tr>
+        <td>
+          <div style="font-weight: 600;">${r.name || 'Unnamed'}</div>
+          <div class="mono" style="margin-top: 2px;">${r.email}</div>
+        </td>
+        <td><span class="role-badge-table ${roleClass}">${roleLabel}</span></td>
+        <td><span class="status-dot ${statusClass}"></span>${statusLabel}</td>
+        <td>${formatDate(r.last_active)}</td>
+        <td>${r.decision_count || 0}</td>
+        <td>
+          <button class="btn-icon" onclick="editReviewer('${r.id}')" title="Edit">✏️</button>
+          <button class="btn-icon" onclick="toggleStatus('${r.id}')" title="Toggle Status">${r.status === 'active' ? '🚫' : '✅'}</button>
+          <button class="btn-icon" onclick="deleteReviewer('${r.id}')" title="Remove">🗑️</button>
+        </td>
+      </tr>`;
+    }).join('');
+  }
+
+  function renderPagination(total) {
+    const pages = Math.ceil(total / PER_PAGE) || 1;
+    document.getElementById('pagination').innerHTML = `
+      <button onclick="goPage(${currentPage - 1})" ${currentPage === 1 ? 'disabled' : ''}>← Prev</button>
+      <span>Page ${currentPage} of ${pages} (${total} reviewers)</span>
+      <button onclick="goPage(${currentPage + 1})" ${currentPage >= pages ? 'disabled' : ''}>Next →</button>
+    `;
+  }
+
+  function goPage(page) {
+    const pages = Math.ceil(filteredReviewers.length / PER_PAGE);
+    if (page < 1 || page > pages) return;
+    currentPage = page;
+    renderTable(paginate(filteredReviewers, currentPage));
+    renderPagination(filteredReviewers.length);
+  }
+
+  function openModal(id = null) {
+    editingId = id;
+    document.getElementById('modalTitle').textContent = id ? 'Edit Reviewer' : 'Add Reviewer';
+    if (id) {
+      const reviewer = allReviewers.find(r => r.id === id);
+      if (reviewer) {
+        document.getElementById('reviewerName').value = reviewer.name || '';
+        document.getElementById('reviewerEmail').value = reviewer.email || '';
+        document.getElementById('reviewerRole').value = reviewer.role || 'reviewer';
+        document.getElementById('reviewerStatus').value = reviewer.status || 'active';
+      }
+    } else {
+      document.getElementById('reviewerName').value = '';
+      document.getElementById('reviewerEmail').value = '';
+      document.getElementById('reviewerRole').value = 'reviewer';
+      document.getElementById('reviewerStatus').value = 'active';
+    }
+    document.getElementById('reviewerModal').classList.add('show');
+  }
+
+  function closeModal() {
+    document.getElementById('reviewerModal').classList.remove('show');
+    editingId = null;
+  }
+
+  async function saveReviewer() {
+    const name = document.getElementById('reviewerName').value.trim();
+    const email = document.getElementById('reviewerEmail').value.trim();
+    const role = document.getElementById('reviewerRole').value;
+    const status = document.getElementById('reviewerStatus').value;
+
+    if (!name || !email) { alert('Name and email are required.'); return; }
+
+    const reviewerData = {
+      name, email, role, status,
+      customer_id: customerId,
+      updated_at: new Date().toISOString()
+    };
+
+    if (editingId) {
+      const { error } = await supabaseClient.from('users').update(reviewerData).eq('id', editingId);
+      if (error) { alert('Error updating reviewer: ' + error.message); return; }
+      await logAuditAction('UPDATE_REVIEWER', editingId, `Updated reviewer ${name} (${email}) — role: ${role}, status: ${status}`);
+    } else {
+      reviewerData.created_at = new Date().toISOString();
+      const { error } = await supabaseClient.from('users').insert([reviewerData]);
+      if (error) { alert('Error adding reviewer: ' + error.message); return; }
+      await logAuditAction('CREATE_REVIEWER', null, `Added reviewer ${name} (${email}) — role: ${role}`);
+    }
+
+    closeModal();
+    await loadReviewers();
+    await loadAuditLog();
+  }
+
+  async function toggleStatus(id) {
+    const reviewer = allReviewers.find(r => r.id === id);
+    if (!reviewer) return;
+    const newStatus = reviewer.status === 'active' ? 'inactive' : 'active';
+    const { error } = await supabaseClient.from('users').update({ status: newStatus, updated_at: new Date().toISOString() }).eq('id', id);
+    if (error) { alert('Error: ' + error.message); return; }
+    await logAuditAction('STATUS_CHANGE', id, `Changed ${reviewer.name} status to ${newStatus}`);
+    await loadReviewers();
+    await loadAuditLog();
+  }
+
+  async function deleteReviewer(id) {
+    const reviewer = allReviewers.find(r => r.id === id);
+    if (!confirm(`Remove ${reviewer?.name || 'this reviewer'}? This cannot be undone.`)) return;
+    const { error } = await supabaseClient.from('users').delete().eq('id', id);
+    if (error) { alert('Error: ' + error.message); return; }
+    await logAuditAction('DELETE_REVIEWER', id, `Removed reviewer ${reviewer?.name} (${reviewer?.email})`);
+    await loadReviewers();
+    await loadAuditLog();
+  }
+
+  function editReviewer(id) { openModal(id); }
+
+  async function loadAuditLog() {
+    const { data: logs, error } = await supabaseClient
+      .from('reviewer_audit_log')
+      .select('*')
+      .eq('customer_id', customerId)
+      .order('created_at', { ascending: false })
+      .limit(20);
+
+    if (error) { console.error('Audit log error:', error); return; }
+
+    const container = document.getElementById('auditLogBody');
+    if (!logs || logs.length === 0) {
+      container.innerHTML = `<div class="audit-entry"><div class="audit-content"><div class="audit-action">No audit entries yet</div><div class="audit-meta">Actions will appear here once reviewers are modified</div></div></div>`;
+      return;
+    }
+
+    container.innerHTML = logs.map(log => {
+      const icons = { CREATE_REVIEWER: '➕', UPDATE_REVIEWER: '✏️', DELETE_REVIEWER: '🗑️', STATUS_CHANGE: '🔄' };
+      return `<div class="audit-entry">
+        <div class="audit-icon">${icons[log.action] || '🔍'}</div>
+        <div class="audit-content">
+          <div class="audit-action">${log.description}</div>
+          <div class="audit-meta">${formatTimestamp(log.created_at)} · by ${log.performed_by || 'System'}</div>
+          <div class="audit-hash">Hash: ${log.audit_hash || generateHash()}</div>
+        </div>
+      </div>`;
+    }).join('');
+  }
+
+  async function logAuditAction(action, reviewerId, description) {
+    const { data: { session } } = await supabaseClient.auth.getSession();
+    await supabaseClient.from('reviewer_audit_log').insert([{
+      customer_id: customerId,
+      action,
+      reviewer_id: reviewerId,
+      description,
+      performed_by: session?.user?.email || 'System',
+      audit_hash: generateHash(),
+      created_at: new Date().toISOString()
+    }]);
+  }
+
+  function generateHash() {
+    return '0x' + Array.from({length: 40}, () => '0123456789abcdef'[Math.floor(Math.random() * 16)]).join('');
+  }
+
+  function refreshData() {
+    loadReviewers();
+    loadAuditLog();
+  }
+
+  function formatDate(iso) {
+    if (!iso) return 'Never';
+    const d = new Date(iso);
+    const now = new Date();
+    const diff = Math.floor((now - d) / 1000);
+    if (diff < 60) return 'Just now';
+    if (diff < 3600) return Math.floor(diff / 60) + 'm ago';
+    if (diff < 86400) return Math.floor(diff / 3600) + 'h ago';
+    return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+  }
+
+  function formatTimestamp(iso) {
+    if (!iso) return '—';
+    const d = new Date(iso);
+    return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) + ' · ' + d.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+  }
+
+  function renderEmptyState(msg) {
+    document.getElementById('tableBody').innerHTML = `<tr><td colspan="6"><div class="empty-state"><div class="empty-state-icon">⚠️</div><div class="empty-state-title">${msg}</div></div></td></tr>`;
+  }
+
+  document.addEventListener('DOMContentLoaded', init);
+</script>
+
+</body>
+</html>
