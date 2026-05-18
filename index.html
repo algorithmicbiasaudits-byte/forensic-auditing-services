@@ -4,8 +4,8 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>F.A.S. — Forensic Auditing Services | ALS Consulting</title>
-  <meta name="description" content="Forensic Auditing Services by ALS Consulting: Real-time AI hiring bias detection, human-in-the-loop compliance review, and court-ready audit trails for NYC LL144, Colorado SB205 (enforcement paused), EU AI Act, and EEOC compliance.">
-  <meta name="keywords" content="forensic auditing services, algorithmic bias auditing, AI hiring compliance, ATS bias detection, disparate impact analysis, NYC LL144 compliance, EU AI Act, EEOC hiring compliance, human in the loop hiring">
+  <meta name="description" content="Forensic Auditing Services by ALS Consulting: Real-time AI hiring bias detection, human-in-the-loop compliance review, and court-ready audit trails for NYC LL144, Colorado SB 189, EU AI Act, EEOC UGESP, OFCCP, and Illinois HB 3773.">
+  <meta name="keywords" content="forensic auditing services, algorithmic bias auditing, AI hiring compliance, ATS bias detection, disparate impact analysis, NYC LL144 compliance, Colorado SB 189, EU AI Act, EEOC UGESP, OFCCP compliance, human in the loop hiring">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,300&display=swap" rel="stylesheet">
@@ -536,6 +536,145 @@
       scroll-margin-top: 48px;
     }
 
+    /* ── JURISDICTION CARDS ── */
+    .jurisdiction-section {
+      background: var(--off-white);
+      padding: 80px 48px;
+      border-top: 1px solid #e8e6e0;
+      border-bottom: 1px solid #e8e6e0;
+    }
+
+    .jurisdiction-inner { max-width: 960px; margin: 0 auto; }
+
+    .jurisdiction-header { text-align: center; margin-bottom: 48px; }
+
+    .jurisdiction-header h2 {
+      font-family: 'Playfair Display', serif;
+      font-size: 34px;
+      color: var(--navy);
+      font-weight: 700;
+      margin-bottom: 16px;
+    }
+
+    .jurisdiction-header p { font-size: 15px; color: var(--gray-600); max-width: 580px; margin: 0 auto; }
+
+    .jurisdiction-cards {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 20px;
+    }
+
+    .jcard {
+      background: var(--white);
+      border: 1px solid #e8e6e0;
+      border-top: 3px solid var(--gold);
+      padding: 28px 24px;
+      position: relative;
+    }
+
+    .jcard.jcard-new { border-top-color: #16a34a; }
+    .jcard.jcard-building { border-top-color: #ca8a04; }
+    .jcard.jcard-active { border-top-color: var(--navy); }
+
+    .jcard-icon { font-size: 22px; margin-bottom: 12px; display: block; }
+
+    .jcard-title { font-size: 14px; font-weight: 700; color: var(--navy); margin-bottom: 4px; }
+
+    .jcard-citation { font-size: 11px; color: #888; font-family: monospace; letter-spacing: 0.5px; margin-bottom: 12px; }
+
+    .jcard-status {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 1px;
+      padding: 3px 10px;
+      border-radius: 2px;
+      margin-bottom: 14px;
+      text-transform: uppercase;
+    }
+
+    .jcard-status.active { background: #f0fdf4; color: #16a34a; border: 1px solid #bbf7d0; }
+    .jcard-status.building { background: #fefce8; color: #ca8a04; border: 1px solid #fde68a; }
+    .jcard-status.jan2027 { background: #fef2f2; color: #dc2626; border: 1px solid #fecaca; }
+
+    .jcard-rules { list-style: none; margin: 0; padding: 0; }
+
+    .jcard-rules li {
+      font-size: 12px;
+      color: var(--gray-600);
+      line-height: 1.7;
+      padding: 4px 0;
+      border-bottom: 1px solid #f0f0f0;
+      display: flex;
+      gap: 8px;
+      align-items: flex-start;
+    }
+
+    .jcard-rules li:last-child { border-bottom: none; }
+    .jcard-rules li::before { content: '—'; color: var(--gold); flex-shrink: 0; margin-top: 1px; }
+
+    .jcard-removed {
+      margin-top: 10px;
+      font-size: 11px;
+      color: #dc2626;
+      background: #fef2f2;
+      border: 1px solid #fecaca;
+      border-radius: 3px;
+      padding: 6px 10px;
+      line-height: 1.6;
+    }
+
+    .jcard-history-toggle {
+      margin-top: 14px;
+      font-size: 11px;
+      color: var(--gold);
+      cursor: pointer;
+      border: none;
+      background: none;
+      font-family: inherit;
+      padding: 0;
+      text-decoration: underline;
+      text-underline-offset: 2px;
+    }
+
+    .jcard-history {
+      display: none;
+      margin-top: 10px;
+      border-top: 1px solid #e8e6e0;
+      padding-top: 10px;
+    }
+
+    .jcard-history.open { display: block; }
+
+    .history-row {
+      display: flex;
+      gap: 10px;
+      font-size: 11px;
+      color: var(--gray-600);
+      padding: 4px 0;
+      line-height: 1.5;
+    }
+
+    .history-date {
+      font-family: monospace;
+      color: #888;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+
+    .jcard-contractor-note {
+      margin-top: 10px;
+      font-size: 11px;
+      color: var(--navy);
+      background: rgba(26,58,107,0.05);
+      border: 1px solid rgba(26,58,107,0.12);
+      border-radius: 3px;
+      padding: 6px 10px;
+      line-height: 1.6;
+    }
+
     @media (max-width: 768px) {
       header { flex-direction: column; padding: 20px; gap: 12px; }
       .anchor-nav { justify-content: flex-start; padding: 0 16px; }
@@ -551,6 +690,8 @@
       .steps::before { display: none; }
       .features, .deliverables-list { grid-template-columns: 1fr; }
       .audience-grid { grid-template-columns: 1fr; }
+      .jurisdiction-cards { grid-template-columns: 1fr; }
+      .jurisdiction-section { padding: 60px 24px; }
     }
   </style>
 </head>
@@ -583,7 +724,7 @@
     <h1>AI Hiring <em>Compliance</em><br>Before It Becomes Liability</h1>
     <p class="hero-lead">Real-time forensic auditing of every AI-driven rejection. Detect bias. Document decisions. Stay compliant — before a regulator asks.</p>
     <a href="waitlist.html" class="btn-gold">Join the Waitlist →</a>
-    <p class="hero-sub">Real-time interception. Human review. Court-defensible documentation.</p>
+    <p class="hero-sub">Built for <strong>legal defensibility</strong>, not just convenience.</p>
   </div>
 </section>
 
@@ -591,13 +732,13 @@
   <div class="compliance-inner">
     <span class="compliance-label">Compliance Coverage</span>
     <div class="compliance-tags">
+      <span class="tag">EEOC UGESP</span>
       <span class="tag">NYC LL144</span>
-      <span class="tag">Colorado SB205</span>
-      <span class="tag">Illinois AIVIA</span>
-      <span class="tag">California AB 2930</span>
+      <span class="tag">Colorado SB 189</span>
+      <span class="tag">Illinois HB 3773</span>
+      <span class="tag">California AB-1018</span>
+      <span class="tag">OFCCP</span>
       <span class="tag">EU AI Act</span>
-      <span class="tag">Texas TRAIGA</span>
-      <span class="tag">EEOC Guidelines</span>
     </div>
   </div>
 </div>
@@ -606,7 +747,117 @@
   <div class="section-label">The Compliance Gap</div>
   <h2>Your ATS Made a Decision.<br>Did Anyone Review It?</h2>
   <p>Companies using AI to screen candidates face a critical compliance gap. AI systems reject candidates in seconds — but compliance reviews happen weeks or months later, if at all. By then, the liability is done.</p>
-  <p>Regulators under NYC LL144, Colorado SB205 (enforcement paused; federal court stay April 27, 2026), the EU AI Act, and EEOC guidelines are already investigating. Your organization needs to audit before rejections execute — not after they become complaints.</p>
+  <p>Regulators under EEOC UGESP (federal baseline, all employers), NYC LL144, Colorado SB 189 (effective January 1, 2027), Illinois HB 3773 (active since January 2026), the EU AI Act, and OFCCP are already investigating. Your organization needs to audit before rejections execute — not after they become complaints.</p>
+</section>
+
+<section class="jurisdiction-section" id="jurisdictions">
+  <div class="jurisdiction-inner">
+    <div class="jurisdiction-header">
+      <div class="section-label">Jurisdiction Coverage</div>
+      <h2>Every Active Framework. One System.</h2>
+      <p>F.A.S. tracks all enforced and upcoming AI hiring laws so your compliance posture is always current.</p>
+    </div>
+    <div class="jurisdiction-cards">
+
+      <!-- UGESP -->
+      <div class="jcard jcard-active">
+        <span class="jcard-icon">⚖️</span>
+        <div class="jcard-title">EEOC UGESP — The Federal Baseline</div>
+        <div class="jcard-citation">29 C.F.R. Part 1607 · In force since 1978</div>
+        <span class="jcard-status active">● Active — All Employers</span>
+        <ul class="jcard-rules">
+          <li>4/5ths rule: selection rate &lt; 80% of highest group = adverse impact</li>
+          <li>Defense: job-related + consistent with business necessity</li>
+          <li>2-year applicant flow data retention required</li>
+          <li>AI tools confirmed as "selection procedures" (EEOC 2023)</li>
+        </ul>
+        <div class="jcard-contractor-note">⚠ EEOC guidance was removed from EEOC.gov in January 2025 — but 29 C.F.R. Part 1607 remains federal law and is fully enforceable.</div>
+      </div>
+
+      <!-- NYC LL144 -->
+      <div class="jcard jcard-active">
+        <span class="jcard-icon">🗽</span>
+        <div class="jcard-title">NYC Local Law 144</div>
+        <div class="jcard-citation">NYC Admin. Code §20-870 · Effective July 5, 2023</div>
+        <span class="jcard-status active">● Active</span>
+        <ul class="jcard-rules">
+          <li>Annual bias audit by independent third party required</li>
+          <li>10-day advance notice to candidates before AEDT use</li>
+          <li>Audit results published on company website</li>
+          <li>$500–$1,500 per violation per day</li>
+        </ul>
+      </div>
+
+      <!-- Colorado SB 189 -->
+      <div class="jcard jcard-building">
+        <span class="jcard-icon">🏔️</span>
+        <div class="jcard-title">Colorado SB 189 (ADMT Act)</div>
+        <div class="jcard-citation">C.R.S. §6-1-1801 et seq. · Signed May 14, 2026</div>
+        <span class="jcard-status jan2027">⚠ Effective January 1, 2027</span>
+        <ul class="jcard-rules">
+          <li>Pre-use notice to consumers required</li>
+          <li>Post-adverse-outcome disclosure within 30 days</li>
+          <li>3-year record retention</li>
+          <li>60-day cure period before penalty</li>
+        </ul>
+        <div class="jcard-removed">Annual impact assessments, risk management programs, and duty-of-care provisions — all REMOVED from prior bill. Notice-only framework.</div>
+        <button class="jcard-history-toggle" onclick="this.nextElementSibling.classList.toggle('open'); this.textContent = this.nextElementSibling.classList.contains('open') ? '▲ Hide legislative history' : '▼ Show legislative history'">▼ Show legislative history</button>
+        <div class="jcard-history">
+          <div class="history-row"><span class="history-date">May 2024</span><span>SB 205 passed — comprehensive requirements including annual audits</span></div>
+          <div class="history-row"><span class="history-date">Aug 2025</span><span>SB 205 delayed to June 30, 2026</span></div>
+          <div class="history-row"><span class="history-date">May 12, 2026</span><span>SB 189 passed — full repeal and replacement of SB 205</span></div>
+          <div class="history-row"><span class="history-date">May 14, 2026</span><span>Governor Polis signed SB 189 into law</span></div>
+          <div class="history-row"><span class="history-date">Jun 30, 2026</span><span>SB 205 NEVER takes effect — superseded by SB 189</span></div>
+          <div class="history-row"><span class="history-date">Jan 1, 2027</span><span>SB 189 (current law) takes effect</span></div>
+        </div>
+      </div>
+
+      <!-- Illinois HB 3773 -->
+      <div class="jcard jcard-active">
+        <span class="jcard-icon">🌾</span>
+        <div class="jcard-title">Illinois HB 3773</div>
+        <div class="jcard-citation">Pub. Act 103-0795 · Effective January 1, 2026</div>
+        <span class="jcard-status active">● Active</span>
+        <ul class="jcard-rules">
+          <li>AI notice to employees and applicants required</li>
+          <li>Strict liability for discriminatory effects — intent irrelevant</li>
+          <li>Zip code proxy discrimination explicitly banned</li>
+          <li>4-year record retention</li>
+        </ul>
+      </div>
+
+      <!-- OFCCP -->
+      <div class="jcard jcard-active">
+        <span class="jcard-icon">🏛️</span>
+        <div class="jcard-title">OFCCP — Federal Contractors</div>
+        <div class="jcard-citation">41 C.F.R. Parts 60-1, 60-300, 60-741</div>
+        <span class="jcard-status active">● Active — Contractors Only</span>
+        <ul class="jcard-rules">
+          <li>Applies: $50K+ contracts (Section 503) / $150K+ (VEVRAA)</li>
+          <li>Written AAP required at $50K+ with 50+ employees</li>
+          <li>VEVRAA veteran hiring benchmark: 5.1%</li>
+          <li>2-year retention: AI inputs, logs, hiring records</li>
+          <li>Vendor contracts must include audit access clause</li>
+        </ul>
+        <div class="jcard-contractor-note">Federal contractors and subcontractors only. Activate in F.A.S. settings if your organization holds qualifying federal contracts.</div>
+      </div>
+
+      <!-- EU AI Act -->
+      <div class="jcard jcard-building">
+        <span class="jcard-icon">🇪🇺</span>
+        <div class="jcard-title">EU AI Act</div>
+        <div class="jcard-citation">Regulation (EU) 2024/1689 · High-risk employment AI</div>
+        <span class="jcard-status building">◑ Effective August 2, 2026</span>
+        <ul class="jcard-rules">
+          <li>Employment AI classified as high-risk</li>
+          <li>Human oversight of high-risk decisions required</li>
+          <li>Conformity assessment before deployment</li>
+          <li>Up to €35M or 7% of global annual turnover</li>
+        </ul>
+      </div>
+
+    </div>
+  </div>
 </section>
 
 <section class="three-second">
@@ -683,7 +934,7 @@
       <div class="feature">
         <span class="feature-icon">🌐</span>
         <h3>Multi-Jurisdiction Coverage</h3>
-        <p>NYC LL144, Colorado SB205, Illinois AIVIA, California AB 2930, EU AI Act, Texas TRAIGA, and EEOC standards. One system covers all active frameworks.</p>
+        <p>EEOC UGESP (federal baseline), NYC LL144, Colorado SB 189, Illinois HB 3773, California AB-1018, OFCCP, and EU AI Act. One system. All active frameworks.</p>
       </div>
       <div class="feature">
         <span class="feature-icon">⚡</span>
@@ -781,15 +1032,18 @@
     <h2>F.A.S. <em>Waitlist</em></h2>
     <p>Real-time bias detection for AI hiring. Human review at every rejection. Court-defensible audit trail.</p>
     <p style="margin-top: 16px;"><strong style="color: var(--white);">Starting at $497/month.</strong> Setup from $2,500. Annual commitment.</p>
+    <p style="margin-top: 8px; font-size: 12px; color: rgba(255,255,255,0.4);">Pricing subject to change based on jurisdiction count and audit volume.</p>
     <br>
     <a href="waitlist.html" class="btn-gold">Join the Waitlist →</a>
-    <p class="waitlist-sub">Expected availability: Q3 2026. Questions? <a href="https://alsconsulting.services/contact" style="color: var(--gold);">Contact ALS Consulting</a></p>
+    <p class="waitlist-sub" style="margin-top: 16px; color: rgba(255,255,255,0.55); font-size: 14px;">Be the first to access F.A.S. when we launch in Q3 2026.</p>
+    <p class="waitlist-sub">You'll receive compliance alerts and product updates.</p>
+    <p class="waitlist-sub" style="margin-top: 12px;">Q3 2026 availability — <a href="waitlist.html" style="color: var(--gold);">Join waitlist for early access</a> · Questions? <a href="https://calendly.com/astargill-ih3e/30min" style="color: var(--gold);">Book a call</a></p>
   </div>
 </section>
 
 <footer>
   <div class="brand">F.A.S. — Forensic Auditing Services</div>
-  <p>A service of ALS Consulting</p>
+  <p>A service of ALS Consulting — Forensic Auditing Services (F.A.S.)</p>
   <p style="margin-top: 16px;">
     <a href="contact.html">Contact</a> &nbsp;|&nbsp;
     <a href="terms.html">Terms</a> &nbsp;|&nbsp;
@@ -799,6 +1053,8 @@
     <a href="security.html">Security</a>
   </p>
   <p style="margin-top: 16px; font-size: 11px; color: rgba(255,255,255,0.25);">© 2026 ALS Consulting Services. All rights reserved.</p>
+  <p style="margin-top: 8px; font-size: 11px; color: rgba(255,255,255,0.3);">F.A.S. is a compliance technology platform, not a law firm.</p>
+  <p style="margin-top: 4px; font-size: 11px; color: rgba(255,255,255,0.25);">Jurisdiction information last verified: May 18, 2026 · Legislative changes are monitored in real-time.</p>
 </footer>
 
 <script>
