@@ -543,39 +543,17 @@
 
 <!-- SIDEBAR -->
 <aside class="sidebar">
-  <div class="sidebar-label">Main</div>
-  <div class="sidebar-section">
-    <a class="sidebar-link active" onclick="showView('dashboard')">
-      <span class="icon">📊</span> Dashboard
-    </a>
-    <a class="sidebar-link" onclick="showView('rejections')">
-      <span class="icon">🚨</span> Rejections
-      <span class="sidebar-badge" id="pending-badge">0</span>
-    </a>
-    <a class="sidebar-link" onclick="showView('reports')">
-      <span class="icon">📋</span> Reports
-    </a>
-  </div>
+  <div class="sidebar-section-label">MAIN</div>
+  <a href="main.html" class="sidebar-link active"><span class="icon">📊</span> Dashboard</a>
+  <a href="rejections.html" class="sidebar-link"><span class="icon">🚨</span> Rejections</a>
+  <a href="reports.html" class="sidebar-link"><span class="icon">📋</span> Reports</a>
 
-  <div class="sidebar-label" style="margin-top:16px;">Compliance</div>
-  <div class="sidebar-section">
-    <a class="sidebar-link" onclick="showView('audit-trail')">
-      <span class="icon">🔒</span> Audit Trail
-    </a>
-    <a class="sidebar-link" onclick="showView('reviewers')">
-      <span class="icon">👥</span> Reviewers
-    </a>
-  </div>
+  <div class="sidebar-section-label">COMPLIANCE</div>
+  <a href="audit-trail.html" class="sidebar-link"><span class="icon">🔒</span> Audit Trail</a>
+  <a href="reviewers.html" class="sidebar-link"><span class="icon">👥</span> Reviewers</a>
 
-  <div class="sidebar-label" style="margin-top:16px;">System</div>
-  <div class="sidebar-section">
-    <a class="sidebar-link" onclick="showView('settings')">
-      <span class="icon">⚙️</span> Settings
-    </a>
-    <a class="sidebar-link" onclick="showView('docs')">
-      <span class="icon">📖</span> IT Setup Docs
-    </a>
-  </div>
+  <div class="sidebar-section-label">SYSTEM</div>
+  <a href="settings.html" class="sidebar-link"><span class="icon">⚙️</span> Settings</a>
 </aside>
 
 <!-- MAIN CONTENT -->
