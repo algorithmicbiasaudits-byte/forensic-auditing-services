@@ -19,10 +19,11 @@
       --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.1);
       --shadow-lg: 0 10px 15px -3px rgba(0,0,0,0.1);
       --font-mono: 'SF Mono', Monaco, 'Cascadia Code', Consolas, monospace;
+      --banner-h: 51px;
     }
 
     * { margin: 0; padding: 0; box-sizing: border-box; }
-    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; font-size: 13px; color: var(--text-primary); background: var(--bg-page); line-height: 1.5; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; font-size: 13px; color: var(--text-primary); background: var(--bg-page); line-height: 1.5; overflow: hidden; }
     a { text-decoration: none; color: inherit; }
     button { cursor: pointer; font-family: inherit; }
 
@@ -36,7 +37,7 @@
     .user-name { font-size: 13px; color: var(--text-secondary); }
     .role-badge-nav { font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; padding: 3px 10px; border-radius: 100px; background: var(--gold-bg); color: var(--gold); border: 1px solid rgba(184,135,46,0.15); }
 
-    /* ── LIVE BANNER (sits below topnav) ── */
+    /* ── LIVE BANNER ── */
     .live-banner { position: fixed; top: 56px; left: 220px; right: 0; z-index: 150; background: linear-gradient(90deg, #fefce8, #fef9c3); border-bottom: 3px solid var(--warning); padding: 10px 24px; display: flex; align-items: center; justify-content: space-between; transition: all 0.2s; }
     .live-banner.critical { background: linear-gradient(90deg, var(--danger-bg), #fecaca); border-bottom-color: var(--danger); animation: pulse-border 1s infinite; }
     @keyframes pulse-border { 0%,100% { border-bottom-color: var(--danger); } 50% { border-bottom-color: #991b1b; } }
@@ -54,11 +55,6 @@
     .sidebar-link.active { background: var(--gold-bg); color: var(--gold); font-weight: 600; border-left: 3px solid var(--gold); padding-left: 13px; margin-left: 9px; }
     .sidebar-link .icon { font-size: 16px; width: 20px; text-align: center; }
 
-    /* ── MAIN CONTENT ── */
-    .main-content { margin-left: 220px; margin-top: 56px; padding: 0; min-height: calc(100vh - 56px); }
-    .main-content.has-banner { margin-top: 56px; padding-top: 51px; }
-    .content-inner { padding: 24px 28px 80px; }
-
     /* ── BUTTONS ── */
     .btn { display: inline-flex; align-items: center; justify-content: center; gap: 6px; font-family: inherit; font-size: 12px; font-weight: 600; padding: 7px 16px; border-radius: 6px; border: 1px solid transparent; cursor: pointer; transition: all 0.15s; white-space: nowrap; }
     .btn-sm { padding: 5px 12px; font-size: 11px; }
@@ -71,95 +67,140 @@
     .btn-gold { background: var(--gold); color: var(--white); border-color: var(--gold); }
     .btn-gold:hover { background: var(--gold-light); }
 
-    /* ── BREADCRUMB ── */
-    .breadcrumb { display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--text-muted); margin-bottom: 16px; }
-    .breadcrumb a { color: var(--gold); }
-    .breadcrumb a:hover { text-decoration: underline; }
-
-    /* ── SECTION SPACING ── */
-    .section { margin-bottom: 20px; }
-
     /* ─────────────────────────────────────────
-       1. THREAT HEADER
+       MAIN CONTENT — split pane wrapper
     ───────────────────────────────────────── */
-    .threat-header { background: var(--white); border: 1px solid var(--border); border-radius: 10px; padding: 20px 24px; box-shadow: var(--shadow-sm); }
-    .threat-header-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; margin-bottom: 16px; }
-    .threat-left { display: flex; align-items: flex-start; gap: 16px; }
-    .threat-risk-badge { padding: 6px 16px; border-radius: 6px; font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; flex-shrink: 0; }
-    .threat-risk-badge.high { background: var(--danger-bg); color: var(--danger); border: 1px solid var(--danger-border); }
-    .threat-risk-badge.medium { background: var(--warning-bg); color: var(--warning); border: 1px solid var(--warning-border); }
-    .threat-risk-badge.low { background: var(--success-bg); color: var(--success); border: 1px solid var(--success-border); }
-    .threat-summary { flex: 1; }
-    .threat-summary-title { font-size: 17px; font-weight: 700; color: var(--text-primary); margin-bottom: 4px; }
-    .threat-summary-text { font-size: 13px; color: var(--text-secondary); line-height: 1.6; }
-    .threat-right { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
-    .threat-meta { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 12px; padding-top: 16px; border-top: 1px solid var(--border); }
-    .meta-item { display: flex; flex-direction: column; gap: 2px; }
-    .meta-label { font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-dim); }
-    .meta-value { font-size: 13px; font-weight: 600; color: var(--text-primary); font-family: var(--font-mono); }
-    .score-pill { display: flex; align-items: center; gap: 8px; background: var(--bg-page); border: 1px solid var(--border); border-radius: 8px; padding: 8px 16px; }
-    .score-number { font-family: var(--font-mono); font-size: 28px; font-weight: 700; color: var(--warning); line-height: 1; }
-    .score-number.high { color: var(--danger); }
-    .score-number.low { color: var(--success); }
-    .score-label { font-size: 11px; color: var(--text-muted); }
-    .flag-pill { display: flex; align-items: center; gap: 6px; background: var(--danger-bg); border: 1px solid var(--danger-border); border-radius: 8px; padding: 8px 14px; }
-    .flag-number { font-size: 22px; font-weight: 700; color: var(--danger); line-height: 1; }
-    .flag-label { font-size: 11px; color: #991b1b; }
+    .main-content {
+      position: fixed;
+      top: 56px;
+      left: 220px;
+      right: 0;
+      bottom: 0;
+      display: flex;
+      flex-direction: column;
+    }
+    .main-content.has-banner { top: calc(56px + var(--banner-h)); }
 
-    /* ─────────────────────────────────────────
-       2. LEGAL COMPLIANCE PANEL
-    ───────────────────────────────────────── */
-    .legal-panel { border-radius: 10px; border: 2px solid var(--danger); background: var(--danger-bg); padding: 18px 20px; }
+    /* ── BREADCRUMB BAR ── */
+    .breadcrumb-bar { flex-shrink: 0; padding: 10px 20px; background: var(--white); border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--text-muted); }
+    .breadcrumb-bar a { color: var(--gold); }
+    .breadcrumb-bar a:hover { text-decoration: underline; }
+
+    /* ── SPLIT PANE ── */
+    .split-pane { flex: 1; display: flex; overflow: hidden; }
+
+    /* ── LEFT PANE ── */
+    .split-left { width: 280px; flex-shrink: 0; border-right: 1px solid var(--border); background: var(--white); overflow-y: auto; display: flex; flex-direction: column; gap: 0; }
+    .left-section { padding: 16px; border-bottom: 1px solid var(--border); }
+    .left-section:last-child { border-bottom: none; }
+    .left-section-label { font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.07em; color: var(--text-dim); margin-bottom: 10px; }
+
+    /* Candidate card */
+    .cand-risk-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+    .risk-badge { padding: 4px 12px; border-radius: 6px; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; }
+    .risk-badge.high { background: var(--danger-bg); color: var(--danger); border: 1px solid var(--danger-border); }
+    .risk-badge.medium { background: var(--warning-bg); color: var(--warning); border: 1px solid var(--warning-border); }
+    .risk-badge.low { background: var(--success-bg); color: var(--success); border: 1px solid var(--success-border); }
+    .cand-score-pair { display: flex; align-items: baseline; gap: 4px; }
+    .cand-score-num { font-family: var(--font-mono); font-size: 22px; font-weight: 700; color: var(--danger); }
+    .cand-score-lbl { font-size: 10px; color: var(--text-muted); }
+    .cand-name { font-size: 14px; font-weight: 700; color: var(--text-primary); margin-bottom: 2px; }
+    .cand-role { font-size: 12px; color: var(--text-secondary); margin-bottom: 10px; }
+    .cand-meta { display: flex; flex-direction: column; gap: 6px; }
+    .cand-meta-row { display: flex; gap: 6px; align-items: flex-start; }
+    .cand-meta-icon { font-size: 12px; flex-shrink: 0; margin-top: 1px; }
+    .cand-meta-text { font-size: 12px; color: var(--text-secondary); }
+    .cand-meta-sub { font-size: 10px; color: var(--text-dim); }
+    .reveal-btn { margin-top: 12px; width: 100%; padding: 7px; border: 1px solid var(--border); border-radius: 6px; background: var(--bg-page); font-size: 12px; font-weight: 500; color: var(--text-secondary); cursor: pointer; transition: all 0.15s; }
+    .reveal-btn:hover { background: var(--white); border-color: var(--gold); color: var(--gold); }
+
+    /* Timer widget in left pane */
+    .timer-widget { text-align: center; }
+    .timer-big { font-family: var(--font-mono); font-size: 32px; font-weight: 700; color: var(--text-primary); line-height: 1; margin-bottom: 4px; }
+    .timer-big.critical { color: var(--danger); }
+    .timer-label { font-size: 11px; color: var(--text-muted); margin-bottom: 12px; }
+    .timer-actions { display: flex; gap: 6px; }
+    .timer-actions .btn { flex: 1; font-size: 11px; padding: 6px 8px; justify-content: center; }
+
+    /* Flag summary in left pane */
+    .left-flag-list { display: flex; flex-direction: column; gap: 6px; }
+    .left-flag-item { display: flex; align-items: center; gap: 8px; padding: 8px 10px; border-radius: 6px; cursor: pointer; border: 1px solid transparent; transition: all 0.15s; }
+    .left-flag-item:hover { background: var(--bg-page); }
+    .left-flag-item.active { background: var(--gold-bg); border-color: rgba(184,135,46,0.25); }
+    .left-flag-icon { font-size: 14px; flex-shrink: 0; }
+    .left-flag-name { font-size: 12px; font-weight: 600; color: var(--text-primary); flex: 1; }
+    .left-flag-status { font-size: 10px; font-weight: 700; padding: 2px 7px; border-radius: 100px; }
+    .left-flag-status.triggered { background: var(--warning-bg); color: var(--warning); border: 1px solid var(--warning-border); }
+    .left-flag-status.critical { background: var(--danger-bg); color: var(--danger); border: 1px solid var(--danger-border); }
+    .left-flag-status.clean { background: var(--success-bg); color: var(--success); border: 1px solid var(--success-border); }
+    .left-flag-reviewed { color: var(--success); font-size: 14px; flex-shrink: 0; }
+
+    /* Resume link */
+    .resume-link { display: flex; align-items: center; gap: 8px; padding: 10px 12px; background: var(--bg-page); border: 1px solid var(--border); border-radius: 8px; font-size: 12px; font-weight: 600; color: var(--info); cursor: pointer; transition: all 0.15s; }
+    .resume-link:hover { background: var(--info-bg); border-color: var(--info); }
+
+    /* ── RIGHT PANE ── */
+    .split-right { flex: 1; display: flex; flex-direction: column; overflow: hidden; background: var(--bg-page); }
+
+    /* Flag selector row */
+    .flag-selector { flex-shrink: 0; background: var(--white); border-bottom: 1px solid var(--border); padding: 12px 20px; }
+    .flag-selector-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-dim); margin-bottom: 8px; }
+    .flag-selector-row { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 2px; }
+    .flag-selector-row::-webkit-scrollbar { height: 3px; }
+    .flag-selector-row::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+    .flag-card { flex-shrink: 0; padding: 10px 14px; border: 2px solid var(--border); border-radius: 8px; cursor: pointer; transition: all 0.15s; background: var(--white); min-width: 140px; position: relative; }
+    .flag-card:hover { border-color: var(--text-secondary); }
+    .flag-card.active { border-color: var(--gold); background: var(--gold-bg); }
+    .flag-card.severity-high { border-left: 3px solid var(--danger); }
+    .flag-card.severity-medium { border-left: 3px solid var(--warning); }
+    .flag-card.severity-clean { border-left: 3px solid var(--success); }
+    .flag-card.active.severity-high { border-color: var(--gold); border-left-color: var(--danger); }
+    .flag-card.active.severity-medium { border-color: var(--gold); border-left-color: var(--warning); }
+    .flag-card-icon { font-size: 16px; margin-bottom: 4px; }
+    .flag-card-name { font-size: 11px; font-weight: 700; color: var(--text-primary); margin-bottom: 2px; }
+    .flag-card-sub { font-size: 10px; color: var(--text-muted); }
+    .flag-card-check { position: absolute; top: 6px; right: 8px; font-size: 14px; display: none; }
+    .flag-card.reviewed .flag-card-check { display: block; }
+
+    /* Evidence scroll area */
+    .evidence-scroll { flex: 1; overflow-y: auto; padding: 16px 20px; display: flex; flex-direction: column; gap: 14px; }
+
+    /* Legal panel */
+    .legal-panel { border-radius: 10px; border: 2px solid var(--danger); background: var(--danger-bg); padding: 16px 18px; }
     .legal-panel.compliant { border-color: var(--success); background: var(--success-bg); }
-    .legal-panel-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
-    .legal-panel-title { display: flex; align-items: center; gap: 8px; font-size: 14px; font-weight: 700; color: #991b1b; }
+    .legal-panel-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
+    .legal-panel-title { display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 700; color: #991b1b; }
     .legal-panel.compliant .legal-panel-title { color: #166534; }
-    .legal-panel-body { font-size: 13px; color: #7f1d1d; line-height: 1.7; margin-bottom: 12px; }
+    .legal-panel-body { font-size: 12px; color: #7f1d1d; line-height: 1.7; margin-bottom: 10px; }
     .legal-panel.compliant .legal-panel-body { color: #166534; }
     .legal-panel-actions { display: flex; gap: 8px; flex-wrap: wrap; }
-    .legal-freeze-notice { display: flex; align-items: center; gap: 8px; background: var(--danger); color: var(--white); font-size: 11px; font-weight: 700; padding: 4px 12px; border-radius: 100px; }
-    .btn-legal { background: var(--white); color: var(--danger); border: 1px solid var(--danger-border); padding: 6px 14px; border-radius: 6px; font-size: 12px; font-weight: 600; cursor: pointer; }
+    .legal-freeze-notice { display: inline-flex; align-items: center; gap: 6px; background: var(--danger); color: var(--white); font-size: 10px; font-weight: 700; padding: 3px 10px; border-radius: 100px; }
+    .btn-legal { background: var(--white); color: var(--danger); border: 1px solid var(--danger-border); padding: 5px 12px; border-radius: 6px; font-size: 11px; font-weight: 600; cursor: pointer; }
     .btn-legal:hover { background: var(--danger-border); }
-    .btn-legal.compliant { color: var(--success); border-color: var(--success-border); }
-    .btn-legal.compliant:hover { background: var(--success-bg); }
 
-    /* ─────────────────────────────────────────
-       3. STORY CARDS (Plain Language Flags)
-    ───────────────────────────────────────── */
-    .story-section-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
-    .story-section-title { font-size: 15px; font-weight: 700; color: var(--text-primary); }
-    .story-section-sub { font-size: 12px; color: var(--text-muted); }
-    .story-card { background: var(--white); border: 1px solid var(--border); border-radius: 10px; box-shadow: var(--shadow-sm); margin-bottom: 14px; overflow: hidden; }
+    /* Evidence panel — flag content */
+    .evidence-panel { display: none; }
+    .evidence-panel.active { display: block; }
+    .evidence-heading { font-size: 14px; font-weight: 700; color: var(--text-primary); margin-bottom: 12px; display: flex; align-items: center; gap: 8px; }
+    .story-card { background: var(--white); border: 1px solid var(--border); border-radius: 10px; box-shadow: var(--shadow-sm); overflow: hidden; }
     .story-card.flag-high { border-left: 4px solid var(--danger); }
     .story-card.flag-medium { border-left: 4px solid var(--warning); }
-    .story-card.flag-low { border-left: 4px solid var(--text-dim); }
-    .story-card-header { display: flex; align-items: center; justify-content: space-between; padding: 14px 18px; }
-    .story-card-left { display: flex; align-items: center; gap: 10px; }
-    .story-icon { width: 34px; height: 34px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 16px; flex-shrink: 0; }
-    .story-icon.high { background: var(--danger-bg); }
-    .story-icon.medium { background: var(--warning-bg); }
-    .story-icon.clean { background: var(--success-bg); }
-    .story-card-title { font-size: 14px; font-weight: 700; color: var(--text-primary); }
-    .story-card-subtitle { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
-    .story-status-badge { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; padding: 3px 10px; border-radius: 100px; }
-    .story-status-badge.triggered { background: var(--warning-bg); color: var(--warning); border: 1px solid var(--warning-border); }
-    .story-status-badge.critical { background: var(--danger-bg); color: var(--danger); border: 1px solid var(--danger-border); }
-    .story-status-badge.clean { background: var(--success-bg); color: var(--success); border: 1px solid var(--success-border); }
-    .story-card-body { padding: 0 18px 18px; }
-    .story-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 14px; }
+    .story-card.flag-clean { border-left: 4px solid var(--success); }
+    .story-card-body { padding: 16px 18px; }
+    .story-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px; }
     .story-cell { background: var(--bg-page); border-radius: 8px; padding: 12px 14px; }
-    .story-cell-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-dim); margin-bottom: 6px; display: flex; align-items: center; gap: 6px; }
+    .story-cell-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-dim); margin-bottom: 6px; }
     .story-cell-label.ats { color: #64748b; }
     .story-cell-label.human { color: var(--success); }
-    .story-cell-text { font-size: 13px; color: var(--text-primary); line-height: 1.6; }
+    .story-cell-text { font-size: 12px; color: var(--text-primary); line-height: 1.6; }
     .story-cell.ats-cell { background: #f8fafc; }
     .story-cell.human-cell { background: #f0fdf4; }
     .story-meaning { background: var(--info-bg); border: 1px solid var(--info-border); border-radius: 8px; padding: 12px 14px; margin-bottom: 10px; }
     .story-meaning-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: var(--info); margin-bottom: 4px; }
-    .story-meaning-text { font-size: 13px; color: #1e40af; line-height: 1.6; }
+    .story-meaning-text { font-size: 12px; color: #1e40af; line-height: 1.6; }
     .story-action { display: flex; align-items: center; justify-content: space-between; background: var(--gold-bg); border: 1px solid rgba(184,135,46,0.2); border-radius: 8px; padding: 10px 14px; }
     .story-action-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: var(--gold); margin-bottom: 2px; }
-    .story-action-text { font-size: 13px; font-weight: 600; color: var(--navy); }
+    .story-action-text { font-size: 12px; font-weight: 600; color: var(--navy); }
     .story-stat { background: var(--info-bg); border-left: 3px solid var(--info); border-radius: 0 6px 6px 0; padding: 10px 14px; margin-top: 10px; font-size: 12px; color: #1e40af; line-height: 1.6; }
     .story-stat strong { font-weight: 700; }
     .story-stat-toggle { display: flex; align-items: center; gap: 6px; margin-top: 6px; font-size: 11px; color: var(--info); cursor: pointer; }
@@ -168,114 +209,133 @@
     input[type="checkbox"] { display: none; }
     input[type="checkbox"]:checked + .toggle-slider { background: var(--info); }
     input[type="checkbox"]:checked + .toggle-slider::after { transform: translateX(14px); }
-
-    /* Clean lane (collapsed summary) */
-    .clean-lane { background: var(--white); border: 1px solid var(--border); border-left: 4px solid var(--success); border-radius: 10px; padding: 12px 16px; margin-bottom: 10px; display: flex; align-items: center; justify-content: space-between; cursor: pointer; transition: box-shadow 0.15s; }
-    .clean-lane:hover { box-shadow: var(--shadow-sm); }
-    .clean-lane-left { display: flex; align-items: center; gap: 10px; }
-    .clean-lane-name { font-size: 13px; font-weight: 600; color: var(--text-secondary); }
-    .clean-lane-detail { font-size: 12px; color: var(--text-muted); }
-
-    /* Reviewer notes inside story card */
     .notes-section { margin-top: 12px; padding-top: 12px; border-top: 1px dashed var(--border); }
     .notes-label { font-size: 11px; font-weight: 600; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 8px; }
     .notes-templates { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 8px; }
     .note-chip { font-size: 11px; padding: 4px 10px; background: var(--bg-page); border: 1px solid var(--border); border-radius: 100px; cursor: pointer; color: var(--text-secondary); transition: all 0.15s; }
     .note-chip:hover { background: var(--info-bg); border-color: var(--info); color: var(--info); }
     .note-chip.active { background: var(--info); border-color: var(--info); color: var(--white); }
-    .note-textarea { width: 100%; min-height: 72px; padding: 10px 12px; font-family: inherit; font-size: 12px; border: 1px solid var(--border); border-radius: 6px; background: var(--white); color: var(--text-primary); resize: vertical; outline: none; transition: border-color 0.15s; }
+    .note-textarea { width: 100%; min-height: 64px; padding: 10px 12px; font-family: inherit; font-size: 12px; border: 1px solid var(--border); border-radius: 6px; background: var(--white); color: var(--text-primary); resize: vertical; outline: none; transition: border-color 0.15s; }
     .note-textarea:focus { border-color: var(--gold); }
     .note-meta-row { display: flex; justify-content: space-between; align-items: center; margin-top: 4px; font-size: 11px; color: var(--text-dim); }
     .note-save-status { color: var(--success); font-weight: 600; }
 
-    /* ─────────────────────────────────────────
-       4. DECISION SECTION
-    ───────────────────────────────────────── */
-    .decision-section { background: var(--white); border: 1px solid var(--border); border-radius: 10px; box-shadow: var(--shadow-md); position: sticky; bottom: 0; z-index: 100; }
-    .decision-header { padding: 14px 20px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
-    .decision-title { font-size: 14px; font-weight: 700; color: var(--text-primary); }
-    .decision-subtitle { font-size: 12px; color: var(--text-muted); }
-    .decision-body { padding: 16px 20px; }
-    .decision-choices { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 16px; }
-    .decision-choice { border: 2px solid var(--border); border-radius: 8px; padding: 14px 16px; cursor: pointer; transition: all 0.15s; background: var(--white); text-align: left; }
-    .decision-choice:hover { border-color: var(--text-secondary); }
-    .decision-choice.selected-override { border-color: var(--success); background: var(--success-bg); }
-    .decision-choice.selected-escalate { border-color: var(--warning); background: var(--warning-bg); }
-    .decision-choice.selected-confirm { border-color: var(--danger); background: var(--danger-bg); }
-    .decision-choice-icon { font-size: 20px; margin-bottom: 6px; }
-    .decision-choice-label { font-size: 13px; font-weight: 700; color: var(--text-primary); margin-bottom: 4px; }
-    .decision-choice-desc { font-size: 11px; color: var(--text-muted); line-height: 1.5; }
-    .decision-blocked { display: flex; align-items: center; gap: 8px; background: var(--danger-bg); border: 1px solid var(--danger-border); border-radius: 8px; padding: 10px 14px; margin-bottom: 14px; font-size: 12px; color: #991b1b; font-weight: 600; }
-    .justification-section { margin-bottom: 14px; }
-    .justification-label { font-size: 12px; font-weight: 600; color: var(--text-secondary); margin-bottom: 8px; display: flex; align-items: center; gap: 6px; }
-    .justification-required { color: var(--danger); font-size: 10px; }
-    .template-chips { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 8px; }
-    .template-chip { font-size: 11px; padding: 4px 10px; background: var(--bg-page); border: 1px solid var(--border); border-radius: 100px; cursor: pointer; color: var(--text-secondary); transition: all 0.15s; }
-    .template-chip:hover { background: var(--info-bg); border-color: var(--info); color: var(--info); }
-    .template-chip.active { background: var(--navy); border-color: var(--navy); color: var(--white); }
-    .justification-textarea { width: 100%; min-height: 90px; padding: 10px 12px; font-family: inherit; font-size: 13px; border: 1px solid var(--border); border-radius: 8px; background: var(--white); color: var(--text-primary); resize: vertical; outline: none; transition: border-color 0.15s; }
-    .justification-textarea:focus { border-color: var(--gold); }
-    .decision-footer { display: flex; align-items: center; justify-content: space-between; }
-    .decision-hint { font-size: 11px; color: var(--text-dim); }
-    .btn-submit { padding: 10px 28px; border: none; border-radius: 6px; background: var(--navy); font-size: 13px; font-weight: 700; color: var(--white); cursor: pointer; transition: background 0.15s; }
-    .btn-submit:hover { background: #1a2d4e; }
-    .btn-submit:disabled { opacity: 0.4; cursor: not-allowed; }
+    /* Clean lane evidence */
+    .clean-lane-detail-card { background: var(--white); border: 1px solid var(--border); border-left: 4px solid var(--success); border-radius: 10px; padding: 14px 18px; }
+    .clean-lane-heading { font-size: 13px; font-weight: 700; color: var(--success); margin-bottom: 8px; }
+    .clean-lane-text { font-size: 12px; color: var(--text-secondary); line-height: 1.6; }
+    .clean-score-row { display: flex; align-items: center; gap: 10px; margin-top: 10px; }
+    .clean-score-label { font-size: 11px; color: var(--text-muted); }
+    .clean-score-bar-wrap { flex: 1; height: 6px; background: var(--border); border-radius: 3px; overflow: hidden; }
+    .clean-score-bar { height: 100%; background: var(--success); border-radius: 3px; }
+    .clean-score-val { font-family: var(--font-mono); font-size: 11px; color: var(--text-muted); min-width: 40px; text-align: right; }
 
-    /* ─────────────────────────────────────────
-       5. TECHNICAL DETAILS (collapsed)
-    ───────────────────────────────────────── */
-    .tech-details { background: var(--white); border: 1px solid var(--border); border-radius: 10px; overflow: hidden; }
-    .tech-details-toggle { display: flex; align-items: center; justify-content: space-between; padding: 14px 18px; cursor: pointer; user-select: none; transition: background 0.15s; }
-    .tech-details-toggle:hover { background: var(--bg-page); }
-    .tech-details-toggle-left { display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 600; color: var(--text-secondary); }
-    .tech-chevron { font-size: 12px; color: var(--text-dim); transition: transform 0.15s; }
-    .tech-chevron.open { transform: rotate(180deg); }
-    .tech-body { display: none; padding: 0 18px 18px; }
-    .tech-body.open { display: block; }
-    .tech-section { margin-bottom: 18px; }
-    .tech-section:last-child { margin-bottom: 0; }
-    .tech-section-title { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-dim); margin-bottom: 8px; padding-top: 14px; border-top: 1px solid var(--border); }
-    .tech-section:first-child .tech-section-title { border-top: none; padding-top: 0; }
-    .lane-score-row { display: flex; align-items: center; gap: 10px; padding: 8px 0; border-bottom: 1px solid var(--border); }
-    .lane-score-row:last-child { border-bottom: none; }
-    .lane-score-name { font-size: 12px; color: var(--text-secondary); flex: 1; }
-    .lane-score-bar-wrap { width: 120px; height: 6px; background: var(--border); border-radius: 3px; overflow: hidden; }
-    .lane-score-bar { height: 100%; border-radius: 3px; }
-    .lane-score-bar.high { background: var(--danger); }
-    .lane-score-bar.medium { background: var(--warning); }
-    .lane-score-bar.low { background: var(--success); }
-    .lane-score-val { font-family: var(--font-mono); font-size: 11px; color: var(--text-muted); min-width: 40px; text-align: right; }
-    pre.tech-pre { font-family: var(--font-mono); font-size: 11px; color: var(--text-secondary); background: var(--bg-page); border: 1px solid var(--border); border-radius: 6px; padding: 12px; line-height: 1.7; white-space: pre-wrap; word-break: break-word; overflow-x: auto; }
-    .hash-display { display: flex; align-items: center; gap: 10px; background: var(--bg-page); border: 1px solid var(--border); border-radius: 6px; padding: 10px 14px; }
-    .hash-value { font-family: var(--font-mono); font-size: 11px; color: var(--text-secondary); flex: 1; word-break: break-all; }
-    .hash-copy { font-size: 11px; padding: 4px 10px; border: 1px solid var(--border); border-radius: 4px; background: var(--white); cursor: pointer; color: var(--text-muted); }
-    .hash-copy:hover { background: var(--bg-page); }
-
-    /* ── AUDIT TRAIL ── */
+    /* Audit trail in evidence area */
     .audit-trail-card { background: var(--white); border: 1px solid var(--border); border-radius: 10px; overflow: hidden; }
-    .audit-trail-header { display: flex; align-items: center; justify-content: space-between; padding: 14px 18px; border-bottom: 1px solid var(--border); }
-    .audit-trail-title { font-size: 13px; font-weight: 700; color: var(--text-primary); }
-    .audit-entry { display: flex; align-items: flex-start; gap: 10px; padding: 10px 18px; border-bottom: 1px solid var(--border); font-size: 12px; }
+    .audit-trail-header { display: flex; align-items: center; justify-content: space-between; padding: 12px 16px; border-bottom: 1px solid var(--border); }
+    .audit-trail-title { font-size: 12px; font-weight: 700; color: var(--text-primary); }
+    .audit-entry { display: flex; align-items: flex-start; gap: 10px; padding: 8px 16px; border-bottom: 1px solid var(--border); font-size: 12px; }
     .audit-entry:last-child { border-bottom: none; }
     .audit-time { font-family: var(--font-mono); color: var(--text-dim); min-width: 64px; flex-shrink: 0; font-size: 11px; }
     .audit-action { color: var(--text-secondary); }
     .audit-action strong { color: var(--text-primary); }
 
+    /* Tech details */
+    .tech-details { background: var(--white); border: 1px solid var(--border); border-radius: 10px; overflow: hidden; }
+    .tech-details-toggle { display: flex; align-items: center; justify-content: space-between; padding: 12px 16px; cursor: pointer; user-select: none; transition: background 0.15s; }
+    .tech-details-toggle:hover { background: var(--bg-page); }
+    .tech-details-toggle-left { display: flex; align-items: center; gap: 8px; font-size: 12px; font-weight: 600; color: var(--text-secondary); }
+    .tech-chevron { font-size: 11px; color: var(--text-dim); transition: transform 0.15s; }
+    .tech-chevron.open { transform: rotate(180deg); }
+    .tech-body { display: none; padding: 0 16px 16px; }
+    .tech-body.open { display: block; }
+    .tech-section { margin-bottom: 16px; }
+    .tech-section:last-child { margin-bottom: 0; }
+    .tech-section-title { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-dim); margin-bottom: 8px; padding-top: 12px; border-top: 1px solid var(--border); }
+    .tech-section:first-child .tech-section-title { border-top: none; padding-top: 0; }
+    .lane-score-row { display: flex; align-items: center; gap: 10px; padding: 6px 0; border-bottom: 1px solid var(--border); }
+    .lane-score-row:last-child { border-bottom: none; }
+    .lane-score-name { font-size: 11px; color: var(--text-secondary); flex: 1; }
+    .lane-score-bar-wrap { width: 100px; height: 5px; background: var(--border); border-radius: 3px; overflow: hidden; }
+    .lane-score-bar { height: 100%; border-radius: 3px; }
+    .lane-score-bar.high { background: var(--danger); }
+    .lane-score-bar.medium { background: var(--warning); }
+    .lane-score-bar.low { background: var(--success); }
+    .lane-score-val { font-family: var(--font-mono); font-size: 11px; color: var(--text-muted); min-width: 40px; text-align: right; }
+    pre.tech-pre { font-family: var(--font-mono); font-size: 11px; color: var(--text-secondary); background: var(--bg-page); border: 1px solid var(--border); border-radius: 6px; padding: 10px; line-height: 1.7; white-space: pre-wrap; word-break: break-word; }
+    .hash-display { display: flex; align-items: center; gap: 10px; background: var(--bg-page); border: 1px solid var(--border); border-radius: 6px; padding: 10px 14px; }
+    .hash-value { font-family: var(--font-mono); font-size: 11px; color: var(--text-secondary); flex: 1; word-break: break-all; }
+    .hash-copy { font-size: 11px; padding: 4px 10px; border: 1px solid var(--border); border-radius: 4px; background: var(--white); cursor: pointer; color: var(--text-muted); }
+    .hash-copy:hover { background: var(--bg-page); }
+
+    /* ─────────────────────────────────────────
+       DECISION SECTION — sticky bottom of right pane
+    ───────────────────────────────────────── */
+    .decision-pane { flex-shrink: 0; background: var(--white); border-top: 2px solid var(--border); }
+    .decision-pane.locked { opacity: 0.7; }
+
+    /* Compact decision choices */
+    .decision-inner { display: flex; flex-direction: column; }
+    .decision-choices-row { display: flex; gap: 8px; padding: 10px 16px; border-bottom: 1px solid var(--border); }
+    .decision-radio-card { flex: 1; display: flex; align-items: center; gap: 8px; padding: 10px 12px; border: 2px solid var(--border); border-radius: 8px; cursor: pointer; transition: all 0.15s; background: var(--white); text-align: left; }
+    .decision-radio-card:hover { border-color: var(--text-secondary); background: var(--bg-page); }
+    .decision-radio-card.selected-override { border-color: var(--success); background: var(--success-bg); }
+    .decision-radio-card.selected-escalate { border-color: var(--warning); background: var(--warning-bg); }
+    .decision-radio-card.selected-confirm { border-color: var(--danger); background: var(--danger-bg); }
+    .decision-radio-card.locked-choice { pointer-events: none; opacity: 0.5; }
+    .choice-icon { font-size: 16px; flex-shrink: 0; }
+    .choice-text { }
+    .choice-label { font-size: 12px; font-weight: 700; color: var(--text-primary); }
+    .choice-desc { font-size: 10px; color: var(--text-muted); }
+    .decision-blocked-inline { display: flex; align-items: center; gap: 8px; padding: 6px 16px; background: var(--danger-bg); border-bottom: 1px solid var(--danger-border); font-size: 11px; color: #991b1b; font-weight: 600; }
+
+    /* Justification row */
+    .justification-row { display: flex; gap: 10px; align-items: flex-end; padding: 10px 16px; }
+    .justification-left { flex: 1; }
+    .justification-label { font-size: 11px; font-weight: 600; color: var(--text-secondary); margin-bottom: 4px; display: flex; align-items: center; justify-content: space-between; }
+    .justification-req { font-size: 10px; color: var(--danger); }
+    .template-chips { display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: 6px; }
+    .template-chip { font-size: 10px; padding: 3px 8px; background: var(--bg-page); border: 1px solid var(--border); border-radius: 100px; cursor: pointer; color: var(--text-secondary); transition: all 0.15s; }
+    .template-chip:hover { background: var(--info-bg); border-color: var(--info); color: var(--info); }
+    .template-chip.active { background: var(--navy); border-color: var(--navy); color: var(--white); }
+    .justification-textarea { width: 100%; min-height: 60px; max-height: 100px; padding: 8px 10px; font-family: inherit; font-size: 12px; border: 1px solid var(--border); border-radius: 6px; background: var(--white); color: var(--text-primary); resize: vertical; outline: none; transition: border-color 0.15s; }
+    .justification-textarea:focus { border-color: var(--gold); }
+
+    /* Submit bar */
+    .submit-bar { display: flex; align-items: center; justify-content: space-between; padding: 10px 16px; background: var(--bg-page); border-top: 1px solid var(--border); }
+    .submit-hint { font-size: 11px; color: var(--text-dim); }
+    .btn-submit-final { padding: 9px 24px; border: none; border-radius: 6px; background: var(--navy); font-size: 13px; font-weight: 700; color: var(--white); cursor: pointer; transition: background 0.15s; }
+    .btn-submit-final:hover:not(:disabled) { background: #1a2d4e; }
+    .btn-submit-final:disabled { opacity: 0.4; cursor: not-allowed; }
+    .btn-submit-final.submitted { background: var(--success); cursor: default; }
+
+    /* ── TOAST ── */
+    .toast { position: fixed; bottom: 24px; right: 24px; z-index: 9999; background: var(--navy); color: var(--white); padding: 14px 20px; border-radius: 10px; box-shadow: var(--shadow-lg); font-size: 13px; font-weight: 500; max-width: 360px; line-height: 1.5; animation: toast-in 0.25s ease; }
+    .toast.success { background: var(--success); }
+    @keyframes toast-in { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
+
     /* ── MODE TOGGLE (demo) ── */
-    .mode-toggle { position: fixed; bottom: 16px; right: 16px; z-index: 999; background: var(--white); border: 1px solid var(--border); border-radius: 8px; padding: 10px 14px; box-shadow: var(--shadow-lg); }
+    .mode-toggle { position: fixed; bottom: 16px; left: 240px; z-index: 999; background: var(--white); border: 1px solid var(--border); border-radius: 8px; padding: 8px 12px; box-shadow: var(--shadow-lg); }
     .mode-toggle-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-dim); margin-bottom: 6px; }
     .mode-btns { display: flex; gap: 6px; }
     .btn-mode { font-size: 11px; padding: 4px 12px; border: 1px solid var(--border); border-radius: 4px; background: var(--white); color: var(--text-secondary); cursor: pointer; }
     .btn-mode.active { background: var(--navy); color: var(--white); border-color: var(--navy); }
 
     /* ── RESPONSIVE ── */
-    @media (max-width: 900px) {
+    @media (max-width: 768px) {
+      body { overflow: auto; }
       .sidebar { display: none; }
-      .main-content { margin-left: 0; }
-      .live-banner { left: 0; }
+      .main-content { position: static; top: auto; left: 0; right: auto; bottom: auto; overflow: visible; }
+      .live-banner { left: 0; position: relative; top: auto; }
+      .split-pane { flex-direction: column; overflow: visible; }
+      .split-left { width: 100%; border-right: none; border-bottom: 1px solid var(--border); }
+      .split-right { overflow: visible; height: auto; }
+      .evidence-scroll { overflow: visible; }
+      .decision-pane { position: sticky; bottom: 0; }
       .story-grid { grid-template-columns: 1fr; }
-      .decision-choices { grid-template-columns: 1fr; }
-      .threat-right { flex-direction: column; }
+      .decision-choices-row { flex-direction: column; }
+      .justification-row { flex-direction: column; }
+      .mode-toggle { left: 16px; }
     }
   </style>
 </head>
@@ -299,7 +359,7 @@
   <div class="live-banner__left">
     <span class="live-badge">● Live Interception</span>
     <span class="live-timer" id="countdown">3.0s</span>
-    <span style="font-size:12px;color:var(--text-secondary);">remaining to review before rejection is finalized</span>
+    <span style="font-size:12px;color:var(--text-secondary);">remaining — submit your decision before the window closes</span>
   </div>
   <div class="live-banner__actions">
     <button class="btn btn-sm btn-secondary" onclick="requestExtension()">⏸ Request 30s Extension</button>
@@ -320,460 +380,422 @@
   <a href="settings.html" class="sidebar-link"><span class="icon">⚙️</span> Settings</a>
 </aside>
 
-<!-- ── MAIN CONTENT ── -->
+<!-- ══════════════════════════════════════
+     MAIN CONTENT
+══════════════════════════════════════ -->
 <main class="main-content has-banner" id="mainContent">
-<div class="content-inner">
 
-  <!-- Breadcrumb -->
-  <div class="breadcrumb">
+  <!-- Breadcrumb bar -->
+  <div class="breadcrumb-bar">
     <a href="rejections.html">← Rejections</a>
     <span>/</span>
     <span id="candidateIdBreadcrumb">CAND-2847</span>
+    <span style="margin-left:auto;display:flex;align-items:center;gap:6px;">
+      <span style="font-size:11px;color:var(--text-muted);">Risk score:</span>
+      <span style="font-family:var(--font-mono);font-weight:700;color:var(--danger);">74</span>
+      <span style="font-size:11px;color:var(--text-muted);margin-left:8px;">Flags:</span>
+      <span style="font-family:var(--font-mono);font-weight:700;color:var(--danger);">2</span>
+    </span>
   </div>
 
-  <!-- ══════════════════════════════════════
-       1. THREAT HEADER
-  ══════════════════════════════════════ -->
-  <div class="threat-header section">
-    <div class="threat-header-top">
-      <div class="threat-left">
-        <span class="threat-risk-badge high" id="threatBadge">High Risk</span>
-        <div class="threat-summary">
-          <div class="threat-summary-title">Senior Financial Analyst — CAND-2847</div>
-          <div class="threat-summary-text" id="threatSummary">
-            The ATS rejected this candidate due to an employment gap and a keyword mismatch. <strong>2 flags require human review</strong> — one of which triggers a legal compliance requirement.
+  <!-- ── SPLIT PANE ── -->
+  <div class="split-pane">
+
+    <!-- ════════════════════
+         LEFT PANE
+    ════════════════════ -->
+    <div class="split-left">
+
+      <!-- Candidate Card -->
+      <div class="left-section">
+        <div class="left-section-label">Candidate</div>
+        <div class="cand-risk-row">
+          <span class="risk-badge high">High Risk</span>
+          <div class="cand-score-pair">
+            <span class="cand-score-num">74</span>
+            <span class="cand-score-lbl">/ 100</span>
+          </div>
+        </div>
+        <div class="cand-name" id="candidateDisplay">CAND-2847</div>
+        <div class="cand-role">Sr. Financial Analyst</div>
+        <div class="cand-meta">
+          <div class="cand-meta-row">
+            <span class="cand-meta-icon">📍</span>
+            <div>
+              <div class="cand-meta-text">New York, NY</div>
+              <div class="cand-meta-sub">On-site preferred</div>
+            </div>
+          </div>
+          <div class="cand-meta-row">
+            <span class="cand-meta-icon">🏢</span>
+            <div>
+              <div class="cand-meta-text">Workday AI v4.2</div>
+              <div class="cand-meta-sub">ATS source · Applied 2026-05-04</div>
+            </div>
+          </div>
+          <div class="cand-meta-row">
+            <span class="cand-meta-icon">⏱</span>
+            <div>
+              <div class="cand-meta-text">Intercepted 09:41:22 UTC</div>
+              <div class="cand-meta-sub">ATS reason: Does not meet min qualifications</div>
+            </div>
+          </div>
+        </div>
+        <button class="reveal-btn" onclick="revealPII()">👁 Reveal Identity</button>
+      </div>
+
+      <!-- Timer widget -->
+      <div class="left-section" id="timerSection">
+        <div class="left-section-label">Review Window</div>
+        <div class="timer-widget">
+          <div class="timer-big" id="timerBig">3.0s</div>
+          <div class="timer-label">remaining before auto-finalize</div>
+          <div class="timer-actions">
+            <button class="btn btn-sm btn-secondary" onclick="requestExtension()">⏸ +30s</button>
+            <button class="btn btn-sm btn-danger-sm" onclick="forceFinalize()">⚠ Force</button>
           </div>
         </div>
       </div>
-      <div class="threat-right">
-        <div class="score-pill">
-          <span class="score-number high" id="compositeScore">74</span>
-          <span class="score-label">Risk<br>Score</span>
+
+      <!-- Flag summary list -->
+      <div class="left-section">
+        <div class="left-section-label">Flags — click to review</div>
+        <div class="left-flag-list" id="leftFlagList">
+          <!-- rendered by JS -->
         </div>
-        <div class="flag-pill">
-          <span class="flag-number" id="flagCount">2</span>
-          <span class="flag-label">Active<br>Flags</span>
+      </div>
+
+      <!-- Resume link -->
+      <div class="left-section">
+        <div class="resume-link" onclick="alert('Resume viewer coming soon — PDF will open in a modal.')">
+          <span>📄</span>
+          <span>View Full Resume</span>
+          <span style="margin-left:auto;font-size:10px;color:var(--text-dim);">PDF ↗</span>
         </div>
-        <button class="btn btn-ghost" onclick="revealPII()">👁 Reveal Identity</button>
       </div>
-    </div>
-    <div class="threat-meta">
-      <div class="meta-item">
-        <span class="meta-label">Candidate ID</span>
-        <span class="meta-value" id="candidateId">CAND-2847</span>
-      </div>
-      <div class="meta-item">
-        <span class="meta-label">Applied Role</span>
-        <span class="meta-value">Sr. Financial Analyst</span>
-      </div>
-      <div class="meta-item">
-        <span class="meta-label">Application Date</span>
-        <span class="meta-value">2026-05-04</span>
-      </div>
-      <div class="meta-item">
-        <span class="meta-label">Rejected By</span>
-        <span class="meta-value">Workday AI v4.2</span>
-      </div>
-      <div class="meta-item">
-        <span class="meta-label">F.A.S. Intercepted</span>
-        <span class="meta-value">09:41:22 UTC</span>
-      </div>
-      <div class="meta-item">
-        <span class="meta-label">ATS Reason</span>
-        <span class="meta-value" style="font-family:inherit;font-size:12px;">Does not meet minimum qualifications</span>
-      </div>
-    </div>
-  </div>
 
-  <!-- ══════════════════════════════════════
-       2. LEGAL COMPLIANCE PANEL
-  ══════════════════════════════════════ -->
-  <div class="legal-panel section" id="legalPanel">
-    <div class="legal-panel-header">
-      <div class="legal-panel-title">
-        <span>⚠️</span> NYC Local Law 144 — Compliance Action Required
-      </div>
-      <span class="legal-freeze-notice">🔒 Decisions Frozen</span>
-    </div>
-    <div class="legal-panel-body">
-      This rejection was made by an Automated Employment Decision Tool (AEDT). Under NYC Local Law 144, your organization must complete an annual bias audit before this tool can be used — and that audit is currently missing. The candidate was also not notified that AI was used to evaluate their application, which is a separate violation. <strong>Finalizing this rejection without completing these steps creates legal exposure of $500–$1,500 per violation.</strong>
-    </div>
-    <div class="legal-panel-actions">
-      <button class="btn-legal" onclick="openComplianceChecklist()">📋 View Compliance Checklist</button>
-      <button class="btn-legal" onclick="generateComplianceDoc()">📄 Generate Compliance Doc</button>
-      <button class="btn-legal" onclick="markAuditComplete()">✓ Mark Bias Audit Complete</button>
-    </div>
-  </div>
+    </div><!-- /split-left -->
 
-  <!-- ══════════════════════════════════════
-       3. THE STORY — Triggered Flags
-  ══════════════════════════════════════ -->
-  <div class="section">
-    <div class="story-section-header">
-      <div>
-        <div class="story-section-title">What the ATS Got Wrong</div>
-        <div class="story-section-sub">2 flags flagged for review — plain language summary of each</div>
-      </div>
-    </div>
+    <!-- ════════════════════
+         RIGHT PANE
+    ════════════════════ -->
+    <div class="split-right">
 
-    <!-- FLAG 1: Employment Gap -->
-    <div class="story-card flag-high">
-      <div class="story-card-header">
-        <div class="story-card-left">
-          <div class="story-icon high">📅</div>
-          <div>
-            <div class="story-card-title">Employment Gap Penalty</div>
-            <div class="story-card-subtitle">The ATS penalized a 14-month gap without reading the explanation</div>
+      <!-- Flag selector row -->
+      <div class="flag-selector">
+        <div class="flag-selector-label">Evidence — select a flag to review</div>
+        <div class="flag-selector-row" id="flagSelectorRow">
+          <!-- rendered by JS -->
+        </div>
+      </div>
+
+      <!-- Evidence scroll area -->
+      <div class="evidence-scroll" id="evidenceScroll">
+
+        <!-- Legal compliance panel (always shown) -->
+        <div class="legal-panel" id="legalPanel">
+          <div class="legal-panel-header">
+            <div class="legal-panel-title">
+              <span>⚠️</span> NYC Local Law 144 — Compliance Action Required
+            </div>
+            <span class="legal-freeze-notice" id="legalFreezeNotice">🔒 Decisions Frozen</span>
+          </div>
+          <div class="legal-panel-body" id="legalPanelBody">
+            This rejection was made by an Automated Employment Decision Tool (AEDT). Under NYC Local Law 144, your organization must complete an annual bias audit before this tool can be used — and that audit is currently missing. <strong>Finalizing without completing these steps creates legal exposure of $500–$1,500 per violation.</strong>
+          </div>
+          <div class="legal-panel-actions">
+            <button class="btn-legal" onclick="openComplianceChecklist()">📋 Compliance Checklist</button>
+            <button class="btn-legal" onclick="generateComplianceDoc()">📄 Generate Doc</button>
+            <button class="btn-legal" onclick="markAuditComplete()">✓ Mark Audit Complete</button>
           </div>
         </div>
-        <span class="story-status-badge triggered">⚠ Triggered</span>
-      </div>
-      <div class="story-card-body">
-        <div class="story-grid">
-          <div class="story-cell ats-cell">
-            <div class="story-cell-label ats">🤖 What the ATS saw</div>
-            <div class="story-cell-text">A 14-month gap in employment history (March 2023 – May 2024). The ATS's gap field was empty — no reason was provided in the structured data fields. It applied an automatic penalty to the candidate's score.</div>
-          </div>
-          <div class="story-cell human-cell">
-            <div class="story-cell-label human">👤 What the ATS missed</div>
-            <div class="story-cell-text">The candidate's cover letter (page 2) explains they stepped away to provide full-time care for their mother during cancer treatment. Their LinkedIn shows 3 volunteer project management roles during the same period. A reference is available from the treating physician.</div>
-          </div>
-        </div>
-        <div class="story-meaning">
-          <div class="story-meaning-label">💡 What this means</div>
-          <div class="story-meaning-text">The candidate's gap is fully documented and entirely justified. Caregiving gaps are not predictive of job performance, and penalizing them may constitute discrimination against a protected class. The ATS simply doesn't read cover letters — it only scans structured fields.</div>
-        </div>
-        <div class="story-action">
-          <div>
-            <div class="story-action-label">Recommended action</div>
-            <div class="story-action-text">Override the gap penalty — candidate's qualifications are not affected by this gap</div>
-          </div>
-          <span style="font-size:18px;">→</span>
-        </div>
-        <div class="story-stat" id="gapStatText">
-          <strong>67%</strong> of rejections in the last 90 days at <strong id="gapStatOrg">KPMG Pakistan</strong> involve candidates whose employment gap exceeds 12 months. This threshold was set on 2026-01-15 and has not been validated against business necessity.
-          <div class="story-stat-toggle">
-            <label style="display:flex;align-items:center;gap:6px;cursor:pointer;">
-              <input type="checkbox" onchange="toggleBaseline(this, 'gap')">
-              <span class="toggle-slider"></span>
-              Compare to industry average
-            </label>
-          </div>
-        </div>
-        <div class="notes-section">
-          <div class="notes-label">Your Notes</div>
-          <div class="notes-templates">
-            <span class="note-chip" onclick="insertNoteTemplate(this, 'gapNotes', 'Candidate meets all stated requirements')">Candidate meets requirements</span>
-            <span class="note-chip" onclick="insertNoteTemplate(this, 'gapNotes', 'Gap is a proxy signal for a protected class (caregiving)')">Proxy for protected class</span>
-            <span class="note-chip" onclick="insertNoteTemplate(this, 'gapNotes', 'Context visible to human reviewer, not available to ATS')">Context not visible to ATS</span>
-          </div>
-          <textarea class="note-textarea" id="gapNotes" placeholder="Add your observations about this flag..." oninput="autosaveNotes(this)"></textarea>
-          <div class="note-meta-row">
-            <span class="note-save-status" id="gapSaveStatus"></span>
-            <span>Last edited: <span id="gapLastEdit">—</span></span>
-          </div>
-        </div>
-      </div>
-    </div>
 
-    <!-- FLAG 2: Keyword Mismatch -->
-    <div class="story-card flag-medium">
-      <div class="story-card-header">
-        <div class="story-card-left">
-          <div class="story-icon medium">🔤</div>
-          <div>
-            <div class="story-card-title">Keyword Mismatch — SAP</div>
-            <div class="story-card-subtitle">The ATS required an exact match but the candidate has 8 years of SAP experience</div>
+        <!-- ── FLAG EVIDENCE PANELS ── -->
+
+        <!-- FLAG: Employment Gap -->
+        <div class="evidence-panel active" id="panel-gap">
+          <div class="evidence-heading">
+            <span>📅</span> Employment Gap Penalty
+            <span style="font-size:11px;font-weight:400;color:var(--danger);margin-left:4px;">High severity</span>
+          </div>
+          <div class="story-card flag-high">
+            <div class="story-card-body">
+              <div class="story-grid">
+                <div class="story-cell ats-cell">
+                  <div class="story-cell-label ats">🤖 What the ATS saw</div>
+                  <div class="story-cell-text">A 14-month gap in employment (March 2023 – May 2024). The explanation field was empty — no reason provided in structured data. An automatic penalty was applied to the candidate's score.</div>
+                </div>
+                <div class="story-cell human-cell">
+                  <div class="story-cell-label human">👤 What the ATS missed</div>
+                  <div class="story-cell-text">The cover letter (page 2) explains the candidate stepped away to provide full-time care for their mother during cancer treatment. LinkedIn shows 3 volunteer project management roles during the same period. A physician reference is available.</div>
+                </div>
+              </div>
+              <div class="story-meaning">
+                <div class="story-meaning-label">💡 What this means</div>
+                <div class="story-meaning-text">The gap is fully documented and entirely justified. Caregiving gaps are not predictive of job performance, and penalizing them may constitute discrimination against a protected class. The ATS doesn't read cover letters — only structured fields.</div>
+              </div>
+              <div class="story-action">
+                <div>
+                  <div class="story-action-label">Recommended action</div>
+                  <div class="story-action-text">Override the gap penalty — candidate's qualifications are unaffected by this gap</div>
+                </div>
+                <span style="font-size:18px;">→</span>
+              </div>
+              <div class="story-stat" id="gapStatText">
+                <strong>67%</strong> of rejections in the last 90 days at <strong id="gapStatOrg">KPMG Pakistan</strong> involve candidates whose employment gap exceeds 12 months. This threshold was set on 2026-01-15 and has not been validated against business necessity.
+                <div class="story-stat-toggle">
+                  <label style="display:flex;align-items:center;gap:6px;cursor:pointer;">
+                    <input type="checkbox" onchange="toggleBaseline(this, 'gap')">
+                    <span class="toggle-slider"></span>
+                    Compare to industry average
+                  </label>
+                </div>
+              </div>
+              <div class="notes-section">
+                <div class="notes-label">Your Notes</div>
+                <div class="notes-templates">
+                  <span class="note-chip" onclick="insertNoteTemplate(this, 'gapNotes', 'Candidate meets all stated requirements')">Candidate meets requirements</span>
+                  <span class="note-chip" onclick="insertNoteTemplate(this, 'gapNotes', 'Gap is a proxy signal for a protected class (caregiving)')">Proxy for protected class</span>
+                  <span class="note-chip" onclick="insertNoteTemplate(this, 'gapNotes', 'Context visible to human reviewer, not available to ATS')">Context not visible to ATS</span>
+                </div>
+                <textarea class="note-textarea" id="gapNotes" placeholder="Add your observations about this flag..." oninput="autosaveNotes(this)"></textarea>
+                <div class="note-meta-row">
+                  <span class="note-save-status" id="gapSaveStatus"></span>
+                  <span>Last edited: <span id="gapLastEdit">—</span></span>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
-        <span class="story-status-badge triggered">⚠ Triggered</span>
-      </div>
-      <div class="story-card-body">
-        <div class="story-grid">
-          <div class="story-cell ats-cell">
-            <div class="story-cell-label ats">🤖 What the ATS saw</div>
-            <div class="story-cell-text">The job required "SAP" as a keyword. The candidate's resume contained "SAP S/4HANA", "SAP ECC 6.0", and "SAP BW/4HANA" — but the ATS requires an exact string match. Skill coverage was scored at 2/3 (66.7%), just below the 75% threshold. Result: FAIL.</div>
-          </div>
-          <div class="story-cell human-cell">
-            <div class="story-cell-label human">👤 What the ATS missed</div>
-            <div class="story-cell-text">S/4HANA is SAP's current ERP platform. ECC 6.0 is the legacy platform. BW/4HANA is SAP's analytics platform. Listing all three demonstrates 8 years of deep SAP expertise across multiple product lines — far more than a generic "SAP" keyword would indicate.</div>
-          </div>
-        </div>
-        <div class="story-meaning">
-          <div class="story-meaning-label">💡 What this means</div>
-          <div class="story-meaning-text">The ATS penalized the candidate for being too specific about their SAP knowledge. A generic "SAP" keyword match would have scored higher than listing the actual platforms they've worked on. This is a false negative caused by overly rigid matching rules, not a real skill gap.</div>
-        </div>
-        <div class="story-action">
-          <div>
-            <div class="story-action-label">Recommended action</div>
-            <div class="story-action-text">Override keyword penalty — candidate clearly meets the SAP requirement</div>
-          </div>
-          <span style="font-size:18px;">→</span>
-        </div>
-        <div class="story-stat" id="kwStatText">
-          <strong>41%</strong> of rejections in the last 90 days at <strong id="kwStatOrg">KPMG Pakistan</strong> involve keyword false negatives where candidates listed skill variants but the ATS required exact string matches.
-          <div class="story-stat-toggle">
-            <label style="display:flex;align-items:center;gap:6px;cursor:pointer;">
-              <input type="checkbox" onchange="toggleBaseline(this, 'kw')">
-              <span class="toggle-slider"></span>
-              Compare to industry average
-            </label>
-          </div>
-        </div>
-        <div class="notes-section">
-          <div class="notes-label">Your Notes</div>
-          <div class="notes-templates">
-            <span class="note-chip" onclick="insertNoteTemplate(this, 'kwNotes', 'Candidate meets all stated requirements')">Candidate meets requirements</span>
-            <span class="note-chip" onclick="insertNoteTemplate(this, 'kwNotes', 'ATS matching rule is overly restrictive')">Rule is overly restrictive</span>
-            <span class="note-chip" onclick="insertNoteTemplate(this, 'kwNotes', 'Context visible to human reviewer, not available to ATS')">Context not visible to ATS</span>
-          </div>
-          <textarea class="note-textarea" id="kwNotes" placeholder="Add your observations about this flag..." oninput="autosaveNotes(this)"></textarea>
-          <div class="note-meta-row">
-            <span class="note-save-status" id="kwSaveStatus"></span>
-            <span>Last edited: <span id="kwLastEdit">—</span></span>
-          </div>
-        </div>
-      </div>
-    </div>
 
-    <!-- Clean Lanes (collapsed) -->
-    <div style="margin-top: 16px; margin-bottom: 6px;">
-      <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:var(--text-dim);margin-bottom:8px;">5 lanes passed without issues</div>
-      <div class="clean-lane" onclick="toggleCleanLane(this, 'ageDetail')">
-        <div class="clean-lane-left">
-          <span class="story-status-badge clean">✓ Clean</span>
-          <div>
-            <div class="clean-lane-name">Age Proxy Signals</div>
-            <div class="clean-lane-detail" id="ageDetail" style="display:none;margin-top:4px;">Graduation year indicates ~31 years old. No age proxy detected — inferred age is below the 40+ threshold.</div>
+        <!-- FLAG: Keyword Mismatch -->
+        <div class="evidence-panel" id="panel-kw">
+          <div class="evidence-heading">
+            <span>🔤</span> Keyword Mismatch — SAP
+            <span style="font-size:11px;font-weight:400;color:var(--warning);margin-left:4px;">Medium severity</span>
+          </div>
+          <div class="story-card flag-medium">
+            <div class="story-card-body">
+              <div class="story-grid">
+                <div class="story-cell ats-cell">
+                  <div class="story-cell-label ats">🤖 What the ATS saw</div>
+                  <div class="story-cell-text">The job required "SAP". The resume contained "SAP S/4HANA", "SAP ECC 6.0", and "SAP BW/4HANA" — but the ATS requires exact string matches. Skill coverage: 2/3 (66.7%), below the 75% threshold. Result: FAIL.</div>
+                </div>
+                <div class="story-cell human-cell">
+                  <div class="story-cell-label human">👤 What the ATS missed</div>
+                  <div class="story-cell-text">S/4HANA is SAP's current ERP platform. ECC 6.0 is the legacy platform. BW/4HANA is SAP's analytics platform. Listing all three demonstrates 8 years of deep SAP expertise across multiple product lines — far more than a generic "SAP" would indicate.</div>
+                </div>
+              </div>
+              <div class="story-meaning">
+                <div class="story-meaning-label">💡 What this means</div>
+                <div class="story-meaning-text">The ATS penalized the candidate for being <em>too specific</em> about their SAP knowledge. A generic "SAP" would have scored higher than listing the actual platforms. This is a false negative caused by overly rigid matching rules, not a real skill gap.</div>
+              </div>
+              <div class="story-action">
+                <div>
+                  <div class="story-action-label">Recommended action</div>
+                  <div class="story-action-text">Override keyword penalty — candidate clearly meets the SAP requirement</div>
+                </div>
+                <span style="font-size:18px;">→</span>
+              </div>
+              <div class="story-stat" id="kwStatText">
+                <strong>41%</strong> of rejections in the last 90 days at <strong id="kwStatOrg">KPMG Pakistan</strong> involve keyword false negatives where candidates listed skill variants but the ATS required exact string matches.
+                <div class="story-stat-toggle">
+                  <label style="display:flex;align-items:center;gap:6px;cursor:pointer;">
+                    <input type="checkbox" onchange="toggleBaseline(this, 'kw')">
+                    <span class="toggle-slider"></span>
+                    Compare to industry average
+                  </label>
+                </div>
+              </div>
+              <div class="notes-section">
+                <div class="notes-label">Your Notes</div>
+                <div class="notes-templates">
+                  <span class="note-chip" onclick="insertNoteTemplate(this, 'kwNotes', 'Candidate meets all stated requirements')">Candidate meets requirements</span>
+                  <span class="note-chip" onclick="insertNoteTemplate(this, 'kwNotes', 'ATS matching rule is overly restrictive')">Rule is overly restrictive</span>
+                  <span class="note-chip" onclick="insertNoteTemplate(this, 'kwNotes', 'Context visible to human reviewer, not available to ATS')">Context not visible to ATS</span>
+                </div>
+                <textarea class="note-textarea" id="kwNotes" placeholder="Add your observations about this flag..." oninput="autosaveNotes(this)"></textarea>
+                <div class="note-meta-row">
+                  <span class="note-save-status" id="kwSaveStatus"></span>
+                  <span>Last edited: <span id="kwLastEdit">—</span></span>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
-        <span style="font-size:12px;color:var(--text-dim);">Score: 12/100 ▾</span>
-      </div>
-      <div class="clean-lane" onclick="toggleCleanLane(this, 'disparateDetail')">
-        <div class="clean-lane-left">
-          <span class="story-status-badge clean">✓ Clean</span>
-          <div>
-            <div class="clean-lane-name">Disparate Impact Patterns</div>
-            <div class="clean-lane-detail" id="disparateDetail" style="display:none;margin-top:4px;">Selection rate is 82%, above the 80% 4/5ths rule threshold. No statistically significant disparity detected across protected classes.</div>
+
+        <!-- CLEAN LANES -->
+        <div class="evidence-panel" id="panel-age">
+          <div class="evidence-heading"><span>✅</span> Age Proxy Signals — Clean</div>
+          <div class="clean-lane-detail-card">
+            <div class="clean-lane-heading">No age proxy signals detected</div>
+            <div class="clean-lane-text">Graduation year indicates the candidate is approximately 31 years old. No age proxy was detected — the inferred age is below the 40+ threshold that would trigger ADEA scrutiny. This lane passed without issue.</div>
+            <div class="clean-score-row">
+              <span class="clean-score-label">Risk score</span>
+              <div class="clean-score-bar-wrap"><div class="clean-score-bar" style="width:12%;background:var(--success);"></div></div>
+              <span class="clean-score-val">12/100</span>
+            </div>
           </div>
         </div>
-        <span style="font-size:12px;color:var(--text-dim);">Score: 8/100 ▾</span>
-      </div>
-      <div class="clean-lane" onclick="toggleCleanLane(this, 'resumeDetail')">
-        <div class="clean-lane-left">
-          <span class="story-status-badge clean">✓ Clean</span>
-          <div>
-            <div class="clean-lane-name">Resume Format Penalties</div>
-            <div class="clean-lane-detail" id="resumeDetail" style="display:none;margin-top:4px;">Standard PDF format. 98% parse accuracy. No format-based penalties applied.</div>
+
+        <div class="evidence-panel" id="panel-disparate">
+          <div class="evidence-heading"><span>✅</span> Disparate Impact — Clean</div>
+          <div class="clean-lane-detail-card">
+            <div class="clean-lane-heading">Selection rate within acceptable bounds</div>
+            <div class="clean-lane-text">Selection rate is 82%, above the 80% four-fifths rule threshold. No statistically significant disparity detected across protected classes. This lane passed without issue.</div>
+            <div class="clean-score-row">
+              <span class="clean-score-label">Risk score</span>
+              <div class="clean-score-bar-wrap"><div class="clean-score-bar" style="width:8%;background:var(--success);"></div></div>
+              <span class="clean-score-val">8/100</span>
+            </div>
           </div>
         </div>
-        <span style="font-size:12px;color:var(--text-dim);">Score: 3/100 ▾</span>
-      </div>
-      <div class="clean-lane" onclick="toggleCleanLane(this, 'sourceDetail')">
-        <div class="clean-lane-left">
-          <span class="story-status-badge clean">✓ Clean</span>
-          <div>
-            <div class="clean-lane-name">Source Channel Bias</div>
-            <div class="clean-lane-detail" id="sourceDetail" style="display:none;margin-top:4px;">Direct application via company careers portal. Internal referrals and direct applications are weighted equally — no channel bias applied.</div>
+
+        <div class="evidence-panel" id="panel-resume">
+          <div class="evidence-heading"><span>✅</span> Resume Format — Clean</div>
+          <div class="clean-lane-detail-card">
+            <div class="clean-lane-heading">No format-based penalties applied</div>
+            <div class="clean-lane-text">Standard PDF format. 98% parse accuracy. No format-based penalties applied. Resume was parsed correctly without any structural issues.</div>
+            <div class="clean-score-row">
+              <span class="clean-score-label">Risk score</span>
+              <div class="clean-score-bar-wrap"><div class="clean-score-bar" style="width:3%;background:var(--success);"></div></div>
+              <span class="clean-score-val">3/100</span>
+            </div>
           </div>
         </div>
-        <span style="font-size:12px;color:var(--text-dim);">Score: 5/100 ▾</span>
-      </div>
-    </div>
-  </div>
 
-  <!-- ══════════════════════════════════════
-       AUDIT TRAIL
-  ══════════════════════════════════════ -->
-  <div class="audit-trail-card section">
-    <div class="audit-trail-header">
-      <span class="audit-trail-title">📋 Review Audit Trail</span>
-      <a href="audit-trail.html" style="font-size:12px;color:var(--gold);font-weight:600;">View Full Trail →</a>
-    </div>
-    <div id="auditLog">
-      <div class="audit-entry"><span class="audit-time">09:41:22</span><span class="audit-action"><strong>F.A.S.</strong> — Rejection intercepted for human review (risk score: 74)</span></div>
-      <div class="audit-entry"><span class="audit-time">09:41:23</span><span class="audit-action"><strong class="reviewer-name">Reviewer U.H.</strong> — Opened review — identity masked</span></div>
-      <div class="audit-entry"><span class="audit-time">09:41:45</span><span class="audit-action"><strong class="reviewer-name">Reviewer U.H.</strong> — Reviewed employment gap flag</span></div>
-      <div class="audit-entry"><span class="audit-time">09:42:01</span><span class="audit-action"><strong class="reviewer-name">Reviewer U.H.</strong> — Reviewed keyword mismatch flag</span></div>
-    </div>
-  </div>
-
-  <!-- ══════════════════════════════════════
-       4. DECISION SECTION
-  ══════════════════════════════════════ -->
-  <div class="decision-section section" id="decisionSection">
-    <div class="decision-header">
-      <div>
-        <div class="decision-title">Your Decision</div>
-        <div class="decision-subtitle">Choose one option below — your reasoning will be logged to the audit trail</div>
-      </div>
-    </div>
-    <div class="decision-body">
-
-      <div class="decision-blocked" id="decisionBlocked">
-        🔒 Decision buttons are locked until the NYC Local Law 144 compliance step above is completed.
-      </div>
-
-      <div class="decision-choices" id="decisionChoices" style="opacity:0.4;pointer-events:none;">
-        <button class="decision-choice" onclick="selectDecision(this, 'override')">
-          <div class="decision-choice-icon">✅</div>
-          <div class="decision-choice-label">Candidate is qualified — override the ATS</div>
-          <div class="decision-choice-desc">The ATS made the wrong call. The candidate should move forward in the process.</div>
-        </button>
-        <button class="decision-choice" onclick="selectDecision(this, 'escalate')">
-          <div class="decision-choice-icon">⚠️</div>
-          <div class="decision-choice-label">Need input from legal or compliance</div>
-          <div class="decision-choice-desc">This case has complexities you can't resolve alone. Send it to the right team.</div>
-        </button>
-        <button class="decision-choice" onclick="selectDecision(this, 'confirm')">
-          <div class="decision-choice-icon">❌</div>
-          <div class="decision-choice-label">ATS decision is correct — confirm rejection</div>
-          <div class="decision-choice-desc">After review, the rejection is justified and the candidate does not meet requirements.</div>
-        </button>
-      </div>
-
-      <div class="justification-section">
-        <div class="justification-label">
-          Your Explanation <span class="justification-required" id="justReq">* Required</span>
+        <div class="evidence-panel" id="panel-source">
+          <div class="evidence-heading"><span>✅</span> Source Channel — Clean</div>
+          <div class="clean-lane-detail-card">
+            <div class="clean-lane-heading">No channel bias detected</div>
+            <div class="clean-lane-text">Direct application via company careers portal. Internal referrals and direct applications are weighted equally — no channel bias was applied.</div>
+            <div class="clean-score-row">
+              <span class="clean-score-label">Risk score</span>
+              <div class="clean-score-bar-wrap"><div class="clean-score-bar" style="width:5%;background:var(--success);"></div></div>
+              <span class="clean-score-val">5/100</span>
+            </div>
+          </div>
         </div>
-        <div class="template-chips">
-          <span class="template-chip" onclick="selectTemplate(this)">Candidate meets all stated requirements</span>
-          <span class="template-chip" onclick="selectTemplate(this)">Gap penalty is not business-justified</span>
-          <span class="template-chip" onclick="selectTemplate(this)">Keyword rule is overly restrictive</span>
-          <span class="template-chip" onclick="selectTemplate(this)">Compliance review required first</span>
+
+        <!-- Audit trail -->
+        <div class="audit-trail-card">
+          <div class="audit-trail-header">
+            <span class="audit-trail-title">📋 Review Audit Trail</span>
+            <a href="audit-trail.html" style="font-size:11px;color:var(--gold);font-weight:600;">View Full Trail →</a>
+          </div>
+          <div id="auditLog">
+            <div class="audit-entry"><span class="audit-time">09:41:22</span><span class="audit-action"><strong>F.A.S.</strong> — Rejection intercepted for human review (risk score: 74)</span></div>
+            <div class="audit-entry"><span class="audit-time">09:41:23</span><span class="audit-action"><strong class="reviewer-name">Reviewer U.H.</strong> — Opened review — identity masked</span></div>
+          </div>
         </div>
-        <textarea class="justification-textarea" id="justificationText" placeholder="Describe your reasoning in plain language. What did the ATS get wrong, and what should happen next?" oninput="validateJustification()"></textarea>
-      </div>
 
-      <div class="decision-footer">
-        <span class="decision-hint" id="submitHint">Select a decision option above to continue</span>
-        <button class="btn-submit" id="submitBtn" onclick="submitAction()" disabled>Submit Decision</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- ══════════════════════════════════════
-       5. TECHNICAL DETAILS (collapsed)
-  ══════════════════════════════════════ -->
-  <div class="tech-details section">
-    <div class="tech-details-toggle" onclick="toggleTechDetails()">
-      <div class="tech-details-toggle-left">
-        <span>🔬</span>
-        <span>Technical Details</span>
-        <span style="font-size:11px;color:var(--text-dim);font-weight:400;">Raw scores, parse logs, audit hash — for auditors</span>
-      </div>
-      <span class="tech-chevron" id="techChevron">▼</span>
-    </div>
-    <div class="tech-body" id="techBody">
-
-      <div class="tech-section">
-        <div class="tech-section-title">Lane Scores (all 7)</div>
-        <div class="lane-score-row">
-          <span class="lane-score-name">Age Proxy Signals</span>
-          <div class="lane-score-bar-wrap"><div class="lane-score-bar low" style="width:12%"></div></div>
-          <span class="lane-score-val">12/100</span>
+        <!-- Technical details -->
+        <div class="tech-details">
+          <div class="tech-details-toggle" onclick="toggleTechDetails()">
+            <div class="tech-details-toggle-left">
+              <span>🔬</span>
+              <span>Technical Details</span>
+              <span style="font-size:11px;color:var(--text-dim);font-weight:400;">Raw scores, parse logs, audit hash</span>
+            </div>
+            <span class="tech-chevron" id="techChevron">▼</span>
+          </div>
+          <div class="tech-body" id="techBody">
+            <div class="tech-section">
+              <div class="tech-section-title">Lane Scores (all 7)</div>
+              <div class="lane-score-row"><span class="lane-score-name">Age Proxy Signals</span><div class="lane-score-bar-wrap"><div class="lane-score-bar low" style="width:12%"></div></div><span class="lane-score-val">12/100</span></div>
+              <div class="lane-score-row"><span class="lane-score-name">Employment Gap Penalties</span><div class="lane-score-bar-wrap"><div class="lane-score-bar high" style="width:72%"></div></div><span class="lane-score-val">72/100</span></div>
+              <div class="lane-score-row"><span class="lane-score-name">Disparate Impact Patterns</span><div class="lane-score-bar-wrap"><div class="lane-score-bar low" style="width:8%"></div></div><span class="lane-score-val">8/100</span></div>
+              <div class="lane-score-row"><span class="lane-score-name">Keyword Mismatches</span><div class="lane-score-bar-wrap"><div class="lane-score-bar medium" style="width:58%"></div></div><span class="lane-score-val">58/100</span></div>
+              <div class="lane-score-row"><span class="lane-score-name">Legal Framework Triggers</span><div class="lane-score-bar-wrap"><div class="lane-score-bar high" style="width:91%"></div></div><span class="lane-score-val">91/100</span></div>
+              <div class="lane-score-row"><span class="lane-score-name">Resume Format Penalties</span><div class="lane-score-bar-wrap"><div class="lane-score-bar low" style="width:3%"></div></div><span class="lane-score-val">3/100</span></div>
+              <div class="lane-score-row"><span class="lane-score-name">Source Channel Bias</span><div class="lane-score-bar-wrap"><div class="lane-score-bar low" style="width:5%"></div></div><span class="lane-score-val">5/100</span></div>
+            </div>
+            <div class="tech-section">
+              <div class="tech-section-title">ATS Parse Log — Employment Gap</div>
+              <pre class="tech-pre">Gap detected: 2023-03 to 2024-05 (14 months)
+Explanation field: [EMPTY]
+Base gap penalty: -0.35 / No explanation multiplier: ×1.2
+Final penalty applied: -0.42</pre>
+            </div>
+            <div class="tech-section">
+              <div class="tech-section-title">ATS Parse Log — Keyword Scan</div>
+              <pre class="tech-pre">Required: ["SAP", "Excel", "Power BI"]
+"SAP S/4HANA"  → MATCH: NO  (exact match only)
+"SAP ECC 6.0"  → MATCH: NO  (exact match only)
+"SAP BW/4HANA" → MATCH: NO  (exact match only)
+"Excel"        → MATCH: YES / "Power BI" → MATCH: YES
+Skill coverage: 2/3 (66.7%) — threshold: 75% — Result: FAIL</pre>
+            </div>
+            <div class="tech-section">
+              <div class="tech-section-title">Audit Hash</div>
+              <div class="hash-display">
+                <span class="hash-value" id="auditHashDisplay">sha256:a3f9d2c1e8b74f56ad920e3b17c54f82d6e91a40fc3d28b5e1097c6f432a8d29</span>
+                <button class="hash-copy" onclick="copyHash()">Copy</button>
+              </div>
+            </div>
+          </div>
         </div>
-        <div class="lane-score-row">
-          <span class="lane-score-name">Employment Gap Penalties</span>
-          <div class="lane-score-bar-wrap"><div class="lane-score-bar high" style="width:72%"></div></div>
-          <span class="lane-score-val">72/100</span>
+
+      </div><!-- /evidence-scroll -->
+
+      <!-- ════════════════════
+           DECISION SECTION (sticky bottom)
+      ════════════════════ -->
+      <div class="decision-pane" id="decisionPane">
+
+        <div class="decision-blocked-inline" id="decisionBlockedInline">
+          🔒 Complete the NYC Local Law 144 compliance step above before making a decision.
         </div>
-        <div class="lane-score-row">
-          <span class="lane-score-name">Disparate Impact Patterns</span>
-          <div class="lane-score-bar-wrap"><div class="lane-score-bar low" style="width:8%"></div></div>
-          <span class="lane-score-val">8/100</span>
+
+        <div class="decision-choices-row" id="decisionChoices">
+          <button class="decision-radio-card locked-choice" id="choice-override" onclick="selectDecision(this, 'override')">
+            <span class="choice-icon">✅</span>
+            <div class="choice-text">
+              <div class="choice-label">Candidate is qualified — override ATS</div>
+              <div class="choice-desc">Move candidate forward in the process</div>
+            </div>
+          </button>
+          <button class="decision-radio-card locked-choice" id="choice-escalate" onclick="selectDecision(this, 'escalate')">
+            <span class="choice-icon">⚠️</span>
+            <div class="choice-text">
+              <div class="choice-label">Escalate to legal or compliance</div>
+              <div class="choice-desc">Send to the right team for input</div>
+            </div>
+          </button>
+          <button class="decision-radio-card locked-choice" id="choice-confirm" onclick="selectDecision(this, 'confirm')">
+            <span class="choice-icon">❌</span>
+            <div class="choice-text">
+              <div class="choice-label">ATS decision is correct — confirm</div>
+              <div class="choice-desc">Candidate does not meet requirements</div>
+            </div>
+          </button>
         </div>
-        <div class="lane-score-row">
-          <span class="lane-score-name">Keyword Mismatches</span>
-          <div class="lane-score-bar-wrap"><div class="lane-score-bar medium" style="width:58%"></div></div>
-          <span class="lane-score-val">58/100</span>
+
+        <div class="justification-row">
+          <div class="justification-left">
+            <div class="justification-label">
+              Your Explanation
+              <span class="justification-req" id="justReq">* Required</span>
+            </div>
+            <div class="template-chips">
+              <span class="template-chip" onclick="selectTemplate(this)">Candidate meets all stated requirements</span>
+              <span class="template-chip" onclick="selectTemplate(this)">Gap penalty is not business-justified</span>
+              <span class="template-chip" onclick="selectTemplate(this)">Keyword rule is overly restrictive</span>
+              <span class="template-chip" onclick="selectTemplate(this)">Compliance review required first</span>
+            </div>
+            <textarea class="justification-textarea" id="justificationText" placeholder="Describe your reasoning in plain language." oninput="validateSubmit()"></textarea>
+          </div>
         </div>
-        <div class="lane-score-row">
-          <span class="lane-score-name">Legal Framework Triggers</span>
-          <div class="lane-score-bar-wrap"><div class="lane-score-bar high" style="width:91%"></div></div>
-          <span class="lane-score-val">91/100</span>
+
+        <div class="submit-bar">
+          <span class="submit-hint" id="submitHint">Complete the compliance step, then select a decision option above</span>
+          <button class="btn-submit-final" id="submitBtn" onclick="submitFinalDecision()" disabled>Submit Final Decision</button>
         </div>
-        <div class="lane-score-row">
-          <span class="lane-score-name">Resume Format Penalties</span>
-          <div class="lane-score-bar-wrap"><div class="lane-score-bar low" style="width:3%"></div></div>
-          <span class="lane-score-val">3/100</span>
-        </div>
-        <div class="lane-score-row">
-          <span class="lane-score-name">Source Channel Bias</span>
-          <div class="lane-score-bar-wrap"><div class="lane-score-bar low" style="width:5%"></div></div>
-          <span class="lane-score-val">5/100</span>
-        </div>
-      </div>
 
-      <div class="tech-section">
-        <div class="tech-section-title">ATS Parse Log — Employment Gap</div>
-        <pre class="tech-pre">Employment History (parsed):
-  - Company: Deloitte, 2019–2023
-  - Gap detected: 2023-03 to 2024-05
-  - Duration: 14 months
-  - Explanation field: [EMPTY]
-  - Structured data: No gap_reason provided
+      </div><!-- /decision-pane -->
 
-Scoring:
-  - Base gap penalty: -0.35
-  - No explanation multiplier: ×1.2
-  - Final penalty applied: -0.42</pre>
-      </div>
-
-      <div class="tech-section">
-        <div class="tech-section-title">ATS Parse Log — Keyword Scan</div>
-        <pre class="tech-pre">Keyword Scan (Job Req ID: 2847-FA):
-  Required: ["SAP", "Excel", "Power BI"]
-
-  Resume tokens parsed:
-    "SAP S/4HANA"  → MATCH: NO  (exact match only)
-    "SAP ECC 6.0"  → MATCH: NO  (exact match only)
-    "SAP BW/4HANA" → MATCH: NO  (exact match only)
-    "Excel"        → MATCH: YES
-    "Power BI"     → MATCH: YES
-
-  Skill coverage: 2/3 (66.7%)
-  Minimum threshold: 75%
-  Result: FAIL</pre>
-      </div>
-
-      <div class="tech-section">
-        <div class="tech-section-title">Legal Compliance — Raw Status</div>
-        <pre class="tech-pre">NYCLL144 Compliance Check:
-  - Annual bias audit:        NOT COMPLETED
-  - Bias audit date:          N/A
-  - Candidate notice:         NOT PROVIDED
-  - Alternative review:       NOT OFFERED
-
-AEDT Classification:
-  - Tool: Workday AI v4.2
-  - Decision type: Ranking + Rejection
-  - Scope: Full candidate pool
-  - Last audit date: NEVER</pre>
-      </div>
-
-      <div class="tech-section">
-        <div class="tech-section-title">Audit Hash</div>
-        <div class="hash-display">
-          <span class="hash-value" id="auditHashDisplay">sha256:a3f9d2c1e8b74f56ad920e3b17c54f82d6e91a40fc3d28b5e1097c6f432a8d29</span>
-          <button class="hash-copy" onclick="copyHash()">Copy</button>
-        </div>
-      </div>
-
-      <div class="tech-section">
-        <div class="tech-section-title">Timestamped Event Log</div>
-        <pre class="tech-pre">2026-05-06T09:41:21.000Z  APPLICATION_RECEIVED      source=workday_portal
-2026-05-06T09:41:21.102Z  ATS_SCORING_START         tool=workday_ai_v4.2
-2026-05-06T09:41:21.847Z  ATS_SCORING_COMPLETE      composite_score=0.31 threshold=0.50
-2026-05-06T09:41:21.848Z  REJECTION_TRIGGERED       reason=below_threshold
-2026-05-06T09:41:22.000Z  FAS_INTERCEPT             risk_score=74 flags=2
-2026-05-06T09:41:22.847Z  REVIEW_WINDOW_OPEN        reviewer=pending timeout=3.0s</pre>
-      </div>
-
-    </div>
-  </div>
-
-</div>
+    </div><!-- /split-right -->
+  </div><!-- /split-pane -->
 </main>
 
 <!-- ── MODE TOGGLE (demo) ── -->
@@ -807,19 +829,96 @@ AEDT Classification:
   let selectedAction = null;
   let piiRevealed = false;
   let legalCleared = false;
+  let decisionSubmitted = false;
+  let currentUserId = null;
 
-  // ── AUTH ──
+  // Flag definitions
+  const FLAGS = [
+    { id: 'gap',       label: 'Employment Gap', icon: '📅', severity: 'critical', panelId: 'panel-gap' },
+    { id: 'kw',        label: 'Keyword Mismatch', icon: '🔤', severity: 'triggered', panelId: 'panel-kw' },
+    { id: 'age',       label: 'Age Proxy', icon: '🎂', severity: 'clean', panelId: 'panel-age' },
+    { id: 'disparate', label: 'Disparate Impact', icon: '📊', severity: 'clean', panelId: 'panel-disparate' },
+    { id: 'resume',    label: 'Resume Format', icon: '📄', severity: 'clean', panelId: 'panel-resume' },
+    { id: 'source',    label: 'Source Channel', icon: '🔗', severity: 'clean', panelId: 'panel-source' },
+  ];
+
+  let activeFlagId = 'gap';
+  const reviewedFlags = new Set();
+
+  // ── INIT ──
   async function init() {
     const { data: { session } } = await supabaseClient.auth.getSession();
     if (!session) { window.location.href = 'login.html'; return; }
+    currentUserId = session.user.id;
     document.getElementById('userName').textContent = session.user.user_metadata?.name || session.user.email;
     document.getElementById('userRole').textContent = session.user.user_metadata?.role || 'Reviewer';
 
-    // Populate org name
     document.querySelectorAll('#gapStatOrg, #kwStatOrg').forEach(el => el.textContent = FAS_CONFIG.org);
     document.querySelectorAll('.reviewer-name').forEach(el => el.textContent = 'Reviewer ' + FAS_CONFIG.reviewer);
 
+    renderFlagWidgets();
+    switchFlag('gap');
     startCountdown();
+  }
+
+  // ── FLAG WIDGETS ──
+  function renderFlagWidgets() {
+    const selectorRow = document.getElementById('flagSelectorRow');
+    const leftList = document.getElementById('leftFlagList');
+    selectorRow.innerHTML = '';
+    leftList.innerHTML = '';
+
+    FLAGS.forEach(f => {
+      // Top flag card
+      const card = document.createElement('div');
+      card.className = `flag-card severity-${f.severity}${f.id === activeFlagId ? ' active' : ''}${reviewedFlags.has(f.id) ? ' reviewed' : ''}`;
+      card.id = `flagcard-${f.id}`;
+      card.onclick = () => switchFlag(f.id);
+      card.innerHTML = `
+        <span class="flag-card-check">✓</span>
+        <div class="flag-card-icon">${f.icon}</div>
+        <div class="flag-card-name">${f.label}</div>
+        <div class="flag-card-sub">${f.severity === 'clean' ? 'Clean' : f.severity === 'critical' ? 'High severity' : 'Medium severity'}</div>
+      `;
+      selectorRow.appendChild(card);
+
+      // Left pane item
+      const item = document.createElement('div');
+      item.className = `left-flag-item${f.id === activeFlagId ? ' active' : ''}`;
+      item.id = `leftflag-${f.id}`;
+      item.onclick = () => switchFlag(f.id);
+      item.innerHTML = `
+        <span class="left-flag-icon">${f.icon}</span>
+        <span class="left-flag-name">${f.label}</span>
+        <span class="left-flag-status ${f.severity}">${f.severity === 'clean' ? 'Clean' : f.severity === 'critical' ? 'Critical' : 'Triggered'}</span>
+        ${reviewedFlags.has(f.id) ? '<span class="left-flag-reviewed">✓</span>' : '<span class="left-flag-reviewed" style="visibility:hidden">✓</span>'}
+      `;
+      leftList.appendChild(item);
+    });
+  }
+
+  function switchFlag(flagId) {
+    activeFlagId = flagId;
+
+    // Mark reviewed
+    reviewedFlags.add(flagId);
+
+    // Hide all panels
+    document.querySelectorAll('.evidence-panel').forEach(p => p.classList.remove('active'));
+    const panel = document.getElementById('panel-' + flagId);
+    if (panel) panel.classList.add('active');
+
+    // Scroll evidence area to top
+    document.getElementById('evidenceScroll').scrollTop = 0;
+
+    // Re-render widgets to update active/reviewed state
+    renderFlagWidgets();
+
+    // Log audit for triggered flags
+    const flag = FLAGS.find(f => f.id === flagId);
+    if (flag && flag.severity !== 'clean') {
+      logAudit(`Reviewed ${flag.label} flag`);
+    }
   }
 
   // ── COUNTDOWN ──
@@ -833,14 +932,20 @@ AEDT Classification:
   }
 
   function updateCountdownDisplay() {
-    document.getElementById('countdown').textContent = Math.max(0, timeRemaining).toFixed(1) + 's';
-    document.getElementById('liveBanner').classList.toggle('critical', timeRemaining <= 1.0);
+    const val = Math.max(0, timeRemaining).toFixed(1) + 's';
+    document.getElementById('countdown').textContent = val;
+    document.getElementById('timerBig').textContent = val;
+    const isCritical = timeRemaining <= 1.0;
+    document.getElementById('liveBanner').classList.toggle('critical', isCritical);
+    document.getElementById('timerBig').classList.toggle('critical', isCritical);
   }
 
   function autoFinalize() {
-    alert('⏱ Time expired — rejection has been automatically finalized.\n\nThis action has been logged to the audit trail.');
+    if (decisionSubmitted) return;
+    showToast('⏱ Time expired — the rejection has been automatically finalized and logged to the audit trail.', false);
     document.getElementById('submitBtn').disabled = true;
     document.getElementById('submitBtn').textContent = 'Window Closed';
+    logAudit('Review window expired — auto-finalized');
   }
 
   function requestExtension() {
@@ -848,6 +953,7 @@ AEDT Classification:
     if (reason?.trim()) {
       timeRemaining += 30;
       updateCountdownDisplay();
+      if (!countdownInterval || timeRemaining > 0.1) startCountdown();
       logAudit('Extension requested: ' + reason.substring(0, 50));
     }
   }
@@ -863,13 +969,13 @@ AEDT Classification:
 
   // ── LEGAL PANEL ──
   function openComplianceChecklist() {
-    alert('Opening NYC Local Law 144 compliance checklist.\n\nRequired steps:\n1. Complete annual bias audit for Workday AI\n2. Provide candidate notice of AEDT use\n3. Offer alternative human review process\n4. Document all steps for CCHR defense');
     logAudit('Viewed NYCLL144 compliance checklist');
+    alert('NYC Local Law 144 — Compliance Checklist\n\n☐ Complete annual bias audit for Workday AI v4.2\n☐ Notify candidate that an AEDT was used\n☐ Offer candidate an alternative human review process\n☐ Document all steps for CCHR response\n\nAll steps must be completed before this rejection can be finalized.');
   }
 
   function generateComplianceDoc() {
     logAudit('Generated compliance documentation');
-    alert('✓ Compliance document generated and saved to audit trail.\n\nDocument includes: AEDT disclosure, review timeline, and flag summary.');
+    showToast('✓ Compliance document generated and saved to audit trail.');
   }
 
   function markAuditComplete() {
@@ -878,67 +984,129 @@ AEDT Classification:
     const panel = document.getElementById('legalPanel');
     panel.classList.add('compliant');
     panel.querySelector('.legal-panel-title').innerHTML = '<span>✅</span> NYC Local Law 144 — Compliance Verified';
-    panel.querySelector('.legal-panel-body').textContent = 'The required annual bias audit has been marked complete. You may now proceed with your decision.';
-    panel.querySelector('.legal-freeze-notice').remove();
-    document.getElementById('decisionBlocked').style.display = 'none';
-    document.getElementById('decisionChoices').style.opacity = '1';
-    document.getElementById('decisionChoices').style.pointerEvents = 'auto';
+    document.getElementById('legalPanelBody').textContent = 'The required annual bias audit has been marked complete. You may now proceed with your decision below.';
+    document.getElementById('legalFreezeNotice').remove();
+    document.getElementById('decisionBlockedInline').style.display = 'none';
+    document.querySelectorAll('.decision-radio-card').forEach(c => c.classList.remove('locked-choice'));
     logAudit('Marked NYCLL144 bias audit as complete');
+    validateSubmit();
   }
 
   // ── DECISION ──
   function selectDecision(el, action) {
     if (!legalCleared) return;
     selectedAction = action;
-    document.querySelectorAll('.decision-choice').forEach(c => {
+    document.querySelectorAll('.decision-radio-card').forEach(c => {
       c.classList.remove('selected-override', 'selected-escalate', 'selected-confirm');
     });
     el.classList.add('selected-' + action);
 
-    const hint = document.getElementById('submitHint');
     const req = document.getElementById('justReq');
     if (action === 'confirm') {
-      hint.textContent = 'Explanation is optional for a confirmed rejection';
       req.textContent = '(optional)';
       req.style.color = 'var(--text-dim)';
     } else {
-      hint.textContent = 'An explanation is required before you can submit';
       req.textContent = '* Required';
       req.style.color = 'var(--danger)';
     }
-    validateJustification();
+    validateSubmit();
   }
 
   function selectTemplate(chip) {
     const textarea = document.getElementById('justificationText');
     document.querySelectorAll('.template-chip').forEach(c => c.classList.remove('active'));
     chip.classList.add('active');
-    const current = textarea.value;
-    textarea.value = (current ? current + '\n\n' : '') + chip.textContent + ': ';
+    textarea.value = (textarea.value ? textarea.value + '\n\n' : '') + chip.textContent + ': ';
     textarea.focus();
-    validateJustification();
+    validateSubmit();
   }
 
-  function validateJustification() {
+  function validateSubmit() {
     const text = document.getElementById('justificationText').value.trim();
     const btn = document.getElementById('submitBtn');
-    if (!selectedAction || !legalCleared) { btn.disabled = true; return; }
-    btn.disabled = (selectedAction !== 'confirm' && text.length < 10);
-  }
+    const hint = document.getElementById('submitHint');
 
-  function submitAction() {
-    if (!selectedAction) { alert('Please select a decision first.'); return; }
-    const justification = document.getElementById('justificationText').value.trim();
-    if (selectedAction !== 'confirm' && justification.length < 10) {
-      alert('Please provide an explanation before submitting.');
+    if (decisionSubmitted) { btn.disabled = true; return; }
+
+    if (!legalCleared) {
+      hint.textContent = 'Complete the compliance step above first';
+      btn.disabled = true;
       return;
     }
-    const labels = { override: 'Override — Candidate is qualified', escalate: 'Escalate to legal/compliance', confirm: 'Confirm rejection' };
-    if (confirm('Submit: "' + labels[selectedAction] + '"?\n\nThis will be logged to the immutable audit trail and cannot be undone.')) {
-      logAudit('Decision submitted: ' + labels[selectedAction]);
-      alert('✓ Decision submitted.\n\nAction: ' + labels[selectedAction] + '\nTimestamp: ' + new Date().toISOString());
+    if (!selectedAction) {
+      hint.textContent = 'Select a decision option above to continue';
+      btn.disabled = true;
+      return;
     }
+    if (selectedAction !== 'confirm' && text.length < 10) {
+      hint.textContent = `Add an explanation (${10 - text.length} more characters needed)`;
+      btn.disabled = true;
+      return;
+    }
+    hint.textContent = 'Ready to submit — this action is permanent and logged';
+    btn.disabled = false;
   }
+
+  // ── SUBMIT ──
+  async function submitFinalDecision() {
+    if (!selectedAction || decisionSubmitted) return;
+    const justification = document.getElementById('justificationText').value.trim();
+
+    if (selectedAction !== 'confirm' && justification.length < 10) {
+      showToast('Please provide an explanation before submitting.', false);
+      return;
+    }
+
+    const labels = { override: 'Override — Candidate is qualified', escalate: 'Escalate to legal/compliance', confirm: 'Confirm rejection' };
+    if (!confirm(`Submit: "${labels[selectedAction]}"?\n\nThis will be logged to the immutable audit trail and cannot be undone.`)) return;
+
+    const btn = document.getElementById('submitBtn');
+    btn.disabled = true;
+    btn.textContent = 'Submitting…';
+
+    const hash = document.getElementById('auditHashDisplay').textContent;
+    const timestamp = new Date().toISOString();
+
+    // Write to Supabase overrides table
+    try {
+      const { error } = await supabaseClient.from('overrides').insert({
+        rejection_id: FAS_CONFIG.candidateId,
+        reviewer_id: currentUserId,
+        decision: selectedAction,
+        justification: justification || null,
+        audit_hash: hash,
+        created_at: timestamp
+      });
+      if (error) console.warn('Supabase insert error:', error.message);
+    } catch (e) {
+      console.warn('Supabase unavailable (demo mode):', e.message);
+    }
+
+    decisionSubmitted = true;
+    logAudit(`Decision submitted: ${labels[selectedAction]}`);
+
+    // Lock the UI
+    document.querySelectorAll('.decision-radio-card').forEach(c => c.style.pointerEvents = 'none');
+    document.getElementById('justificationText').disabled = true;
+    document.querySelectorAll('.template-chip').forEach(c => c.style.pointerEvents = 'none');
+
+    btn.textContent = '✓ Submitted';
+    btn.classList.add('submitted');
+    btn.disabled = true;
+
+    showToast(`Decision recorded.\nAudit hash: ${hash.substring(0, 30)}…`, true);
+
+    // Return to rejections list after brief delay
+    setTimeout(() => { window.location.href = 'rejections.html'; }, 3000);
+  }
+
+  // ── UNSAVED NAVIGATION WARNING ──
+  window.addEventListener('beforeunload', e => {
+    if (selectedAction && !decisionSubmitted) {
+      e.preventDefault();
+      e.returnValue = '';
+    }
+  });
 
   // ── NOTES ──
   function insertNoteTemplate(chip, textareaId, text) {
@@ -951,11 +1119,9 @@ AEDT Classification:
   }
 
   function autosaveNotes(textarea) {
-    const base = textarea.id.replace('Notes', '').replace('kw', 'kw');
-    const statusId = base + 'SaveStatus';
-    const timeId = base + 'LastEdit';
-    const statusEl = document.getElementById(statusId);
-    const timeEl = document.getElementById(timeId);
+    const base = textarea.id.replace('Notes', '');
+    const statusEl = document.getElementById(base + 'SaveStatus');
+    const timeEl = document.getElementById(base + 'LastEdit');
     if (!statusEl) return;
     statusEl.textContent = 'Saving…';
     setTimeout(() => {
@@ -969,29 +1135,21 @@ AEDT Classification:
   function toggleBaseline(checkbox, key) {
     if (key === 'gap') {
       const el = document.getElementById('gapStatText');
+      const toggleHTML = `<div class="story-stat-toggle"><label style="display:flex;align-items:center;gap:6px;cursor:pointer;"><input type="checkbox" onchange="toggleBaseline(this,'gap')" ${checkbox.checked ? 'checked' : ''}><span class="toggle-slider"></span>Compare to industry average</label></div>`;
       if (checkbox.checked) {
-        el.childNodes[0].textContent = '';
-        el.innerHTML = '<strong>41%</strong> of rejections across <strong>all F.A.S. beta clients</strong> involve employment gap penalties where gaps are under 18 months. Industry data suggests thresholds above 12 months have no statistically validated link to job performance.' + el.querySelector('.story-stat-toggle').outerHTML;
+        el.innerHTML = `<strong>41%</strong> of rejections across <strong>all F.A.S. beta clients</strong> involve employment gap penalties where gaps are under 18 months. Industry data suggests thresholds above 12 months have no statistically validated link to job performance.${toggleHTML}`;
       } else {
-        el.innerHTML = '<strong>67%</strong> of rejections in the last 90 days at <strong id="gapStatOrg">KPMG Pakistan</strong> involve candidates whose employment gap exceeds 12 months. This threshold was set on 2026-01-15 and has not been validated against business necessity.<div class="story-stat-toggle"><label style="display:flex;align-items:center;gap:6px;cursor:pointer;"><input type="checkbox" onchange="toggleBaseline(this, \'gap\')"><span class="toggle-slider"></span>Compare to industry average</label></div>';
+        el.innerHTML = `<strong>67%</strong> of rejections in the last 90 days at <strong id="gapStatOrg">KPMG Pakistan</strong> involve candidates whose employment gap exceeds 12 months. This threshold was set on 2026-01-15 and has not been validated against business necessity.${toggleHTML}`;
       }
     } else {
       const el = document.getElementById('kwStatText');
+      const toggleHTML = `<div class="story-stat-toggle"><label style="display:flex;align-items:center;gap:6px;cursor:pointer;"><input type="checkbox" onchange="toggleBaseline(this,'kw')" ${checkbox.checked ? 'checked' : ''}><span class="toggle-slider"></span>Compare to industry average</label></div>`;
       if (checkbox.checked) {
-        el.innerHTML = '<strong>38%</strong> of rejections across <strong>all F.A.S. beta clients</strong> involve keyword false negatives. Industry average: 42% of ATS systems use exact-match only, with no synonym or variant matching configured.<div class="story-stat-toggle"><label style="display:flex;align-items:center;gap:6px;cursor:pointer;"><input type="checkbox" onchange="toggleBaseline(this, \'kw\')"><span class="toggle-slider"></span>Compare to industry average</label></div>';
+        el.innerHTML = `<strong>38%</strong> of rejections across <strong>all F.A.S. beta clients</strong> involve keyword false negatives. Industry average: 42% of ATS systems use exact-match only, with no synonym or variant matching configured.${toggleHTML}`;
       } else {
-        el.innerHTML = '<strong>41%</strong> of rejections in the last 90 days at <strong id="kwStatOrg">KPMG Pakistan</strong> involve keyword false negatives where candidates listed skill variants but the ATS required exact string matches.<div class="story-stat-toggle"><label style="display:flex;align-items:center;gap:6px;cursor:pointer;"><input type="checkbox" onchange="toggleBaseline(this, \'kw\')"><span class="toggle-slider"></span>Compare to industry average</label></div>';
+        el.innerHTML = `<strong>41%</strong> of rejections in the last 90 days at <strong id="kwStatOrg">KPMG Pakistan</strong> involve keyword false negatives where candidates listed skill variants but the ATS required exact string matches.${toggleHTML}`;
       }
     }
-  }
-
-  // ── CLEAN LANE TOGGLE ──
-  function toggleCleanLane(el, detailId) {
-    const detail = document.getElementById(detailId);
-    const isOpen = detail.style.display !== 'none';
-    detail.style.display = isOpen ? 'none' : 'block';
-    const arrow = el.querySelector('span:last-child');
-    if (arrow) arrow.textContent = isOpen ? 'Score: ' + arrow.textContent.split(' ').pop() + ' ▾' : arrow.textContent.replace('▾', '▴');
   }
 
   // ── TECH DETAILS ──
@@ -1006,7 +1164,7 @@ AEDT Classification:
   // ── PII ──
   function revealPII() {
     if (!piiRevealed && confirm('Revealing identity will be logged to the audit trail. Continue?')) {
-      document.getElementById('candidateId').textContent = 'Ahmad R. (CAND-2847)';
+      document.getElementById('candidateDisplay').textContent = 'Ahmad R.';
       document.getElementById('candidateIdBreadcrumb').textContent = 'Ahmad R. — CAND-2847';
       piiRevealed = true;
       logAudit('Identity revealed by reviewer');
@@ -1023,10 +1181,14 @@ AEDT Classification:
     });
   }
 
-  // ── COMPLIANCE DOC ──
-  function openComplianceChecklist() {
-    logAudit('Viewed NYCLL144 compliance checklist');
-    alert('NYC Local Law 144 — Compliance Checklist\n\n☐ Complete annual bias audit for Workday AI v4.2\n☐ Notify candidate that an AEDT was used in their evaluation\n☐ Offer candidate an alternative (human-only) review process\n☐ Document all steps for CCHR response\n\nAll steps must be completed before this rejection can be finalized.');
+  // ── TOAST ──
+  function showToast(msg, success = true) {
+    const t = document.createElement('div');
+    t.className = `toast${success ? ' success' : ''}`;
+    t.style.whiteSpace = 'pre-line';
+    t.textContent = msg;
+    document.body.appendChild(t);
+    setTimeout(() => t.remove(), 4000);
   }
 
   // ── AUDIT LOG ──
@@ -1055,10 +1217,8 @@ AEDT Classification:
       banner.style.display = 'none';
       main.classList.remove('has-banner');
       clearInterval(countdownInterval);
+      document.getElementById('timerSection').style.display = 'none';
     }
-    selectedAction = null;
-    document.querySelectorAll('.decision-choice').forEach(c => c.classList.remove('selected-override', 'selected-escalate', 'selected-confirm'));
-    validateJustification();
   }
 
   document.addEventListener('DOMContentLoaded', init);
