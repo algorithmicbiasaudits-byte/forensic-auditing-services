@@ -466,10 +466,10 @@
   async function resolveCustomer(email) {
     const { data: customer } = await supabaseClient
       .from('customers')
-      .select('id, company_name')
+      .select('customer_id, company_name')
       .eq('contact_email', email)
       .single();
-    if (customer) customerId = customer.id;
+    if (customer) customerId = customer.customer_id;
   }
 
   async function loadReportsData() {
@@ -791,7 +791,7 @@
     document.querySelectorAll('.report-card').forEach(c => c.classList.remove('active-report'));
     el.classList.add('active-report');
     activeReportType = type;
-    const titles = { 'bias-audit': 'Bias Audit Records', 'regulatory-package': 'Regulatory Filing Records', 'system-integrity': 'System Integrity Records' };
+    const titles = { 'bias-audit': 'Bias Audit Records', 'ugesp-report': 'EEOC UGESP Compliance Records', 'ofccp-package': 'OFCCP Compliance Records', 'regulatory-package': 'Regulatory Filing Records', 'system-integrity': 'System Integrity Records' };
     document.getElementById('tableTitle').textContent = titles[type] || 'Records';
     applyFilters();
   }
