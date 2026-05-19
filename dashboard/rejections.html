@@ -641,26 +641,26 @@
   <div class="stats-row">
     <div class="stat-card">
       <div class="stat-card-body">
-        <div class="stat-value" style="color:#b8872e;">12</div>
+        <div class="stat-value stat-pending" style="color:#b8872e;">—</div>
         <div class="stat-label">Pending Review</div>
       </div>
     </div>
     <div class="stat-card">
       <div class="stat-card-body">
-        <div class="stat-value" style="color:#dc2626;">3</div>
+        <div class="stat-value stat-high" style="color:#dc2626;">—</div>
         <div class="stat-label">HIGH Risk</div>
       </div>
     </div>
     <div class="stat-card">
       <div class="stat-card-body">
-        <div class="stat-value" style="color:#dc2626;">3</div>
+        <div class="stat-value stat-threshold" style="color:#dc2626;">—</div>
         <div class="stat-label">Past Review Threshold</div>
       </div>
       <div class="pulse-dot"></div>
     </div>
     <div class="stat-card">
       <div class="stat-card-body">
-        <div class="stat-value" style="color:#16a34a;">7</div>
+        <div class="stat-value stat-reviewed" style="color:#16a34a;">—</div>
         <div class="stat-label">Reviewed Today</div>
       </div>
     </div>
@@ -714,6 +714,7 @@
     </div>
   </div>
 
+  <div id="rejectionCards">
   <!-- ──────────────────────────────────────
        OVERDUE — 3 cards
   ────────────────────────────────────── -->
@@ -1181,6 +1182,7 @@
     </a>
 
   </div>
+  </div><!-- #rejectionCards -->
 
   <!-- Pagination -->
   <div class="pagination-bar">
@@ -1196,16 +1198,145 @@
 </main>
 
 <script>
-  function setTab(el, tab) {
-    document.querySelectorAll('.filter-tab').forEach(t => t.classList.remove('active'));
-    el.classList.add('active');
+const { createClient } = supabase;
+const supabaseClient = createClient(
+  'https://znjvjofsfvxccmidfpgy.supabase.co',
+  'sb_publishable_9eXyp1KWa4g_uvM4TCliBg_XAwwSuwD'
+);
+
+let allRejections = [];
+let customerId = null;
+
+async function init() {
+  const { data: { session } } = await supabaseClient.auth.getSession();
+  if (!session) { window.location.href = 'login.html'; return; }
+
+  const { data: customer } = await supabaseClient
+    .from('customers')
+    .select('customer_id, company_name')
+    .eq('contact_email', session.user.email)
+    .single();
+
+  if (customer) {
+    customerId = customer.customer_id;
+    await loadRejections();
+  }
+}
+
+async function loadRejections() {
+  const { data: rejections, error } = await supabaseClient
+    .from('rejections')
+    .select('*, audits(*), overrides(*)')
+    .eq('customer_id', customerId)
+    .order('created_at', { ascending: false });
+
+  if (error) {
+    console.error('Error:', error);
+    return;
   }
 
-  function clearFilters() {
-    document.querySelectorAll('.filter-select').forEach(s => { if (s.tagName === 'SELECT') s.selectedIndex = 0; });
-    document.querySelectorAll('input[type="text"]').forEach(i => i.value = '');
-    document.querySelectorAll('input[type="date"]').forEach(i => i.value = '');
+  allRejections = rejections || [];
+  renderStats(allRejections);
+  renderCards(allRejections);
+}
+
+function renderStats(rejections) {
+  const pending = rejections.filter(r => !r.overrides || r.overrides.length === 0).length;
+  const highRisk = rejections.filter(r => {
+    const audit = r.audits?.[0];
+    return (audit?.risk_level === 'high' || audit?.risk_level === 'red') &&
+           (!r.overrides || r.overrides.length === 0);
+  }).length;
+  const pastThreshold = rejections.filter(r => {
+    const hoursSince = (Date.now() - new Date(r.created_at)) / 3600000;
+    return hoursSince > 3 && (!r.overrides || r.overrides.length === 0);
+  }).length;
+  const reviewedToday = rejections.filter(r => {
+    const reviewed = r.overrides?.[0]?.reviewed_timestamp;
+    if (!reviewed) return false;
+    return new Date(reviewed).toDateString() === new Date().toDateString();
+  }).length;
+
+  document.querySelector('.stat-pending').textContent = pending;
+  document.querySelector('.stat-high').textContent = highRisk;
+  document.querySelector('.stat-threshold').textContent = pastThreshold;
+  document.querySelector('.stat-reviewed').textContent = reviewedToday;
+}
+
+function renderCards(rejections) {
+  const container = document.getElementById('rejectionCards');
+  if (!container) return;
+
+  if (!rejections.length) {
+    container.innerHTML = '<div style="padding:48px;text-align:center;color:#94a3b8;">No rejections found.</div>';
+    return;
   }
+
+  container.innerHTML = rejections.map(r => {
+    const audit = r.audits?.[0];
+    const riskLevel = audit?.risk_level || 'low';
+    const riskLabel = riskLevel === 'high' || riskLevel === 'red' ? 'HIGH' :
+                      riskLevel === 'medium' || riskLevel === 'orange' ? 'MEDIUM' : 'LOW';
+    const isOverdue = (Date.now() - new Date(r.created_at)) / 3600000 > 3;
+    const hasOverride = r.overrides && r.overrides.length > 0;
+    const lanes = audit?.lanes_triggered || [];
+
+    return `
+      <div class="rejection-card risk-${riskLevel === 'red' ? 'high' : riskLevel === 'orange' ? 'medium' : riskLevel}${isOverdue && !hasOverride ? ' overdue' : ''}">
+        <div class="card-inner">
+          <div class="card-row-1">
+            <span class="case-id">#${r.rejection_id}</span>
+            <span class="badge badge-${riskLabel.toLowerCase()}">${riskLabel}</span>
+            ${isOverdue && !hasOverride ? '<span class="badge badge-overdue">⏱ OVERDUE</span>' : ''}
+            ${lanes.map(l => `<span class="badge badge-lane">${l}</span>`).join('')}
+          </div>
+          <div class="card-row-2">
+            <span class="card-role">${r.job_title || 'Unknown Position'}</span>
+            <div class="card-meta">
+              <span>${r.ats_source || 'Unknown ATS'}</span>
+            </div>
+          </div>
+          <div class="card-row-3">
+            <span class="reason-prefix">Reason</span>${r.rejection_reason_from_ats || 'No reason provided'}
+          </div>
+          <div class="card-row-4">
+            <div class="card-row-4-left">
+              <span class="card-time">Intercepted ${formatTime(r.created_at)}</span>
+            </div>
+            <div class="card-actions">
+              ${hasOverride
+                ? `<span class="badge badge-status-reviewed">${r.overrides[0].decision}</span>`
+                : `<button class="btn btn-primary btn-sm" onclick="window.location='/dashboard/rejection-detail.html?id=${r.rejection_id}'">Review Now →</button>`
+              }
+            </div>
+          </div>
+        </div>
+      </div>`;
+  }).join('');
+}
+
+function formatTime(iso) {
+  if (!iso) return '—';
+  const d = new Date(iso);
+  const diff = (Date.now() - d) / 1000;
+  if (diff < 60) return 'Just now';
+  if (diff < 3600) return Math.floor(diff / 60) + 'm ago';
+  if (diff < 86400) return Math.floor(diff / 3600) + 'h ago';
+  return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+}
+
+function setTab(el, tab) {
+  document.querySelectorAll('.filter-tab').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+}
+
+function clearFilters() {
+  document.querySelectorAll('.filter-select').forEach(s => { if (s.tagName === 'SELECT') s.selectedIndex = 0; });
+  document.querySelectorAll('input[type="text"]').forEach(i => i.value = '');
+  document.querySelectorAll('input[type="date"]').forEach(i => i.value = '');
+}
+
+document.addEventListener('DOMContentLoaded', init);
 </script>
 
 </body>
