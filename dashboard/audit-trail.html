@@ -4,6 +4,8 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Audit Trail — F.A.S. Dashboard</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
   <style>
     *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
 
@@ -447,7 +449,7 @@
     </div>
     <div class="header-actions">
       <button class="btn btn-secondary" onclick="alert('Export coming soon.')">↓ Export CSV</button>
-      <button class="btn btn-primary" onclick="alert('Report coming soon.')">Generate Compliance Report</button>
+      <button class="btn btn-primary" onclick="generateAuditComplianceReport()">Generate Compliance Report</button>
     </div>
   </div>
 
@@ -717,6 +719,119 @@
   function clearFilters() {
     document.querySelectorAll('.filter-select').forEach(s => s.selectedIndex = 0);
     document.querySelectorAll('.filter-input').forEach(i => i.value = '');
+  }
+
+  function generateAuditComplianceReport() {
+    const rows = Array.from(document.querySelectorAll('#audit-table tbody tr'))
+      .filter(tr => tr.style.display !== 'none');
+
+    if (!rows.length) {
+      alert('No audit records visible. Adjust your filters and try again.');
+      return;
+    }
+
+    // Collect row data
+    const records = rows.map(tr => {
+      const cells = tr.querySelectorAll('td');
+      return {
+        id:         cells[0]?.textContent.trim() || '—',
+        timestamp:  cells[1]?.textContent.trim() || '—',
+        candidate:  cells[2]?.textContent.trim() || '—',
+        position:   cells[3]?.textContent.trim() || '—',
+        jurisdiction: cells[7]?.textContent.trim() || '—',
+        compliance: cells[8]?.textContent.trim() || '—',
+        hash:       cells[10]?.querySelector('.hash-cell')?.getAttribute('title') || cells[10]?.textContent.trim() || '—',
+      };
+    });
+
+    // Summary stats
+    const total   = records.length;
+    const clear   = records.filter(r => r.compliance.includes('Clear')).length;
+    const debt    = records.filter(r => r.compliance.includes('Debt')).length;
+    const pending = records.filter(r => r.compliance.includes('Pending')).length;
+    const jSet    = new Set(records.flatMap(r => r.jurisdiction.split('·').map(j => j.trim()).filter(Boolean)));
+    const jurisdictions = Array.from(jSet).join(', ') || '—';
+
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'letter' });
+    const pageW  = doc.internal.pageSize.getWidth();
+    const pageH  = doc.internal.pageSize.getHeight();
+    const margin = 15;
+    const today  = new Date().toISOString().slice(0, 10);
+
+    // ── Header ──
+    doc.setFillColor(10, 22, 40);
+    doc.rect(0, 0, pageW, 26, 'F');
+    doc.setTextColor(184, 135, 46);
+    doc.setFontSize(17);
+    doc.setFont('helvetica', 'bold');
+    doc.text('F.A.S. AUDIT TRAIL COMPLIANCE REPORT', margin, 14);
+    doc.setTextColor(255, 255, 255);
+    doc.setFontSize(8.5);
+    doc.setFont('helvetica', 'normal');
+    doc.text(`Generated: ${new Date().toLocaleString()}  ·  Records shown: ${total}  ·  Tamper-evident hashing enabled`, margin, 21);
+
+    // ── Summary block ──
+    let y = 34;
+    doc.setTextColor(30, 41, 59);
+    doc.setFontSize(12);
+    doc.setFont('helvetica', 'bold');
+    doc.text('SUMMARY', margin, y);
+    y += 6;
+    doc.setFontSize(9);
+    doc.setFont('helvetica', 'normal');
+    doc.setTextColor(71, 85, 105);
+
+    const col2 = margin + 90;
+    doc.text(`Total Records:        ${total}`,  margin, y);
+    doc.text(`Jurisdictions Covered:  ${jurisdictions}`, col2, y);
+    y += 5;
+    doc.text(`✓ Clear:              ${clear}`,  margin, y);
+    doc.text(`⚠ Debt Logged:        ${debt}`,   margin + 45, y);
+    doc.text(`Pending Review:       ${pending}`, margin + 90, y);
+    y += 10;
+
+    // ── Table ──
+    doc.setTextColor(30, 41, 59);
+    doc.setFontSize(12);
+    doc.setFont('helvetica', 'bold');
+    doc.text('AUDIT RECORDS', margin, y);
+    y += 4;
+
+    doc.autoTable({
+      startY: y,
+      head: [['Record ID', 'Timestamp', 'Candidate', 'Position', 'Jurisdiction', 'Compliance Status', 'Audit Hash']],
+      body: records.map(r => [r.id, r.timestamp, r.candidate, r.position, r.jurisdiction, r.compliance, r.hash]),
+      theme: 'grid',
+      headStyles: {
+        fillColor: [10, 22, 40],
+        textColor: [184, 135, 46],
+        fontSize: 8,
+        fontStyle: 'bold',
+      },
+      bodyStyles: { fontSize: 7.5, textColor: [30, 41, 59] },
+      alternateRowStyles: { fillColor: [248, 250, 252] },
+      columnStyles: {
+        0: { cellWidth: 22 },
+        1: { cellWidth: 36 },
+        2: { cellWidth: 22 },
+        3: { cellWidth: 60 },
+        4: { cellWidth: 36 },
+        5: { cellWidth: 28 },
+        6: { cellWidth: 40, font: 'courier', fontSize: 6.5 },
+      },
+      margin: { left: margin, right: margin },
+      didDrawPage: (data) => {
+        doc.setFontSize(7.5);
+        doc.setTextColor(148, 163, 184);
+        doc.text(
+          `Page ${data.pageNumber}  ·  F.A.S. Forensic Auditing Services  ·  CONFIDENTIAL`,
+          margin, pageH - 7
+        );
+      },
+    });
+
+    doc.save(`FAS_Audit_Trail_Report_${today}.pdf`);
   }
 </script>
 
