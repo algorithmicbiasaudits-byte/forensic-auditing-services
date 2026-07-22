@@ -963,7 +963,8 @@ Skill coverage: 2/3 (66.7%) — threshold: 75% — Result: FAIL</pre>
     org: 'KPMG Pakistan',
     reviewer: 'U.H.',
     reviewWindow: 3.0,
-    candidateId: 'CAND-2847'
+    candidateId: 'CAND-2847',
+    upgradeAlertEndpoint: 'https://znjvjofsfvxccmidfpgy.supabase.co/functions/v1/upgrade-request'
   };
 
   let currentMode       = 'live';
@@ -975,6 +976,8 @@ Skill coverage: 2/3 (66.7%) — threshold: 75% — Result: FAIL</pre>
   let decisionSubmitted = false;
   let currentUserId     = null;
   let currentUserName   = '—';
+  let currentCustomerId    = null;
+  let currentCustomerPlan  = null;
 
   // ── Draft state ──
   let selectedTags     = new Set();
@@ -1008,11 +1011,100 @@ Skill coverage: 2/3 (66.7%) — threshold: 75% — Result: FAIL</pre>
     document.querySelectorAll('#gapStatOrg, #kwStatOrg').forEach(el => el.textContent = FAS_CONFIG.org);
     document.querySelectorAll('.reviewer-name').forEach(el => el.textContent = 'Reviewer ' + FAS_CONFIG.reviewer);
 
+    await checkEntitlement();
+
     renderFlagWidgets();
     switchFlag('gap');
     await loadDraft();
     startDraftAutosave();
     startCountdown();
+  }
+
+  // ════════════════════════════════════════
+  // FAS HITL ENTITLEMENT GATE
+  // ════════════════════════════════════════
+  async function checkEntitlement() {
+    const { data: userRow } = await supabaseClient
+      .from('users').select('customer_id').eq('auth_id', currentUserId).single();
+    if (!userRow) return;
+
+    const { data: customerRow } = await supabaseClient
+      .from('customers').select('plan').eq('customer_id', userRow.customer_id).single();
+
+    currentCustomerId   = userRow.customer_id;
+    currentCustomerPlan = customerRow?.plan || null;
+
+    if (currentCustomerPlan === 'auditing_only') applyRestrictedState();
+  }
+
+  function applyRestrictedState() {
+    document.querySelectorAll('#decisionChoices .decision-radio-card').forEach(btn => btn.disabled = true);
+    document.querySelectorAll('#tagPillsRow .tag-pill').forEach(pill => {
+      pill.style.pointerEvents = 'none';
+      pill.style.opacity = '0.5';
+    });
+    document.getElementById('otherTagText').disabled = true;
+    document.getElementById('justificationText').disabled = true;
+
+    const submitBtn = document.getElementById('submitBtn');
+    submitBtn.disabled = false;
+    submitBtn.textContent = 'Certify — Requires Remediation Plan';
+    submitBtn.onclick = openUpgradeModal;
+
+    showExposureBanner();
+  }
+
+  function showExposureBanner() {
+    const banner = document.createElement('div');
+    banner.id = 'exposureBanner';
+    banner.style.cssText = 'position:sticky;top:0;z-index:50;background:#fef3c7;border-left:4px solid #f59e0b;padding:12px 16px;font-size:13px;font-weight:600;color:#92400e;';
+    banner.textContent = 'Raw exposure data — mathematically final but operationally raw. Not certified, not human-reviewed, not usable as legal-defense evidence without an active Remediation Plan.';
+    (document.querySelector('.evidence-panel')?.parentElement ?? document.body).prepend(banner);
+  }
+
+  // Derived from FLAGS' static demo severities, not a real computed risk
+  // score — flagging that limitation rather than inventing a fake number.
+  function getHighestSeverity() {
+    if (FLAGS.some(f => f.severity === 'critical')) return 'high';
+    if (FLAGS.some(f => f.severity === 'triggered')) return 'medium';
+    return 'low';
+  }
+
+  function openUpgradeModal() {
+    const modal = document.createElement('div');
+    modal.className = 'modal-overlay';
+    modal.style.cssText = 'display:flex;position:fixed;inset:0;z-index:100;background:rgba(0,0,0,.5);align-items:center;justify-content:center;';
+    modal.innerHTML = `
+      <div style="background:#fff;border-radius:12px;padding:24px;max-width:420px;">
+        <h3 style="margin:0 0 8px;">Certification requires a Remediation Plan</h3>
+        <p style="font-size:13px;color:#555;margin-bottom:16px;">This account is on FAS Auditing only. Request an upgrade and ALS Consulting Sales will follow up — no self-serve checkout.</p>
+        <button id="upgradeRequestBtn" class="btn-submit-final">Request Upgrade</button>
+        <button onclick="this.closest('.modal-overlay').remove()" style="margin-left:8px;">Cancel</button>
+      </div>`;
+    document.body.appendChild(modal);
+
+    document.getElementById('upgradeRequestBtn').onclick = async () => {
+      try {
+        const { data: { session } } = await supabaseClient.auth.getSession();
+        const res = await fetch(FAS_CONFIG.upgradeAlertEndpoint, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${session.access_token}`,
+          },
+          body: JSON.stringify({
+            rejection_id: FAS_CONFIG.candidateId,
+            job_id: FAS_CONFIG.jobId ?? null,
+            risk_level: getHighestSeverity(),
+          }),
+        });
+        if (!res.ok) throw new Error('non-200 from upgrade endpoint');
+        showToast('Upgrade request sent to ALS Consulting Sales.', true);
+      } catch (e) {
+        showToast('Could not send request — try again or contact Sales directly.', false);
+      }
+      modal.remove();
+    };
   }
 
   // ════════════════════════════════════════
@@ -1409,29 +1501,43 @@ Skill coverage: 2/3 (66.7%) — threshold: 75% — Result: FAIL</pre>
   }
 
   // ── Execute the final write ──
+  // Column-name fix 2026-07-21: reviewer_id -> reviewed_by_user_id,
+  // justification -> justification_comment; tags/audit_hash dropped from
+  // the insert (neither column exists on the real overrides table) — this
+  // was supposed to already be fixed per 2026-07-19's "Thing 2" but wasn't.
+  // Still NOT fixed here: reviewed_by_user_id receives the raw auth UUID,
+  // not a resolved bigint user_id, and audit_id (NOT NULL) isn't supplied —
+  // that's Track A's unfinished rebuild, intentionally out of scope for
+  // this pass. That will surface as a non-42501 error and correctly fall
+  // through to the generic error path below rather than being masked.
   async function executeFinalDecision() {
     const justification = document.getElementById('justificationText').value.trim();
-    const otherText     = document.getElementById('otherTagText')?.value || '';
-    const tags          = [...selectedTags].map(t => t === 'other' ? `other:${otherText}` : t);
-    const hash          = document.getElementById('auditHashDisplay').textContent;
-    const timestamp     = new Date().toISOString();
-    const LABELS        = { override: 'Override — Candidate is qualified', escalate: 'Escalate to legal/compliance', confirm: 'Confirm rejection' };
+    const hash           = document.getElementById('auditHashDisplay').textContent;
+    const timestamp       = new Date().toISOString();
+    const LABELS = { override: 'Override — Candidate is qualified', escalate: 'Escalate to legal/compliance', confirm: 'Confirm rejection' };
 
-    try {
-      await supabaseClient.from('overrides').insert({
-        rejection_id: FAS_CONFIG.candidateId,
-        reviewer_id:  currentUserId,
-        decision:     selectedAction,
-        justification: justification || null,
-        tags,
-        audit_hash:  hash,
-        created_at:  timestamp
-      });
-      // Remove draft now that it's finalized
-      await supabaseClient.from('reviewer_drafts').delete()
-        .eq('rejection_id', FAS_CONFIG.candidateId)
-        .eq('reviewer_id',  currentUserId);
-    } catch (e) { console.warn('Supabase unavailable (demo):', e.message); }
+    const { error } = await supabaseClient.from('overrides').insert({
+      rejection_id: FAS_CONFIG.candidateId,
+      reviewed_by_user_id: currentUserId,
+      decision: selectedAction,
+      justification_comment: justification || null,
+    });
+
+    if (error) {
+      if (error.code === '42501') {
+        closeFinalizeModal();
+        openUpgradeModal();
+        return;
+      }
+      console.error('Finalize failed:', error);
+      showToast('Could not save your decision — please try again.', false);
+      return;
+    }
+
+    // Remove draft now that it's finalized
+    await supabaseClient.from('reviewer_drafts').delete()
+      .eq('rejection_id', FAS_CONFIG.candidateId)
+      .eq('reviewer_id',  currentUserId);
 
     decisionSubmitted = true;
     clearInterval(draftAutoSaveInt);

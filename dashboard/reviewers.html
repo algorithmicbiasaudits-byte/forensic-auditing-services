@@ -289,14 +289,23 @@
   const PER_PAGE = 10;
   let customerId = null;
   let editingId = null;
+  let currentCustomerPlan = null;
 
   async function init() {
     const { data: { session } } = await supabaseClient.auth.getSession();
     if (!session) { window.location.href = 'login.html'; return; }
     injectUserInfo(session.user);
     await resolveCustomer(session.user.email);
+    await checkEntitlement();
     await loadReviewers();
     await loadAuditLog();
+  }
+
+  async function checkEntitlement() {
+    if (!customerId) return;
+    const { data: customerRow } = await supabaseClient
+      .from('customers').select('plan').eq('customer_id', customerId).single();
+    currentCustomerPlan = customerRow?.plan || null;
   }
 
   function injectUserInfo(user) {
@@ -399,6 +408,8 @@
       return;
     }
 
+    const restricted = currentCustomerPlan === 'auditing_only';
+
     tbody.innerHTML = reviewers.map(r => {
       const roleClass = r.role === 'admin' ? 'role-admin' : r.role === 'compliance_officer' ? 'role-officer' : r.role === 'senior_reviewer' ? 'role-reviewer' : 'role-viewer';
       const roleLabel = r.role === 'admin' ? 'Admin' : r.role === 'compliance_officer' ? 'Officer' : r.role === 'senior_reviewer' ? 'Senior' : 'Viewer';
@@ -415,9 +426,9 @@
         <td>${formatDate(r.last_active)}</td>
         <td>${r.decision_count || 0}</td>
         <td>
-          <button class="btn-icon" onclick="editReviewer('${r.id}')" title="Edit">✏️</button>
-          <button class="btn-icon" onclick="toggleStatus('${r.id}')" title="Toggle Status">${r.status === 'active' ? '🚫' : '✅'}</button>
-          <button class="btn-icon" onclick="deleteReviewer('${r.id}')" title="Remove">🗑️</button>
+          <button class="btn-icon" onclick="editReviewer('${r.id}')" title="Edit" ${restricted ? 'disabled' : ''}>✏️</button>
+          <button class="btn-icon" onclick="toggleStatus('${r.id}')" title="Toggle Status" ${restricted ? 'disabled' : ''}>${r.status === 'active' ? '🚫' : '✅'}</button>
+          <button class="btn-icon" onclick="deleteReviewer('${r.id}')" title="Remove" ${restricted ? 'disabled' : ''}>🗑️</button>
         </td>
       </tr>`;
     }).join('');
