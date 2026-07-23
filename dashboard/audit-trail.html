@@ -6,6 +6,8 @@
     <title>Compliance Audit Trail & Adverse Impact Matrix</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
 </head>
 <body class="bg-gray-50 text-gray-900 font-sans antialiased min-h-screen">
 
@@ -86,9 +88,15 @@
         </div>
 
         <div class="bg-white shadow rounded-lg border border-gray-200 overflow-hidden">
-            <div class="px-6 py-5 border-b border-gray-200 bg-gray-50">
-                <h3 class="text-base font-semibold leading-6 text-gray-900">Application Intake Log</h3>
-                <p class="text-xs text-gray-500 mt-1">Ledger of incoming applicant telemetry and recorded ATS outcomes.</p>
+            <div class="px-6 py-5 border-b border-gray-200 bg-gray-50 md:flex md:items-center md:justify-between">
+                <div>
+                    <h3 class="text-base font-semibold leading-6 text-gray-900">Application Intake Log</h3>
+                    <p class="text-xs text-gray-500 mt-1">Ledger of incoming applicant telemetry and recorded ATS outcomes.</p>
+                </div>
+                <div class="mt-3 md:mt-0 flex items-center gap-2">
+                    <button id="exportCsvBtn" onclick="exportCSV()" class="inline-flex items-center rounded-md border border-gray-300 bg-white px-3 py-1.5 text-xs font-semibold text-gray-700 shadow-sm hover:bg-gray-50">Export CSV</button>
+                    <button id="exportPdfBtn" onclick="exportPDF()" class="inline-flex items-center rounded-md border border-indigo-600 bg-white px-3 py-1.5 text-xs font-semibold text-indigo-600 shadow-sm hover:bg-indigo-50">Export PDF</button>
+                </div>
             </div>
             <div class="overflow-x-auto">
                 <table class="min-w-full divide-y divide-gray-300">
@@ -108,6 +116,7 @@
                     </tbody>
                 </table>
             </div>
+            <div id="intakePagination" class="px-6 py-3 border-t border-gray-200 flex items-center justify-between text-xs text-gray-500"></div>
         </div>
 
     </div>
@@ -129,6 +138,16 @@
 
         let cachedApplications = [];
         let filtersInitialized = false;
+        let companyName = null;
+
+        // Export/pagination state — set inside processAndRenderAnalytics()
+        // so exports and pagination always reflect the current job-title filter.
+        let currentFilteredRecords = [];
+        let currentMatrix = {};
+        let currentRatiosByCohort = {};
+        let currentPendingByCohort = {};
+        let currentIntakePage = 1;
+        const INTAKE_PER_PAGE = 25;
 
         async function initAuditTrail() {
             try {
@@ -152,6 +171,10 @@
                 }
 
                 const resolvedCustomerId = userRow.customer_id;
+                const { data: customer } = await supabaseClient
+                    .from('customers').select('company_name').eq('customer_id', resolvedCustomerId).single();
+                companyName = customer?.company_name || null;
+
                 await fetchTenantApplicationRecords(resolvedCustomerId);
                 setupUIEventListeners();
 
@@ -208,6 +231,9 @@
                 ? cachedApplications
                 : cachedApplications.filter(app => app.job_title === selectedJobFilter);
 
+            currentFilteredRecords = targetRecords;
+            currentIntakePage = 1; // filter changed (or first load) — back to page 1
+
             const totalCount = targetRecords.length;
             document.getElementById('totalAuditedVolume').textContent = totalCount;
 
@@ -235,6 +261,10 @@
                 (analysisOutput.disparateImpact?.ratios || []).map(r => [r.cohort, r])
             );
             const pendingByCohort = analysisOutput.pendingByCohort || {};
+
+            currentMatrix = matrix;
+            currentRatiosByCohort = ratiosByCohort;
+            currentPendingByCohort = pendingByCohort;
 
             const resolvedCount = Object.values(matrix).reduce((sum, c) => sum + c.total, 0);
             const totalPending = Object.values(pendingByCohort).reduce((sum, n) => sum + n, 0);
@@ -315,10 +345,14 @@
 
             if (records.length === 0) {
                 tbody.innerHTML = `<tr><td colspan="5" class="px-6 py-8 text-center text-sm text-gray-500">No auditable matching operational events found.</td></tr>`;
+                renderIntakePagination(0);
                 return;
             }
 
-            tbody.innerHTML = records.map(rec => {
+            const start = (currentIntakePage - 1) * INTAKE_PER_PAGE;
+            const pageRecords = records.slice(start, start + INTAKE_PER_PAGE);
+
+            tbody.innerHTML = pageRecords.map(rec => {
                 let statusBadgeColor = "bg-gray-100 text-gray-800";
                 if (rec.outcome === 'hired') statusBadgeColor = "bg-green-100 text-green-800 border border-green-200";
                 if (rec.outcome === 'rejected') statusBadgeColor = "bg-red-100 text-red-800 border border-red-200";
@@ -339,6 +373,150 @@
                     </tr>
                 `;
             }).join('');
+
+            renderIntakePagination(records.length);
+        }
+
+        function renderIntakePagination(total) {
+            const container = document.getElementById('intakePagination');
+            if (!container) return;
+            if (total === 0) { container.innerHTML = ''; return; }
+
+            const pages = Math.ceil(total / INTAKE_PER_PAGE);
+            const start = (currentIntakePage - 1) * INTAKE_PER_PAGE + 1;
+            const end = Math.min(currentIntakePage * INTAKE_PER_PAGE, total);
+
+            container.innerHTML = `
+                <span>Showing ${start}–${end} of ${total}</span>
+                <div class="flex items-center gap-2">
+                    <button onclick="goIntakePage(${currentIntakePage - 1})" ${currentIntakePage === 1 ? 'disabled' : ''} class="rounded-md border border-gray-300 px-2.5 py-1 text-xs font-medium text-gray-700 disabled:opacity-40 disabled:cursor-not-allowed hover:bg-gray-50">← Prev</button>
+                    <span>Page ${currentIntakePage} of ${pages}</span>
+                    <button onclick="goIntakePage(${currentIntakePage + 1})" ${currentIntakePage >= pages ? 'disabled' : ''} class="rounded-md border border-gray-300 px-2.5 py-1 text-xs font-medium text-gray-700 disabled:opacity-40 disabled:cursor-not-allowed hover:bg-gray-50">Next →</button>
+                </div>
+            `;
+        }
+
+        function goIntakePage(page) {
+            const pages = Math.ceil(currentFilteredRecords.length / INTAKE_PER_PAGE);
+            if (page < 1 || page > pages) return;
+            currentIntakePage = page;
+            renderIntakeTableLogs(currentFilteredRecords);
+        }
+
+        function formatCohortLabel(key) {
+            return key ? key.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase()) : 'Undisclosed';
+        }
+
+        // ─── EXPORTS ───
+        // Both exports operate on currentFilteredRecords/currentMatrix —
+        // whatever the active job-title filter currently shows, not the
+        // full unfiltered dataset. No fabricated hash or certification
+        // language — a factual export of what's on screen, timestamped.
+        function exportCSV() {
+            if (!currentFilteredRecords.length) { alert('No records to export.'); return; }
+            const headers = ['Application ID', 'Timestamp', 'Job Title', 'Cohort', 'Outcome'];
+            const rows = currentFilteredRecords.map(rec => [
+                rec.application_id,
+                rec.occurred_at,
+                rec.job_title || '',
+                formatCohortLabel(rec.protected_class_cohort),
+                rec.outcome
+            ].map(v => `"${String(v).replace(/"/g, '""')}"`).join(','));
+            const csv = [headers.join(','), ...rows].join('\n');
+            const blob = new Blob([csv], { type: 'text/csv' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `FAS_Audit_Trail_${new Date().toISOString().slice(0, 10)}.csv`;
+            document.body.appendChild(a); a.click(); document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+
+        function exportPDF() {
+            if (!currentFilteredRecords.length) { alert('No records to export.'); return; }
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'letter' });
+            const pageWidth = doc.internal.pageSize.getWidth();
+            const margin = 15;
+            const jobFilter = document.getElementById('jobTitleFilter')?.value || 'all';
+
+            doc.setFontSize(16);
+            doc.setFont('helvetica', 'bold');
+            doc.setTextColor(30, 41, 59);
+            doc.text('F.A.S. Compliance Audit Trail Export', margin, 18);
+            doc.setFontSize(9);
+            doc.setFont('helvetica', 'normal');
+            doc.setTextColor(100, 116, 139);
+            doc.text(companyName || 'Organization', margin, 25);
+            doc.text(`Job title filter: ${jobFilter === 'all' ? 'All jobs / requisitions' : jobFilter}`, margin, 30);
+            doc.text(`Generated: ${new Date().toLocaleString()}`, margin, 35);
+
+            let y = 44;
+            doc.setFontSize(12);
+            doc.setFont('helvetica', 'bold');
+            doc.setTextColor(30, 41, 59);
+            doc.text('Demographic Cohort Selection Rates & Adverse Impact Matrix', margin, y);
+            y += 6;
+
+            const keys = [...new Set([...Object.keys(currentMatrix), ...Object.keys(currentPendingByCohort)])].sort();
+            const matrixRows = keys.map(key => {
+                const c = currentMatrix[key] || { total: 0, selected: 0 };
+                const pending = currentPendingByCohort[key] || 0;
+                const ratio = currentRatiosByCohort[key];
+                const selRate = ratio ? (ratio.selectionRate * 100).toFixed(1) + '%' : '—';
+                const impactRatio = ratio && typeof ratio.impactRatio === 'number' ? ratio.impactRatio.toFixed(2) : '—';
+                const status = !ratio || ratio.belowFourFifths == null ? 'Insufficient Data' : (ratio.belowFourFifths ? 'Adverse Impact Indicated' : 'Compliant (Pass)');
+                return [formatCohortLabel(key), c.total, c.selected, pending, selRate, impactRatio, status];
+            });
+
+            doc.autoTable({
+                startY: y,
+                head: [['Cohort', 'Total Pool', 'Selected', 'Pending', 'Sel. Rate', 'Impact Ratio', 'Status']],
+                body: matrixRows.length ? matrixRows : [['No demographic cohort data available yet.', '', '', '', '', '', '']],
+                theme: 'grid',
+                headStyles: { fillColor: [30, 41, 59], fontSize: 8, fontStyle: 'bold' },
+                bodyStyles: { fontSize: 8 },
+                margin: { left: margin, right: margin }
+            });
+
+            y = doc.lastAutoTable.finalY + 12;
+            doc.setFontSize(12);
+            doc.setFont('helvetica', 'bold');
+            doc.text('Application Intake Log', margin, y);
+            y += 6;
+
+            const CAP = 200;
+            const intakeRows = currentFilteredRecords.slice(0, CAP).map(rec => [
+                rec.application_id.substring(0, 8) + '...',
+                new Date(rec.occurred_at).toLocaleString(),
+                rec.job_title || '—',
+                formatCohortLabel(rec.protected_class_cohort),
+                rec.outcome
+            ]);
+
+            doc.autoTable({
+                startY: y,
+                head: [['Application ID', 'Timestamp', 'Job Title', 'Cohort', 'Outcome']],
+                body: intakeRows,
+                theme: 'grid',
+                headStyles: { fillColor: [30, 41, 59], fontSize: 8, fontStyle: 'bold' },
+                bodyStyles: { fontSize: 7.5 },
+                margin: { left: margin, right: margin },
+                didDrawPage: (data) => {
+                    doc.setFontSize(7.5);
+                    doc.setTextColor(148, 163, 184);
+                    doc.text(`Page ${data.pageNumber} | F.A.S. Forensic Auditing Services`, margin, doc.internal.pageSize.getHeight() - 8);
+                }
+            });
+
+            if (currentFilteredRecords.length > CAP) {
+                const finalY = doc.lastAutoTable.finalY + 6;
+                doc.setFontSize(8);
+                doc.setTextColor(100, 116, 139);
+                doc.text(`* Showing first ${CAP} of ${currentFilteredRecords.length} records. Full dataset available via CSV export.`, margin, finalY);
+            }
+
+            doc.save(`FAS_Audit_Trail_${new Date().toISOString().slice(0, 10)}.pdf`);
         }
 
         function setupUIEventListeners() {
@@ -359,6 +537,14 @@
             const colspan = tbodyId === 'impactMatrixTableBody' ? 7 : 5;
             tbody.innerHTML = `<tr><td colspan="${colspan}" class="px-6 py-8 text-center text-sm text-red-500">${message}</td></tr>`;
         }
+
+        // This is a module script — top-level function declarations are NOT
+        // automatically global, but the export/pagination buttons use inline
+        // onclick= handlers (static buttons, and pagination controls that are
+        // regenerated on every render). Expose explicitly so those resolve.
+        window.exportCSV = exportCSV;
+        window.exportPDF = exportPDF;
+        window.goIntakePage = goIntakePage;
 
         document.addEventListener('DOMContentLoaded', initAuditTrail);
     </script>

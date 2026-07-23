@@ -471,12 +471,12 @@
   <div class="breadcrumb-bar">
     <a href="rejections.html">← Rejections</a>
     <span>/</span>
-    <span id="candidateIdBreadcrumb">CAND-2847</span>
+    <span id="candidateIdBreadcrumb">Loading…</span>
     <span style="margin-left:auto;display:flex;align-items:center;gap:6px;">
-      <span style="font-size:11px;color:var(--text-muted);">Risk score:</span>
-      <span style="font-family:var(--font-mono);font-weight:700;color:var(--danger);">74</span>
+      <span style="font-size:11px;color:var(--text-muted);">Risk level:</span>
+      <span id="breadcrumbRisk" style="font-family:var(--font-mono);font-weight:700;color:var(--danger);">—</span>
       <span style="font-size:11px;color:var(--text-muted);margin-left:8px;">Flags:</span>
-      <span style="font-family:var(--font-mono);font-weight:700;color:var(--danger);">2</span>
+      <span id="breadcrumbFlagCount" style="font-family:var(--font-mono);font-weight:700;color:var(--danger);">—</span>
     </span>
   </div>
 
@@ -492,38 +492,30 @@
       <div class="left-section">
         <div class="left-section-label">Candidate</div>
         <div class="cand-risk-row">
-          <span class="risk-badge high">High Risk</span>
+          <span class="risk-badge high" id="candRiskBadge">—</span>
           <div class="cand-score-pair">
-            <span class="cand-score-num">74</span>
-            <span class="cand-score-lbl">/ 100</span>
+            <span class="cand-score-num" id="candFlagCount">—</span>
+            <span class="cand-score-lbl" id="candFlagTotal">/ —</span>
           </div>
         </div>
-        <div class="cand-name" id="candidateDisplay">CAND-2847</div>
-        <div class="cand-role">Sr. Financial Analyst</div>
+        <div class="cand-name" id="candidateDisplay">—</div>
+        <div class="cand-role" id="candRole">—</div>
         <div class="cand-meta">
-          <div class="cand-meta-row">
-            <span class="cand-meta-icon">📍</span>
-            <div>
-              <div class="cand-meta-text">New York, NY</div>
-              <div class="cand-meta-sub">On-site preferred</div>
-            </div>
-          </div>
           <div class="cand-meta-row">
             <span class="cand-meta-icon">🏢</span>
             <div>
-              <div class="cand-meta-text">Workday AI v4.2</div>
-              <div class="cand-meta-sub">ATS source · Applied 2026-05-04</div>
+              <div class="cand-meta-text" id="candAts">—</div>
+              <div class="cand-meta-sub" id="candApplied">—</div>
             </div>
           </div>
           <div class="cand-meta-row">
             <span class="cand-meta-icon">⏱</span>
             <div>
-              <div class="cand-meta-text">Intercepted 09:41:22 UTC</div>
-              <div class="cand-meta-sub">ATS reason: Does not meet min qualifications</div>
+              <div class="cand-meta-text" id="candAuditTime">—</div>
+              <div class="cand-meta-sub" id="candAtsReason">ATS reason: —</div>
             </div>
           </div>
         </div>
-        <button class="reveal-btn" onclick="revealPII()">👁 Reveal Identity</button>
       </div>
 
       <!-- Timer widget -->
@@ -574,188 +566,14 @@
       <!-- Evidence scroll area -->
       <div class="evidence-scroll" id="evidenceScroll">
 
-        <!-- Legal compliance panel (always shown) -->
-        <div class="legal-panel" id="legalPanel">
-          <div class="legal-panel-header">
-            <div class="legal-panel-title">
-              <span>⚠️</span> NYC Local Law 144 — Compliance Action Required
-            </div>
-            <span class="legal-freeze-notice" id="legalFreezeNotice">🔒 Decisions Frozen</span>
-          </div>
-          <div class="legal-panel-body" id="legalPanelBody">
-            This rejection was made by an Automated Employment Decision Tool (AEDT). Under NYC Local Law 144, your organization must complete an annual bias audit before this tool can be used — and that audit is currently missing. <strong>Finalizing without completing these steps creates legal exposure of $500–$1,500 per violation.</strong>
-          </div>
-          <div class="legal-panel-actions">
-            <button class="btn-legal" onclick="openComplianceChecklist()">📋 Compliance Checklist</button>
-            <button class="btn-legal" onclick="generateComplianceDoc()">📄 Generate Doc</button>
-            <button class="btn-legal" onclick="markAuditComplete()">✓ Mark Audit Complete</button>
-          </div>
-        </div>
+        <!-- ── FLAG EVIDENCE PANELS (rendered dynamically from real audit data) ── -->
+        <div id="evidencePanels"><p style="font-size:0.8rem;color:var(--text-dim);padding:16px 0;">Loading record…</p></div>
 
-        <!-- ── FLAG EVIDENCE PANELS ── -->
-
-        <!-- FLAG: Employment Gap -->
-        <div class="evidence-panel active" id="panel-gap">
-          <div class="evidence-heading">
-            <span>📅</span> Employment Gap Penalty
-            <span style="font-size:11px;font-weight:400;color:var(--danger);margin-left:4px;">High severity</span>
-          </div>
-          <div class="story-card flag-high">
-            <div class="story-card-body">
-              <div class="story-grid">
-                <div class="story-cell ats-cell">
-                  <div class="story-cell-label ats">🤖 What the ATS saw</div>
-                  <div class="story-cell-text">A 14-month gap in employment (March 2023 – May 2024). The explanation field was empty — no reason provided in structured data. An automatic penalty was applied to the candidate's score.</div>
-                </div>
-                <div class="story-cell human-cell">
-                  <div class="story-cell-label human">👤 What the ATS missed</div>
-                  <div class="story-cell-text">The cover letter (page 2) explains the candidate stepped away to provide full-time care for their mother during cancer treatment. LinkedIn shows 3 volunteer project management roles during the same period. A physician reference is available.</div>
-                </div>
-              </div>
-              <div class="story-meaning">
-                <div class="story-meaning-label">💡 What this means</div>
-                <div class="story-meaning-text">The gap is fully documented and entirely justified. Caregiving gaps are not predictive of job performance, and penalizing them may constitute discrimination against a protected class. The ATS doesn't read cover letters — only structured fields.</div>
-              </div>
-              <div class="story-action">
-                <div>
-                  <div class="story-action-label">Recommended action</div>
-                  <div class="story-action-text">Override the gap penalty — candidate's qualifications are unaffected by this gap</div>
-                </div>
-                <span style="font-size:18px;">→</span>
-              </div>
-              <div class="story-stat" id="gapStatText">
-                <strong>67%</strong> of rejections in the last 90 days at <strong id="gapStatOrg">KPMG Pakistan</strong> involve candidates whose employment gap exceeds 12 months. This threshold was set on 2026-01-15 and has not been validated against business necessity.
-                <div class="story-stat-toggle">
-                  <label style="display:flex;align-items:center;gap:6px;cursor:pointer;">
-                    <input type="checkbox" onchange="toggleBaseline(this, 'gap')">
-                    <span class="toggle-slider"></span>
-                    Compare to industry average
-                  </label>
-                </div>
-              </div>
-              <div class="notes-section">
-                <div class="notes-label">Your Notes</div>
-                <div class="notes-templates">
-                  <span class="note-chip" onclick="insertNoteTemplate(this, 'gapNotes', 'Candidate meets all stated requirements')">Candidate meets requirements</span>
-                  <span class="note-chip" onclick="insertNoteTemplate(this, 'gapNotes', 'Gap is a proxy signal for a protected class (caregiving)')">Proxy for protected class</span>
-                  <span class="note-chip" onclick="insertNoteTemplate(this, 'gapNotes', 'Context visible to human reviewer, not available to ATS')">Context not visible to ATS</span>
-                </div>
-                <textarea class="note-textarea" id="gapNotes" placeholder="Add your observations about this flag..." oninput="autosaveNotes(this)"></textarea>
-                <div class="note-meta-row">
-                  <span class="note-save-status" id="gapSaveStatus"></span>
-                  <span>Last edited: <span id="gapLastEdit">—</span></span>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- FLAG: Keyword Mismatch -->
-        <div class="evidence-panel" id="panel-kw">
-          <div class="evidence-heading">
-            <span>🔤</span> Keyword Mismatch — SAP
-            <span style="font-size:11px;font-weight:400;color:var(--warning);margin-left:4px;">Medium severity</span>
-          </div>
-          <div class="story-card flag-medium">
-            <div class="story-card-body">
-              <div class="story-grid">
-                <div class="story-cell ats-cell">
-                  <div class="story-cell-label ats">🤖 What the ATS saw</div>
-                  <div class="story-cell-text">The job required "SAP". The resume contained "SAP S/4HANA", "SAP ECC 6.0", and "SAP BW/4HANA" — but the ATS requires exact string matches. Skill coverage: 2/3 (66.7%), below the 75% threshold. Result: FAIL.</div>
-                </div>
-                <div class="story-cell human-cell">
-                  <div class="story-cell-label human">👤 What the ATS missed</div>
-                  <div class="story-cell-text">S/4HANA is SAP's current ERP platform. ECC 6.0 is the legacy platform. BW/4HANA is SAP's analytics platform. Listing all three demonstrates 8 years of deep SAP expertise across multiple product lines — far more than a generic "SAP" would indicate.</div>
-                </div>
-              </div>
-              <div class="story-meaning">
-                <div class="story-meaning-label">💡 What this means</div>
-                <div class="story-meaning-text">The ATS penalized the candidate for being <em>too specific</em> about their SAP knowledge. A generic "SAP" would have scored higher than listing the actual platforms. This is a false negative caused by overly rigid matching rules, not a real skill gap.</div>
-              </div>
-              <div class="story-action">
-                <div>
-                  <div class="story-action-label">Recommended action</div>
-                  <div class="story-action-text">Override keyword penalty — candidate clearly meets the SAP requirement</div>
-                </div>
-                <span style="font-size:18px;">→</span>
-              </div>
-              <div class="story-stat" id="kwStatText">
-                <strong>41%</strong> of rejections in the last 90 days at <strong id="kwStatOrg">KPMG Pakistan</strong> involve keyword false negatives where candidates listed skill variants but the ATS required exact string matches.
-                <div class="story-stat-toggle">
-                  <label style="display:flex;align-items:center;gap:6px;cursor:pointer;">
-                    <input type="checkbox" onchange="toggleBaseline(this, 'kw')">
-                    <span class="toggle-slider"></span>
-                    Compare to industry average
-                  </label>
-                </div>
-              </div>
-              <div class="notes-section">
-                <div class="notes-label">Your Notes</div>
-                <div class="notes-templates">
-                  <span class="note-chip" onclick="insertNoteTemplate(this, 'kwNotes', 'Candidate meets all stated requirements')">Candidate meets requirements</span>
-                  <span class="note-chip" onclick="insertNoteTemplate(this, 'kwNotes', 'ATS matching rule is overly restrictive')">Rule is overly restrictive</span>
-                  <span class="note-chip" onclick="insertNoteTemplate(this, 'kwNotes', 'Context visible to human reviewer, not available to ATS')">Context not visible to ATS</span>
-                </div>
-                <textarea class="note-textarea" id="kwNotes" placeholder="Add your observations about this flag..." oninput="autosaveNotes(this)"></textarea>
-                <div class="note-meta-row">
-                  <span class="note-save-status" id="kwSaveStatus"></span>
-                  <span>Last edited: <span id="kwLastEdit">—</span></span>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- CLEAN LANES -->
-        <div class="evidence-panel" id="panel-age">
-          <div class="evidence-heading"><span>✅</span> Age Proxy Signals — Clean</div>
-          <div class="clean-lane-detail-card">
-            <div class="clean-lane-heading">No age proxy signals detected</div>
-            <div class="clean-lane-text">Graduation year indicates the candidate is approximately 31 years old. No age proxy was detected — the inferred age is below the 40+ threshold that would trigger ADEA scrutiny. This lane passed without issue.</div>
-            <div class="clean-score-row">
-              <span class="clean-score-label">Risk score</span>
-              <div class="clean-score-bar-wrap"><div class="clean-score-bar" style="width:12%;background:var(--success);"></div></div>
-              <span class="clean-score-val">12/100</span>
-            </div>
-          </div>
-        </div>
-
-        <div class="evidence-panel" id="panel-disparate">
-          <div class="evidence-heading"><span>✅</span> Disparate Impact — Clean</div>
-          <div class="clean-lane-detail-card">
-            <div class="clean-lane-heading">Selection rate within acceptable bounds</div>
-            <div class="clean-lane-text">Selection rate is 82%, above the 80% four-fifths rule threshold. No statistically significant disparity detected across protected classes. This lane passed without issue.</div>
-            <div class="clean-score-row">
-              <span class="clean-score-label">Risk score</span>
-              <div class="clean-score-bar-wrap"><div class="clean-score-bar" style="width:8%;background:var(--success);"></div></div>
-              <span class="clean-score-val">8/100</span>
-            </div>
-          </div>
-        </div>
-
-        <div class="evidence-panel" id="panel-resume">
-          <div class="evidence-heading"><span>✅</span> Resume Format — Clean</div>
-          <div class="clean-lane-detail-card">
-            <div class="clean-lane-heading">No format-based penalties applied</div>
-            <div class="clean-lane-text">Standard PDF format. 98% parse accuracy. No format-based penalties applied. Resume was parsed correctly without any structural issues.</div>
-            <div class="clean-score-row">
-              <span class="clean-score-label">Risk score</span>
-              <div class="clean-score-bar-wrap"><div class="clean-score-bar" style="width:3%;background:var(--success);"></div></div>
-              <span class="clean-score-val">3/100</span>
-            </div>
-          </div>
-        </div>
-
-        <div class="evidence-panel" id="panel-source">
-          <div class="evidence-heading"><span>✅</span> Source Channel — Clean</div>
-          <div class="clean-lane-detail-card">
-            <div class="clean-lane-heading">No channel bias detected</div>
-            <div class="clean-lane-text">Direct application via company careers portal. Internal referrals and direct applications are weighted equally — no channel bias was applied.</div>
-            <div class="clean-score-row">
-              <span class="clean-score-label">Risk score</span>
-              <div class="clean-score-bar-wrap"><div class="clean-score-bar" style="width:5%;background:var(--success);"></div></div>
-              <span class="clean-score-val">5/100</span>
-            </div>
+        <!-- Shared real audit narrative (F.A.S. engine output — one blob per audit, not per-lane) -->
+        <div class="left-section" id="narrativeSection" style="display:none;margin-top:12px;">
+          <div class="left-section-label">Audit Narrative (F.A.S. Engine Output)</div>
+          <div class="notes-section" style="background:var(--bg-page);border-radius:8px;padding:14px 16px;">
+            <div id="narrativeText" style="font-size:12.5px;line-height:1.6;color:var(--text-secondary);white-space:pre-wrap;"></div>
           </div>
         </div>
 
@@ -765,10 +583,7 @@
             <span class="audit-trail-title">📋 Review Audit Trail</span>
             <a href="audit-trail.html" style="font-size:11px;color:var(--gold);font-weight:600;">View Full Trail →</a>
           </div>
-          <div id="auditLog">
-            <div class="audit-entry"><span class="audit-time">09:41:22</span><span class="audit-action"><strong>F.A.S.</strong> — Rejection intercepted for human review (risk score: 74)</span></div>
-            <div class="audit-entry"><span class="audit-time">09:41:23</span><span class="audit-action"><strong class="reviewer-name">Reviewer U.H.</strong> — Opened review — identity masked</span></div>
-          </div>
+          <div id="auditLog"></div>
         </div>
 
         <!-- Technical details -->
@@ -777,42 +592,19 @@
             <div class="tech-details-toggle-left">
               <span>🔬</span>
               <span>Technical Details</span>
-              <span style="font-size:11px;color:var(--text-dim);font-weight:400;">Raw scores, parse logs, audit hash</span>
+              <span style="font-size:11px;color:var(--text-dim);font-weight:400;">Lane flags, audit hash</span>
             </div>
             <span class="tech-chevron" id="techChevron">▼</span>
           </div>
           <div class="tech-body" id="techBody">
             <div class="tech-section">
-              <div class="tech-section-title">Lane Scores (all 7)</div>
-              <div class="lane-score-row"><span class="lane-score-name">Age Proxy Signals</span><div class="lane-score-bar-wrap"><div class="lane-score-bar low" style="width:12%"></div></div><span class="lane-score-val">12/100</span></div>
-              <div class="lane-score-row"><span class="lane-score-name">Employment Gap Penalties</span><div class="lane-score-bar-wrap"><div class="lane-score-bar high" style="width:72%"></div></div><span class="lane-score-val">72/100</span></div>
-              <div class="lane-score-row"><span class="lane-score-name">Disparate Impact Patterns</span><div class="lane-score-bar-wrap"><div class="lane-score-bar low" style="width:8%"></div></div><span class="lane-score-val">8/100</span></div>
-              <div class="lane-score-row"><span class="lane-score-name">Keyword Mismatches</span><div class="lane-score-bar-wrap"><div class="lane-score-bar medium" style="width:58%"></div></div><span class="lane-score-val">58/100</span></div>
-              <div class="lane-score-row"><span class="lane-score-name">Legal Framework Triggers</span><div class="lane-score-bar-wrap"><div class="lane-score-bar high" style="width:91%"></div></div><span class="lane-score-val">91/100</span></div>
-              <div class="lane-score-row"><span class="lane-score-name">Resume Format Penalties</span><div class="lane-score-bar-wrap"><div class="lane-score-bar low" style="width:3%"></div></div><span class="lane-score-val">3/100</span></div>
-              <div class="lane-score-row"><span class="lane-score-name">Source Channel Bias</span><div class="lane-score-bar-wrap"><div class="lane-score-bar low" style="width:5%"></div></div><span class="lane-score-val">5/100</span></div>
-            </div>
-            <div class="tech-section">
-              <div class="tech-section-title">ATS Parse Log — Employment Gap</div>
-              <pre class="tech-pre">Gap detected: 2023-03 to 2024-05 (14 months)
-Explanation field: [EMPTY]
-Base gap penalty: -0.35 / No explanation multiplier: ×1.2
-Final penalty applied: -0.42</pre>
-            </div>
-            <div class="tech-section">
-              <div class="tech-section-title">ATS Parse Log — Keyword Scan</div>
-              <pre class="tech-pre">Required: ["SAP", "Excel", "Power BI"]
-"SAP S/4HANA"  → MATCH: NO  (exact match only)
-"SAP ECC 6.0"  → MATCH: NO  (exact match only)
-"SAP BW/4HANA" → MATCH: NO  (exact match only)
-"Excel"        → MATCH: YES / "Power BI" → MATCH: YES
-Skill coverage: 2/3 (66.7%) — threshold: 75% — Result: FAIL</pre>
+              <div class="tech-section-title">Lane Flags</div>
+              <div id="techLaneList"></div>
             </div>
             <div class="tech-section">
               <div class="tech-section-title">Audit Hash</div>
               <div class="hash-display">
-                <span class="hash-value" id="auditHashDisplay">sha256:a3f9d2c1e8b74f56ad920e3b17c54f82d6e91a40fc3d28b5e1097c6f432a8d29</span>
-                <button class="hash-copy" onclick="copyHash()">Copy</button>
+                <span class="hash-value" id="auditHashDisplay" style="font-style:italic;color:var(--text-dim);">Not available — no cryptographic hash generated for this record</span>
               </div>
             </div>
           </div>
@@ -904,27 +696,6 @@ Skill coverage: 2/3 (66.7%) — threshold: 75% — Result: FAIL</pre>
         <div class="modal-decision-preview" id="modalDecisionPreview">—</div>
       </div>
 
-      <!-- Compliance check results -->
-      <div class="modal-section">
-        <div class="modal-section-label">Compliance check</div>
-        <div id="modalComplianceCheck">—</div>
-      </div>
-
-      <!-- Two paths (shown only when issues exist) -->
-      <div id="modalPathsSection" style="display:none;">
-        <div class="modal-section-label" style="margin-top:4px;">How do you want to proceed?</div>
-        <div class="modal-paths">
-          <button class="modal-path-btn warning" onclick="submitWithFlag()">
-            <strong>Submit with compliance flag</strong>
-            <span>Record compliance_debt and proceed. Compliance team will be notified for follow-up.</span>
-          </button>
-          <button class="modal-path-btn secondary" onclick="holdForAudit()">
-            <strong>Hold for audit</strong>
-            <span>Save draft and go to Reports to complete the required audits first, then return to finalize.</span>
-          </button>
-        </div>
-      </div>
-
       <!-- 3-second countdown (shown once confirm clicked) -->
       <div id="modalCountdownWrap" style="display:none;margin-top:16px;text-align:center;">
         <div class="countdown-label" id="modalCountdownLabel">Finalizing in 3…</div>
@@ -960,42 +731,72 @@ Skill coverage: 2/3 (66.7%) — threshold: 75% — Result: FAIL</pre>
 
   const FAS_CONFIG = {
     mode: 'demo',
-    org: 'KPMG Pakistan',
-    reviewer: 'U.H.',
     reviewWindow: 3.0,
-    candidateId: 'CAND-2847',
     upgradeAlertEndpoint: 'https://znjvjofsfvxccmidfpgy.supabase.co/functions/v1/upgrade-request'
   };
+
+  const FLAG_META = {
+    employment_gap_flagged:        { label: 'Employment Gap Penalty',      icon: '📅' },
+    keyword_mismatch_flagged:      { label: 'Keyword Mismatch',            icon: '🔤' },
+    proxy_discrimination_detected: { label: 'Proxy Discrimination Signal', icon: '⚖️' },
+    disparate_impact_detected:     { label: 'Disparate Impact Pattern',    icon: '📊' },
+    legal_trigger_flagged:         { label: 'Legal Trigger Language',      icon: '⚠️' },
+  };
+
+  const DECISION_LABELS = { approved: 'Approved', escalated: 'Escalated', confirmed: 'Confirmed' };
 
   let currentMode       = 'live';
   let timeRemaining     = FAS_CONFIG.reviewWindow;
   let countdownInterval = null;
   let selectedAction    = null;
-  let piiRevealed       = false;
-  let legalCleared      = false;
   let decisionSubmitted = false;
-  let currentUserId     = null;
+  let currentUserId       = null; // auth uuid
+  let currentUserRecordId = null; // real users.user_id (bigint) — needed for overrides.reviewed_by_user_id
   let currentUserName   = '—';
   let currentCustomerId    = null;
   let currentCustomerPlan  = null;
+
+  let candidateId        = null; // from ?id=
+  let currentRejectionId  = null; // real rejections.rejection_id (bigint)
+  let currentAuditId      = null; // real audits.audit_id (bigint), required by overrides
+  let currentRecord       = null; // { ...rejection, audit, override }
 
   // ── Draft state ──
   let selectedTags     = new Set();
   let draftSaveTimer   = null;
   let draftAutoSaveInt = null;
 
-  // ── Flag definitions ──
-  const FLAGS = [
-    { id: 'gap',       label: 'Employment Gap',   icon: '📅', severity: 'critical' },
-    { id: 'kw',        label: 'Keyword Mismatch',  icon: '🔤', severity: 'triggered' },
-    { id: 'age',       label: 'Age Proxy',         icon: '🎂', severity: 'clean' },
-    { id: 'disparate', label: 'Disparate Impact',  icon: '📊', severity: 'clean' },
-    { id: 'resume',    label: 'Resume Format',     icon: '📄', severity: 'clean' },
-    { id: 'source',    label: 'Source Channel',    icon: '🔗', severity: 'clean' },
-  ];
-
-  let activeFlagId = 'gap';
+  // ── Flag definitions — built dynamically from the real audit record ──
+  let FLAGS = [];
+  let activeFlagId = null;
   const reviewedFlags = new Set();
+
+  function escapeHtml(s) {
+    const div = document.createElement('div');
+    div.textContent = s;
+    return div.innerHTML;
+  }
+
+  // audits.claude_output stores literal backslash-n instead of real
+  // newlines (seed-data artifact) — unescape for readable display.
+  function unescapeNarrative(s) {
+    return s.replace(/\\n/g, '\n');
+  }
+
+  function showRecordError(message) {
+    document.getElementById('candidateIdBreadcrumb').textContent = 'Not found';
+    document.getElementById('breadcrumbRisk').textContent = '—';
+    document.getElementById('breadcrumbFlagCount').textContent = '—';
+    document.getElementById('candidateDisplay').textContent = '—';
+    document.getElementById('candRole').textContent = '—';
+    document.getElementById('candRiskBadge').textContent = '—';
+    document.getElementById('evidencePanels').innerHTML = `<p style="font-size:0.8rem;color:var(--text-dim);padding:16px 0;">${escapeHtml(message)}</p>`;
+    document.querySelector('.audit-trail-card').style.display = 'none';
+    document.querySelector('.tech-details').style.display = 'none';
+    document.getElementById('decisionPane').style.display = 'none';
+    document.getElementById('liveBanner').style.display = 'none';
+    document.getElementById('timerSection').style.display = 'none';
+  }
 
   // ════════════════════════════════════════
   // INIT
@@ -1008,33 +809,134 @@ Skill coverage: 2/3 (66.7%) — threshold: 75% — Result: FAIL</pre>
     document.getElementById('userName').textContent = currentUserName;
     document.getElementById('userRole').textContent = session.user.user_metadata?.role || 'Reviewer';
 
-    document.querySelectorAll('#gapStatOrg, #kwStatOrg').forEach(el => el.textContent = FAS_CONFIG.org);
-    document.querySelectorAll('.reviewer-name').forEach(el => el.textContent = 'Reviewer ' + FAS_CONFIG.reviewer);
+    const params = new URLSearchParams(window.location.search);
+    candidateId = params.get('id');
+    if (!candidateId) { showRecordError('No record specified — missing ?id= parameter.'); return; }
 
-    await checkEntitlement();
+    const { data: userRow, error: userError } = await supabaseClient
+      .from('users').select('user_id, customer_id').eq('auth_id', currentUserId).single();
+    if (userError || !userRow) { showRecordError('Could not resolve your organization — customer_id lookup failed.'); return; }
+    currentUserRecordId = userRow.user_id;
+    currentCustomerId   = userRow.customer_id;
 
-    renderFlagWidgets();
-    switchFlag('gap');
+    const { data: customerRow } = await supabaseClient
+      .from('customers').select('plan').eq('customer_id', currentCustomerId).single();
+    currentCustomerPlan = customerRow?.plan || null;
+
+    const { data: rejection, error: rejError } = await supabaseClient
+      .from('rejections')
+      .select(`
+        rejection_id, candidate_id, job_id, job_title, ats_source, created_at,
+        rejection_reason_from_ats, years_experience, education_level, protected_class_cohort,
+        audits ( audit_id, risk_level, employment_gap_flagged, keyword_mismatch_flagged, proxy_discrimination_detected, disparate_impact_detected, legal_trigger_flagged, audit_timestamp, claude_output ),
+        overrides ( override_id, decision, reviewed_timestamp, justification_comment )
+      `)
+      .eq('candidate_id', candidateId)
+      .eq('customer_id', currentCustomerId)
+      .single();
+
+    if (rejError || !rejection) { showRecordError(`No record found for candidate ${candidateId}.`); return; }
+
+    const audit    = (rejection.audits || []).sort((a, b) => new Date(b.audit_timestamp) - new Date(a.audit_timestamp))[0] || null;
+    const override = (rejection.overrides || []).sort((a, b) => new Date(b.reviewed_timestamp) - new Date(a.reviewed_timestamp))[0] || null;
+    currentRecord      = { ...rejection, audit, override };
+    currentRejectionId = rejection.rejection_id;
+    currentAuditId     = audit?.audit_id || null;
+
+    FLAGS = Object.keys(FLAG_META).map(key => ({
+      id: key,
+      label: FLAG_META[key].label,
+      icon: FLAG_META[key].icon,
+      severity: (audit && audit[key]) ? 'critical' : 'clean',
+    }));
+    activeFlagId = (FLAGS.find(f => f.severity === 'critical') || FLAGS[0])?.id || null;
+
+    renderRecord();
+
+    if (currentCustomerPlan === 'auditing_only') applyRestrictedState();
+
+    if (override) {
+      decisionSubmitted = true;
+      clearInterval(countdownInterval);
+      document.getElementById('liveBanner').style.display = 'none';
+      document.getElementById('timerSection').style.display = 'none';
+      renderFinalizedState(DECISION_LABELS[override.decision] || override.decision, override.reviewed_timestamp, false);
+      return;
+    }
+
     await loadDraft();
     startDraftAutosave();
     startCountdown();
   }
 
-  // ════════════════════════════════════════
-  // FAS HITL ENTITLEMENT GATE
-  // ════════════════════════════════════════
-  async function checkEntitlement() {
-    const { data: userRow } = await supabaseClient
-      .from('users').select('customer_id').eq('auth_id', currentUserId).single();
-    if (!userRow) return;
+  function renderRecord() {
+    const { audit } = currentRecord;
+    const risk = audit?.risk_level || null;
+    const riskClassMap = { red: 'high', orange: 'high', yellow: 'medium', green: 'low' };
+    const triggeredCount = FLAGS.filter(f => f.severity === 'critical').length;
 
-    const { data: customerRow } = await supabaseClient
-      .from('customers').select('plan').eq('customer_id', userRow.customer_id).single();
+    document.getElementById('candidateDisplay').textContent      = currentRecord.candidate_id;
+    document.getElementById('candidateIdBreadcrumb').textContent = currentRecord.candidate_id;
+    document.getElementById('candRole').textContent              = currentRecord.job_title || 'Unspecified role';
+    document.getElementById('candAts').textContent                = currentRecord.ats_source || 'Unknown ATS';
+    document.getElementById('candApplied').textContent            = 'ATS source · Applied ' + (currentRecord.created_at ? new Date(currentRecord.created_at).toLocaleDateString() : '—');
+    document.getElementById('candAuditTime').textContent          = audit?.audit_timestamp ? ('Audited ' + new Date(audit.audit_timestamp).toLocaleString()) : 'Not yet audited';
+    document.getElementById('candAtsReason').textContent          = 'ATS reason: ' + (currentRecord.rejection_reason_from_ats || '—');
 
-    currentCustomerId   = userRow.customer_id;
-    currentCustomerPlan = customerRow?.plan || null;
+    const riskBadge = document.getElementById('candRiskBadge');
+    riskBadge.className = 'risk-badge ' + (riskClassMap[risk] || 'medium');
+    riskBadge.textContent = risk ? risk.toUpperCase() + ' Risk' : 'Risk Unknown';
+    document.getElementById('breadcrumbRisk').textContent = risk ? risk.toUpperCase() : '—';
 
-    if (currentCustomerPlan === 'auditing_only') applyRestrictedState();
+    document.getElementById('candFlagCount').textContent = triggeredCount;
+    document.getElementById('candFlagTotal').textContent = '/ ' + FLAGS.length;
+    document.getElementById('breadcrumbFlagCount').textContent = `${triggeredCount} / ${FLAGS.length}`;
+
+    renderEvidencePanels();
+    renderFlagWidgets();
+    if (activeFlagId) switchFlag(activeFlagId, /* skipLog */ true);
+
+    const narrativeSection = document.getElementById('narrativeSection');
+    const narrativeText    = document.getElementById('narrativeText');
+    if (audit?.claude_output) {
+      narrativeText.textContent = unescapeNarrative(audit.claude_output);
+      narrativeSection.style.display = 'block';
+    } else {
+      narrativeSection.style.display = 'none';
+    }
+
+    document.getElementById('techLaneList').innerHTML = FLAGS.map(f => `
+      <div class="lane-score-row"><span class="lane-score-name">${f.label}</span><span class="lane-score-val" style="color:${f.severity === 'critical' ? 'var(--danger)' : 'var(--success)'};">${f.severity === 'critical' ? 'Triggered' : 'Clear'}</span></div>
+    `).join('');
+
+    renderInitialAuditLog();
+  }
+
+  function renderEvidencePanels() {
+    document.getElementById('evidencePanels').innerHTML = FLAGS.map(f => {
+      const triggered = f.severity === 'critical';
+      return `
+      <div class="evidence-panel" id="panel-${f.id}">
+        <div class="evidence-heading">
+          <span>${triggered ? '🚩' : '✅'}</span> ${f.label}
+          <span style="font-size:11px;font-weight:400;color:${triggered ? 'var(--danger)' : 'var(--success)'};margin-left:4px;">${triggered ? 'Triggered' : 'Clean'}</span>
+        </div>
+        <div class="clean-lane-detail-card">
+          <div class="clean-lane-heading">${triggered ? 'This lane was triggered by the F.A.S. audit engine.' : 'No issue detected on this lane.'}</div>
+          <div class="clean-lane-text">${triggered ? 'See the Audit Narrative below for the engine’s findings on this record.' : 'This lane passed without issue for this record.'}</div>
+        </div>
+      </div>`;
+    }).join('');
+  }
+
+  function renderInitialAuditLog() {
+    const log = document.getElementById('auditLog');
+    const { audit, created_at, ats_source } = currentRecord;
+    const entries = [];
+    if (audit?.audit_timestamp) entries.push({ time: audit.audit_timestamp, text: `<strong>F.A.S.</strong> — Audit completed, risk level ${(audit.risk_level || 'unknown').toUpperCase()}` });
+    entries.push({ time: created_at, text: `<strong>F.A.S.</strong> — Rejection recorded from ${escapeHtml(ats_source || 'ATS')}` });
+    entries.sort((a, b) => new Date(b.time) - new Date(a.time));
+    log.innerHTML = entries.map(e => `<div class="audit-entry"><span class="audit-time">${e.time ? new Date(e.time).toLocaleTimeString('en-US', { hour12: false }) : '—'}</span><span class="audit-action">${e.text}</span></div>`).join('');
   }
 
   function applyRestrictedState() {
@@ -1062,11 +964,10 @@ Skill coverage: 2/3 (66.7%) — threshold: 75% — Result: FAIL</pre>
     (document.querySelector('.evidence-panel')?.parentElement ?? document.body).prepend(banner);
   }
 
-  // Derived from FLAGS' static demo severities, not a real computed risk
-  // score — flagging that limitation rather than inventing a fake number.
   function getHighestSeverity() {
-    if (FLAGS.some(f => f.severity === 'critical')) return 'high';
-    if (FLAGS.some(f => f.severity === 'triggered')) return 'medium';
+    const risk = currentRecord?.audit?.risk_level;
+    if (risk === 'red') return 'high';
+    if (risk === 'orange' || risk === 'yellow') return 'medium';
     return 'low';
   }
 
@@ -1093,8 +994,8 @@ Skill coverage: 2/3 (66.7%) — threshold: 75% — Result: FAIL</pre>
             'Authorization': `Bearer ${session.access_token}`,
           },
           body: JSON.stringify({
-            rejection_id: FAS_CONFIG.candidateId,
-            job_id: FAS_CONFIG.jobId ?? null,
+            rejection_id: currentRecord?.candidate_id ?? candidateId,
+            job_id: currentRecord?.job_id ?? null,
             risk_level: getHighestSeverity(),
           }),
         });
@@ -1141,16 +1042,16 @@ Skill coverage: 2/3 (66.7%) — threshold: 75% — Result: FAIL</pre>
     });
   }
 
-  function switchFlag(flagId) {
+  function switchFlag(flagId, skipLog) {
     activeFlagId = flagId;
-    reviewedFlags.add(flagId);
+    if (!skipLog) reviewedFlags.add(flagId);
     document.querySelectorAll('.evidence-panel').forEach(p => p.classList.remove('active'));
     const panel = document.getElementById('panel-' + flagId);
     if (panel) panel.classList.add('active');
-    document.getElementById('evidenceScroll').scrollTop = 0;
+    if (!skipLog) document.getElementById('evidenceScroll').scrollTop = 0;
     renderFlagWidgets();
     const flag = FLAGS.find(f => f.id === flagId);
-    if (flag && flag.severity !== 'clean') logAudit(`Reviewed ${flag.label} flag`);
+    if (!skipLog && flag && flag.severity !== 'clean') logAudit(`Reviewed ${flag.label} flag`);
   }
 
   // ════════════════════════════════════════
@@ -1200,31 +1101,6 @@ Skill coverage: 2/3 (66.7%) — threshold: 75% — Result: FAIL</pre>
       updateCountdownDisplay();
       autoFinalize();
     }
-  }
-
-  // ════════════════════════════════════════
-  // LEGAL PANEL (informational — no longer gates decision)
-  // ════════════════════════════════════════
-  function openComplianceChecklist() {
-    logAudit('Viewed NYCLL144 compliance checklist');
-    alert('NYC Local Law 144 — Compliance Checklist\n\n☐ Complete annual bias audit for Workday AI v4.2\n☐ Notify candidate that an AEDT was used\n☐ Offer candidate an alternative human review process\n☐ Document all steps for CCHR response');
-  }
-
-  function generateComplianceDoc() {
-    logAudit('Generated compliance documentation');
-    showToast('✓ Compliance document generated and saved to audit trail.');
-  }
-
-  function markAuditComplete() {
-    if (!confirm('Confirm that the required bias audit has been completed and documentation is on file?')) return;
-    legalCleared = true;
-    const panel = document.getElementById('legalPanel');
-    panel.classList.add('compliant');
-    panel.querySelector('.legal-panel-title').innerHTML = '<span>✅</span> NYC Local Law 144 — Compliance Verified';
-    document.getElementById('legalPanelBody').textContent = 'The required annual bias audit has been marked complete.';
-    const notice = document.getElementById('legalFreezeNotice');
-    if (notice) notice.remove();
-    logAudit('Marked NYCLL144 bias audit as complete');
   }
 
   // ════════════════════════════════════════
@@ -1293,49 +1169,48 @@ Skill coverage: 2/3 (66.7%) — threshold: 75% — Result: FAIL</pre>
   }
 
   async function saveDraft() {
-    if (decisionSubmitted) return;
+    if (decisionSubmitted || !currentRejectionId) return;
     const justification = document.getElementById('justificationText').value;
     const otherText     = document.getElementById('otherTagText')?.value || '';
     const tags          = [...selectedTags].map(t => t === 'other' ? `other:${otherText}` : t);
 
-    try {
-      await supabaseClient.from('reviewer_drafts').upsert({
-        rejection_id: FAS_CONFIG.candidateId,
-        reviewer_id:  currentUserId,
-        tags,
-        justification,
-        updated_at: new Date().toISOString()
-      }, { onConflict: 'rejection_id,reviewer_id' });
-    } catch (e) { /* demo — table may not exist yet */ }
+    const { error } = await supabaseClient.from('reviewer_drafts').upsert({
+      rejection_id: currentRejectionId,
+      reviewer_id:  currentUserId,
+      tags,
+      justification,
+      selected_action: selectedAction || '',
+      updated_at: new Date().toISOString()
+    }, { onConflict: 'rejection_id,reviewer_id' });
+    if (error) { console.error('Draft save failed:', error); return; }
 
     showMicroToast('Draft saved');
   }
 
   async function loadDraft() {
-    try {
-      const { data } = await supabaseClient
-        .from('reviewer_drafts')
-        .select('*')
-        .eq('rejection_id', FAS_CONFIG.candidateId)
-        .eq('reviewer_id', currentUserId)
-        .single();
-      if (!data) return;
+    if (!currentRejectionId) return;
+    const { data } = await supabaseClient
+      .from('reviewer_drafts')
+      .select('*')
+      .eq('rejection_id', currentRejectionId)
+      .eq('reviewer_id', currentUserId)
+      .maybeSingle();
+    if (!data) return;
 
-      document.getElementById('justificationText').value = data.justification || '';
-      updateCharCounter();
+    document.getElementById('justificationText').value = data.justification || '';
+    updateCharCounter();
 
-      (data.tags || []).forEach(tag => {
-        if (tag.startsWith('other:')) {
-          const pill = document.querySelector('[data-tag="other"]');
-          if (pill) { pill.classList.add('active'); selectedTags.add('other'); }
-          document.getElementById('otherTagInput').style.display = 'block';
-          document.getElementById('otherTagText').value = tag.replace('other:', '');
-        } else {
-          const pill = document.querySelector(`[data-tag="${tag}"]`);
-          if (pill) { pill.classList.add('active'); selectedTags.add(tag); }
-        }
-      });
-    } catch (e) { /* no draft exists */ }
+    (data.tags || []).forEach(tag => {
+      if (tag.startsWith('other:')) {
+        const pill = document.querySelector('[data-tag="other"]');
+        if (pill) { pill.classList.add('active'); selectedTags.add('other'); }
+        document.getElementById('otherTagInput').style.display = 'block';
+        document.getElementById('otherTagText').value = tag.replace('other:', '');
+      } else {
+        const pill = document.querySelector(`[data-tag="${tag}"]`);
+        if (pill) { pill.classList.add('active'); selectedTags.add(tag); }
+      }
+    });
   }
 
   function showMicroToast(msg) {
@@ -1358,8 +1233,7 @@ Skill coverage: 2/3 (66.7%) — threshold: 75% — Result: FAIL</pre>
       return;
     }
 
-    const issues = runComplianceCheck();
-    renderFinalizeModal(issues);
+    renderFinalizeModal();
     document.getElementById('finalizeModal').style.display = 'flex';
   }
 
@@ -1373,33 +1247,7 @@ Skill coverage: 2/3 (66.7%) — threshold: 75% — Result: FAIL</pre>
     document.getElementById('modalCountdownWrap').style.display = 'none';
   }
 
-  // ── Compliance check (moved here from page-load) ──
-  function runComplianceCheck() {
-    const issues = [];
-    if (!legalCleared) {
-      issues.push({
-        severity: 'critical',
-        law:    'NYC Local Law 144',
-        issue:  'Annual bias audit not completed for Workday AI v4.2',
-        action: 'Complete bias audit before finalizing'
-      });
-      issues.push({
-        severity: 'critical',
-        law:    'NYC LL144 §894-7',
-        issue:  'Candidate not notified that an AEDT was used in evaluation',
-        action: 'Send required AEDT disclosure notice to candidate'
-      });
-      issues.push({
-        severity: 'warning',
-        law:    'CO SB 205',
-        issue:  'Alternative human-only review path not documented as offered',
-        action: 'Document offer or applicable exemption'
-      });
-    }
-    return issues;
-  }
-
-  function renderFinalizeModal(issues) {
+  function renderFinalizeModal() {
     const LABELS = { override: 'Override — Candidate is qualified', escalate: 'Escalate to legal/compliance', confirm: 'Confirm rejection' };
     const ICONS  = { override: '✅', escalate: '⚠️', confirm: '❌' };
 
@@ -1415,55 +1263,14 @@ Skill coverage: 2/3 (66.7%) — threshold: 75% — Result: FAIL</pre>
         <span style="font-size:20px;">${ICONS[selectedAction]}</span>
         <div>
           <div style="font-size:14px;font-weight:700;color:var(--text-primary);">${LABELS[selectedAction]}</div>
-          <div style="font-size:11px;color:var(--text-muted);">CAND-2847 · Sr. Financial Analyst</div>
+          <div style="font-size:11px;color:var(--text-muted);">${escapeHtml(currentRecord?.candidate_id || candidateId)} · ${escapeHtml(currentRecord?.job_title || 'Unspecified role')}</div>
         </div>
       </div>
       ${tagLabels.length ? `<div style="display:flex;flex-wrap:wrap;gap:5px;margin-bottom:10px;">${tagLabels.map(t => `<span style="font-size:11px;padding:3px 10px;background:var(--gold-bg);border:1px solid rgba(184,135,46,0.3);border-radius:100px;color:var(--gold);font-weight:600;">${t}</span>`).join('')}</div>` : ''}
       ${justification ? `<div style="font-size:12px;color:var(--text-secondary);background:var(--bg-page);padding:10px 12px;border-radius:6px;border-left:3px solid var(--gold);font-style:italic;">"${justification}"</div>` : ''}
     `;
 
-    // Compliance results
-    const checkEl = document.getElementById('modalComplianceCheck');
-    if (issues.length === 0) {
-      checkEl.innerHTML = `<div style="display:flex;align-items:center;gap:8px;padding:12px 14px;background:var(--success-bg);border:1px solid var(--success-border);border-radius:8px;font-size:13px;color:#166534;font-weight:600;">✅ All compliance checks passed — safe to finalize</div>`;
-      document.getElementById('modalPathsSection').style.display = 'none';
-      document.getElementById('modalConfirmBtn').style.display   = 'inline-flex';
-    } else {
-      checkEl.innerHTML = issues.map(i => `
-        <div class="compliance-issue ${i.severity}">
-          <div class="compliance-issue-header">
-            <span class="compliance-badge ${i.severity}">${i.severity === 'critical' ? '🚨 Critical' : '⚠️ Warning'}</span>
-            <span class="compliance-issue-law">${i.law}</span>
-          </div>
-          <div class="compliance-issue-text">${i.issue}</div>
-          <div class="compliance-issue-action">→ ${i.action}</div>
-        </div>`).join('');
-      document.getElementById('modalPathsSection').style.display = 'block';
-      document.getElementById('modalConfirmBtn').style.display   = 'none';
-    }
-  }
-
-  // ── Two compliance paths ──
-  async function submitWithFlag() {
-    try {
-      await supabaseClient.from('compliance_debt').insert({
-        rejection_id: FAS_CONFIG.candidateId,
-        reviewer_id:  currentUserId,
-        issues:       runComplianceCheck().map(i => `${i.law}: ${i.issue}`),
-        created_at:   new Date().toISOString()
-      });
-    } catch (e) { /* demo */ }
-    logAudit('Submitted with compliance flags — compliance_debt logged');
-    document.getElementById('modalPathsSection').style.display = 'none';
-    document.getElementById('modalConfirmBtn').style.display   = 'inline-flex';
-  }
-
-  async function holdForAudit() {
-    await saveDraft();
-    logAudit('Decision held — saved draft, redirecting to Reports');
-    closeFinalizeModal();
-    showToast('Draft saved. Complete the required audit in Reports, then return to finalize.', false);
-    setTimeout(() => { window.location.href = 'reports.html'; }, 2500);
+    document.getElementById('modalConfirmBtn').style.display = 'inline-flex';
   }
 
   // ── 3-second final countdown ──
@@ -1501,25 +1308,21 @@ Skill coverage: 2/3 (66.7%) — threshold: 75% — Result: FAIL</pre>
   }
 
   // ── Execute the final write ──
-  // Column-name fix 2026-07-21: reviewer_id -> reviewed_by_user_id,
-  // justification -> justification_comment; tags/audit_hash dropped from
-  // the insert (neither column exists on the real overrides table) — this
-  // was supposed to already be fixed per 2026-07-19's "Thing 2" but wasn't.
-  // Still NOT fixed here: reviewed_by_user_id receives the raw auth UUID,
-  // not a resolved bigint user_id, and audit_id (NOT NULL) isn't supplied —
-  // that's Track A's unfinished rebuild, intentionally out of scope for
-  // this pass. That will surface as a non-42501 error and correctly fall
-  // through to the generic error path below rather than being masked.
   async function executeFinalDecision() {
     const justification = document.getElementById('justificationText').value.trim();
-    const hash           = document.getElementById('auditHashDisplay').textContent;
-    const timestamp       = new Date().toISOString();
+    const timestamp      = new Date().toISOString();
     const LABELS = { override: 'Override — Candidate is qualified', escalate: 'Escalate to legal/compliance', confirm: 'Confirm rejection' };
+    // real overrides.decision values are 'approved'/'escalated'/'confirmed'
+    // (verified against live data) — selectedAction stays 'override'/
+    // 'escalate'/'confirm' internally since button ids/CSS classes depend
+    // on it; translate only at the write boundary.
+    const DB_DECISION = { override: 'approved', escalate: 'escalated', confirm: 'confirmed' };
 
     const { error } = await supabaseClient.from('overrides').insert({
-      rejection_id: FAS_CONFIG.candidateId,
-      reviewed_by_user_id: currentUserId,
-      decision: selectedAction,
+      rejection_id: currentRejectionId,
+      audit_id: currentAuditId,
+      reviewed_by_user_id: currentUserRecordId,
+      decision: DB_DECISION[selectedAction],
       justification_comment: justification || null,
     });
 
@@ -1536,35 +1339,31 @@ Skill coverage: 2/3 (66.7%) — threshold: 75% — Result: FAIL</pre>
 
     // Remove draft now that it's finalized
     await supabaseClient.from('reviewer_drafts').delete()
-      .eq('rejection_id', FAS_CONFIG.candidateId)
+      .eq('rejection_id', currentRejectionId)
       .eq('reviewer_id',  currentUserId);
 
     decisionSubmitted = true;
     clearInterval(draftAutoSaveInt);
     logAudit(`Decision finalized: ${LABELS[selectedAction]}`);
     closeFinalizeModal();
-    renderFinalizedState(LABELS[selectedAction], timestamp, hash);
-    showToast(`Decision recorded.\nAudit hash: ${hash.substring(0, 30)}…`, true);
+    renderFinalizedState(LABELS[selectedAction], timestamp, true);
+    showToast('Decision recorded.', true);
     setTimeout(() => { window.location.href = 'rejections.html'; }, 4000);
   }
 
   // ── Replace decision pane with read-only finalized state ──
-  function renderFinalizedState(label, timestamp, hash) {
+  function renderFinalizedState(label, timestamp, redirecting) {
     document.getElementById('decisionPane').innerHTML = `
       <div class="finalized-panel">
         <div class="finalized-header">
           <span class="finalized-icon">✅</span>
           <div>
             <div class="finalized-title">Decision Finalized</div>
-            <div class="finalized-meta">by ${currentUserName} at ${new Date(timestamp).toLocaleTimeString('en-US', { hour12: false })}</div>
+            <div class="finalized-meta">by ${escapeHtml(currentUserName)} at ${new Date(timestamp).toLocaleTimeString('en-US', { hour12: false })}</div>
           </div>
         </div>
         <div class="finalized-decision">${label}</div>
-        <div class="finalized-hash">
-          <span class="finalized-hash-label">Audit hash</span>
-          <span class="finalized-hash-val">${hash}</span>
-        </div>
-        <div class="finalized-footer-note">No further edits are possible. Returning to rejections list…</div>
+        <div class="finalized-footer-note">${redirecting ? 'No further edits are possible. Returning to rejections list…' : 'This record has already been reviewed — no further edits are possible.'}</div>
       </div>`;
   }
 
@@ -1579,50 +1378,6 @@ Skill coverage: 2/3 (66.7%) — threshold: 75% — Result: FAIL</pre>
   });
 
   // ════════════════════════════════════════
-  // NOTES (per-flag)
-  // ════════════════════════════════════════
-  function insertNoteTemplate(chip, textareaId, text) {
-    document.querySelectorAll(`[onclick*="${textareaId}"]`).forEach(c => c.classList.remove('active'));
-    chip.classList.add('active');
-    const ta = document.getElementById(textareaId);
-    ta.value = text + ':\n';
-    ta.focus();
-    autosaveNotes(ta);
-  }
-
-  function autosaveNotes(textarea) {
-    const base     = textarea.id.replace('Notes', '');
-    const statusEl = document.getElementById(base + 'SaveStatus');
-    const timeEl   = document.getElementById(base + 'LastEdit');
-    if (!statusEl) return;
-    statusEl.textContent = 'Saving…';
-    setTimeout(() => {
-      statusEl.textContent = '✓ Saved';
-      if (timeEl) timeEl.textContent = new Date().toLocaleTimeString('en-US', { hour12: false, hour: '2-digit', minute: '2-digit', second: '2-digit' });
-      setTimeout(() => { statusEl.textContent = ''; }, 2000);
-    }, 500);
-  }
-
-  // ════════════════════════════════════════
-  // BASELINE TOGGLE
-  // ════════════════════════════════════════
-  function toggleBaseline(checkbox, key) {
-    if (key === 'gap') {
-      const el = document.getElementById('gapStatText');
-      const th = `<div class="story-stat-toggle"><label style="display:flex;align-items:center;gap:6px;cursor:pointer;"><input type="checkbox" onchange="toggleBaseline(this,'gap')" ${checkbox.checked ? 'checked' : ''}><span class="toggle-slider"></span>Compare to industry average</label></div>`;
-      el.innerHTML = checkbox.checked
-        ? `<strong>41%</strong> of rejections across <strong>all F.A.S. beta clients</strong> involve employment gap penalties where gaps are under 18 months. Industry data suggests thresholds above 12 months have no statistically validated link to job performance.${th}`
-        : `<strong>67%</strong> of rejections in the last 90 days at <strong id="gapStatOrg">KPMG Pakistan</strong> involve candidates whose employment gap exceeds 12 months. This threshold was set on 2026-01-15 and has not been validated against business necessity.${th}`;
-    } else {
-      const el = document.getElementById('kwStatText');
-      const th = `<div class="story-stat-toggle"><label style="display:flex;align-items:center;gap:6px;cursor:pointer;"><input type="checkbox" onchange="toggleBaseline(this,'kw')" ${checkbox.checked ? 'checked' : ''}><span class="toggle-slider"></span>Compare to industry average</label></div>`;
-      el.innerHTML = checkbox.checked
-        ? `<strong>38%</strong> of rejections across <strong>all F.A.S. beta clients</strong> involve keyword false negatives. Industry average: 42% of ATS systems use exact-match only, with no synonym or variant matching configured.${th}`
-        : `<strong>41%</strong> of rejections in the last 90 days at <strong id="kwStatOrg">KPMG Pakistan</strong> involve keyword false negatives where candidates listed skill variants but the ATS required exact string matches.${th}`;
-    }
-  }
-
-  // ════════════════════════════════════════
   // MISC
   // ════════════════════════════════════════
   function toggleTechDetails() {
@@ -1631,24 +1386,6 @@ Skill coverage: 2/3 (66.7%) — threshold: 75% — Result: FAIL</pre>
     const isOpen  = body.classList.contains('open');
     body.classList.toggle('open', !isOpen);
     chevron.classList.toggle('open', !isOpen);
-  }
-
-  function revealPII() {
-    if (!piiRevealed && confirm('Revealing identity will be logged to the audit trail. Continue?')) {
-      document.getElementById('candidateDisplay').textContent         = 'Ahmad R.';
-      document.getElementById('candidateIdBreadcrumb').textContent    = 'Ahmad R. — CAND-2847';
-      piiRevealed = true;
-      logAudit('Identity revealed by reviewer');
-    }
-  }
-
-  function copyHash() {
-    const hash = document.getElementById('auditHashDisplay').textContent;
-    navigator.clipboard.writeText(hash).then(() => {
-      const btn = document.querySelector('.hash-copy');
-      btn.textContent = '✓ Copied';
-      setTimeout(() => btn.textContent = 'Copy', 1500);
-    });
   }
 
   function showToast(msg, success = true) {
@@ -1665,7 +1402,7 @@ Skill coverage: 2/3 (66.7%) — threshold: 75% — Result: FAIL</pre>
     const time = new Date().toLocaleTimeString('en-US', { hour12: false, hour: '2-digit', minute: '2-digit', second: '2-digit' });
     const entry = document.createElement('div');
     entry.className = 'audit-entry';
-    entry.innerHTML = `<span class="audit-time">${time}</span><span class="audit-action"><strong>Reviewer ${FAS_CONFIG.reviewer}</strong> — ${action}</span>`;
+    entry.innerHTML = `<span class="audit-time">${time}</span><span class="audit-action"><strong>${escapeHtml(currentUserName)}</strong> — ${action}</span>`;
     log.insertBefore(entry, log.firstChild);
   }
 

@@ -191,6 +191,7 @@
     .stat-value.danger  { color: #dc2626; }
     .stat-value.warning { color: var(--warning); }
     .stat-value.gold    { color: var(--gold); }
+    .stat-value.muted   { color: var(--text-dim); }
 
     .stat-label {
       font-size: 0.72rem;
@@ -284,6 +285,7 @@
 
     .case-card.escalated  { border-left: 3px solid var(--danger); }
     .case-card.active-case { border-left: 3px solid var(--gold); }
+    .case-card.reviewed-case { border-left: 3px solid var(--success); }
 
     .case-header {
       background: #f8fafc;
@@ -378,6 +380,7 @@
       display: inline-flex;
       align-items: center;
       gap: 4px;
+      text-decoration: none;
     }
 
     .btn-review  { background: var(--navy); color: #ffffff; }
@@ -385,12 +388,6 @@
 
     .btn-delegate { background: #ffffff; color: var(--text-muted); border: 1px solid var(--border); }
     .btn-delegate:hover { border-color: var(--border-hover); color: #1e293b; }
-
-    .btn-override { background: #ffffff; color: #16a34a; border: 1px solid rgba(22,163,74,0.3); }
-    .btn-override:hover { background: rgba(22,163,74,0.06); border-color: rgba(22,163,74,0.5); }
-
-    .btn-snooze { background: #ffffff; color: var(--text-muted); border: 1px solid var(--border); }
-    .btn-snooze:hover { border-color: var(--border-hover); color: #1e293b; }
 
     /* ── BADGES ── */
     .badge {
@@ -405,13 +402,18 @@
       white-space: nowrap;
     }
 
-    .badge-risk-high   { background: rgba(220,38,38,0.09); color: #dc2626; border: 1px solid rgba(220,38,38,0.2); }
-    .badge-risk-medium { background: rgba(202,138,4,0.09); color: #ca8a04; border: 1px solid rgba(202,138,4,0.2); }
-    .badge-risk-low    { background: rgba(22,163,74,0.09); color: #16a34a; border: 1px solid rgba(22,163,74,0.2); }
+    .badge-risk-red    { background: rgba(220,38,38,0.09); color: #dc2626; border: 1px solid rgba(220,38,38,0.2); }
+    .badge-risk-orange { background: rgba(234,88,12,0.09); color: #ea580c; border: 1px solid rgba(234,88,12,0.2); }
+    .badge-risk-yellow { background: rgba(202,138,4,0.09); color: #ca8a04; border: 1px solid rgba(202,138,4,0.2); }
+    .badge-risk-green  { background: rgba(22,163,74,0.09); color: #16a34a; border: 1px solid rgba(22,163,74,0.2); }
 
     .badge-timer-critical { background: rgba(220,38,38,0.07); color: #dc2626; border: 1px solid rgba(220,38,38,0.2); }
     .badge-timer-warning  { background: rgba(202,138,4,0.07); color: #ca8a04; border: 1px solid rgba(202,138,4,0.2); }
     .badge-timer-normal   { background: rgba(100,116,139,0.07); color: #64748b; border: 1px solid rgba(100,116,139,0.2); }
+
+    .badge-status-approved  { background: rgba(22,163,74,0.09); color: #16a34a; border: 1px solid rgba(22,163,74,0.2); }
+    .badge-status-escalated { background: rgba(220,38,38,0.09); color: #dc2626; border: 1px solid rgba(220,38,38,0.2); }
+    .badge-status-confirmed { background: rgba(100,116,139,0.09); color: #64748b; border: 1px solid rgba(100,116,139,0.2); }
 
     .badge-lane {
       background: rgba(37,99,235,0.05);
@@ -424,15 +426,15 @@
 
     .lane-badges { display: flex; flex-wrap: wrap; gap: 3px; margin-top: 5px; }
 
-    .badge-jurisdiction {
-      background: rgba(10,22,40,0.05);
-      color: var(--navy);
-      border: 1px solid rgba(10,22,40,0.14);
-      font-size: 0.6rem;
-      padding: 2px 8px;
-      border-radius: 100px;
-      font-weight: 600;
-      letter-spacing: 0.07em;
+    /* ── EMPTY / LOADING ── */
+    .empty-state {
+      background: #ffffff;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 2rem;
+      text-align: center;
+      font-size: 0.8rem;
+      color: var(--text-dim);
     }
 
     /* ── RESPONSIVE ── */
@@ -461,9 +463,9 @@
     <span class="header-title">Escalation Queue</span>
   </div>
   <div class="topnav-right">
-    <span class="user-name">Sarah Chen</span>
-    <span class="nav-role">COMPLIANCE OFFICER</span>
-    <a href="/dashboard/login.html" class="nav-logout">Sign out</a>
+    <span class="user-name" id="userName">—</span>
+    <span class="nav-role" id="userRole">—</span>
+    <a href="login.html" class="nav-logout">Sign out</a>
   </div>
 </nav>
 
@@ -480,7 +482,6 @@
 
   <div class="sidebar-section-label">SYSTEM</div>
   <a href="settings.html" class="sidebar-link"><span class="icon">⚙️</span> Settings</a>
-  <a href="it-setup-docs.html" class="sidebar-link"><span class="icon">📄</span> IT Setup Docs</a>
 </aside>
 
 <!-- ── MAIN CONTENT ── -->
@@ -490,392 +491,253 @@
   <div class="page-header">
     <div>
       <div class="page-title">Escalation Queue</div>
-      <div class="page-subtitle">ATS rejections flagged for human review before finalization · Updated 2 min ago</div>
-    </div>
-    <div class="header-actions">
-      <button class="btn btn-delegate" onclick="alert('Export feature coming soon.')">↓ Export CSV</button>
-      <button class="btn btn-review" onclick="alert('Bulk review coming in v1.1.')">Review All Critical →</button>
+      <div class="page-subtitle" id="pageSubtitle">Rejections flagged by the audit engine, awaiting human review</div>
     </div>
   </div>
 
   <!-- Stats -->
   <div class="stats-row">
     <div class="stat-card">
-      <div class="stat-value">12</div>
+      <div class="stat-value" id="statTotal">—</div>
       <div class="stat-label">Total in Queue</div>
     </div>
     <div class="stat-card">
-      <div class="stat-value danger">3</div>
-      <div class="stat-label">Critical — SLA Exceeded</div>
+      <div class="stat-value danger" id="statNeedsReview">—</div>
+      <div class="stat-label">Needs Review</div>
     </div>
     <div class="stat-card">
-      <div class="stat-value warning">7</div>
-      <div class="stat-label">Pending Review</div>
+      <div class="stat-value gold" id="statReviewed">—</div>
+      <div class="stat-label">Reviewed</div>
     </div>
     <div class="stat-card">
-      <div class="stat-value gold">2.4h</div>
-      <div class="stat-label">Avg Review Time</div>
+      <div class="stat-value muted" id="statAvgTime">—</div>
+      <div class="stat-label">Avg Time to Decision</div>
     </div>
   </div>
 
   <!-- Filter bar -->
   <div class="filter-bar">
     <div class="filter-tabs">
-      <button class="filter-btn active" onclick="setFilter(this,'all')">All (12)</button>
-      <button class="filter-btn" onclick="setFilter(this,'critical')">Critical (3)</button>
-      <button class="filter-btn" onclick="setFilter(this,'pending')">Pending (7)</button>
-      <button class="filter-btn" onclick="setFilter(this,'delegated')">Delegated (2)</button>
+      <button class="filter-btn active" data-filter="all" onclick="setFilter(this,'all')">All</button>
+      <button class="filter-btn" data-filter="needs-review" onclick="setFilter(this,'needs-review')">Needs Review</button>
+      <button class="filter-btn" data-filter="reviewed" onclick="setFilter(this,'reviewed')">Reviewed</button>
     </div>
-    <input type="text" class="filter-search" placeholder="Search by candidate, role, or case ID…" oninput="filterSearch(this.value)">
+    <input type="text" class="filter-search" placeholder="Search by candidate, role, or ATS…" oninput="filterSearch(this.value)">
   </div>
 
-  <!-- ── CRITICAL SECTION ── -->
-  <div class="queue-section" id="section-critical">
+  <!-- ── NEEDS REVIEW SECTION ── -->
+  <div class="queue-section" id="section-needs-review">
     <div class="section-header">
-      <span class="section-title critical">● Critical</span>
-      <span class="section-count">3 cases — SLA exceeded, review required now</span>
+      <span class="section-title critical">● Needs Review</span>
+      <span class="section-count" id="needsReviewCount">—</span>
     </div>
-    <div class="case-list">
-
-      <!-- CASE 1 -->
-      <div class="case-card escalated" data-case="FAS-2847">
-        <div class="case-header">
-          <div class="case-header-left">
-            <span class="case-id">FAS-2847</span>
-            <span class="badge badge-risk-high">High Risk</span>
-            <span class="badge badge-jurisdiction">NYC LL144</span>
-          </div>
-          <div class="case-header-right">
-            <span class="badge badge-timer-critical">⏱ 6.2h in queue</span>
-          </div>
-        </div>
-        <div class="case-body">
-          <div class="meta-block">
-            <div class="case-meta"><strong>Position</strong><br>Senior Accountant — Financial Controls</div>
-            <div class="case-meta" style="margin-top:0.5rem"><strong>ATS</strong> Workday &nbsp;·&nbsp; <strong>Req ID</strong> WD-4412</div>
-            <div class="case-meta" style="margin-top:0.5rem"><strong>Candidate ID</strong> C-28847 &nbsp;·&nbsp; <strong>Applied</strong> May 3, 2026</div>
-            <div class="lane-badges" style="margin-top:0.6rem">
-              <span class="badge badge-lane">Age Proxy</span>
-              <span class="badge badge-lane">Gap Penalty</span>
-            </div>
-          </div>
-          <div class="case-flags">
-            <div class="case-flag">
-              <div class="case-flag-label">Lane 1 — Age Proxy Signal</div>
-              <p>Requirement for "recent graduate 2020–2022" filters candidates by graduation year — a documented age proxy under NYC LL144 §23-1502.</p>
-            </div>
-            <div class="case-flag">
-              <div class="case-flag-label">Lane 2 — Employment Gap Penalty</div>
-              <p>ATS scoring deducted 18 points for a 14-month gap (2021–2022). Gap pre-dates the job requirement window.</p>
-            </div>
-          </div>
-        </div>
-        <div class="case-footer">
-          <span>Flagged by F.A.S. engine · Audit ID AUD-9921 · Assigned: S. Chen</span>
-          <div class="case-actions">
-            <button class="btn btn-review" onclick="openReview('FAS-2847')">Review →</button>
-            <button class="btn btn-delegate" onclick="delegate('FAS-2847')">Delegate</button>
-            <button class="btn btn-override" onclick="override('FAS-2847')">Override — Allow</button>
-            <button class="btn btn-snooze" onclick="snooze('FAS-2847')">⏸ Snooze 1h</button>
-          </div>
-        </div>
-      </div>
-
-      <!-- CASE 2 -->
-      <div class="case-card escalated" data-case="FAS-2851">
-        <div class="case-header">
-          <div class="case-header-left">
-            <span class="case-id">FAS-2851</span>
-            <span class="badge badge-risk-high">High Risk</span>
-            <span class="badge badge-jurisdiction">OFCCP</span>
-          </div>
-          <div class="case-header-right">
-            <span class="badge badge-timer-critical">⏱ 5.1h in queue</span>
-          </div>
-        </div>
-        <div class="case-body">
-          <div class="meta-block">
-            <div class="case-meta"><strong>Position</strong><br>Senior Software Engineer — Platform</div>
-            <div class="case-meta" style="margin-top:0.5rem"><strong>ATS</strong> Greenhouse &nbsp;·&nbsp; <strong>Req ID</strong> GH-1183</div>
-            <div class="case-meta" style="margin-top:0.5rem"><strong>Candidate ID</strong> C-28851 &nbsp;·&nbsp; <strong>Applied</strong> May 3, 2026</div>
-            <div class="lane-badges" style="margin-top:0.6rem">
-              <span class="badge badge-lane">Disparate Impact</span>
-              <span class="badge badge-lane">Keyword Mismatch</span>
-            </div>
-          </div>
-          <div class="case-flags">
-            <div class="case-flag">
-              <div class="case-flag-label">Lane 3 — Disparate Impact Pattern</div>
-              <p>"Must have continuous 5-year tenure at a single employer" screens out 34% of Black and Hispanic applicants vs. 12% of white applicants — EEOC 4/5ths rule violation risk.</p>
-            </div>
-            <div class="case-flag">
-              <div class="case-flag-label">Lane 5 — Keyword Mismatch</div>
-              <p>ATS rejected on "Kubernetes" vs candidate's listed "K8s" — documented synonym. Candidate meets the underlying requirement.</p>
-            </div>
-          </div>
-        </div>
-        <div class="case-footer">
-          <span>Flagged by F.A.S. engine · Audit ID AUD-9925 · Assigned: M. Torres</span>
-          <div class="case-actions">
-            <button class="btn btn-review" onclick="openReview('FAS-2851')">Review →</button>
-            <button class="btn btn-delegate" onclick="delegate('FAS-2851')">Delegate</button>
-            <button class="btn btn-override" onclick="override('FAS-2851')">Override — Allow</button>
-            <button class="btn btn-snooze" onclick="snooze('FAS-2851')">⏸ Snooze 1h</button>
-          </div>
-        </div>
-      </div>
-
-      <!-- CASE 3 -->
-      <div class="case-card escalated" data-case="FAS-2853">
-        <div class="case-header">
-          <div class="case-header-left">
-            <span class="case-id">FAS-2853</span>
-            <span class="badge badge-risk-high">High Risk</span>
-            <span class="badge badge-jurisdiction">Colorado SB205</span>
-          </div>
-          <div class="case-header-right">
-            <span class="badge badge-timer-critical">⏱ 4.3h in queue</span>
-          </div>
-        </div>
-        <div class="case-body">
-          <div class="meta-block">
-            <div class="case-meta"><strong>Position</strong><br>Director of Operations — Supply Chain</div>
-            <div class="case-meta" style="margin-top:0.5rem"><strong>ATS</strong> Lever &nbsp;·&nbsp; <strong>Req ID</strong> LV-0882</div>
-            <div class="case-meta" style="margin-top:0.5rem"><strong>Candidate ID</strong> C-28853 &nbsp;·&nbsp; <strong>Applied</strong> May 3, 2026</div>
-            <div class="lane-badges" style="margin-top:0.6rem">
-              <span class="badge badge-lane">Credential Inflation</span>
-              <span class="badge badge-lane">Disability Exclusion</span>
-            </div>
-          </div>
-          <div class="case-flags">
-            <div class="case-flag">
-              <div class="case-flag-label">Lane 4 — Credential Inflation</div>
-              <p>MBA required for a role where 87% of current incumbents hold a Bachelor's. Requirement exceeds documented necessity and has disparate impact under SB205 §8-27-101.</p>
-            </div>
-            <div class="case-flag">
-              <div class="case-flag-label">Lane 6 — Disability Exclusion Language</div>
-              <p>"Must be able to travel 60% without accommodation" — language screens out protected disabilities without established business necessity documentation.</p>
-            </div>
-          </div>
-        </div>
-        <div class="case-footer">
-          <span>Flagged by F.A.S. engine · Audit ID AUD-9927 · Assigned: S. Chen</span>
-          <div class="case-actions">
-            <button class="btn btn-review" onclick="openReview('FAS-2853')">Review →</button>
-            <button class="btn btn-delegate" onclick="delegate('FAS-2853')">Delegate</button>
-            <button class="btn btn-override" onclick="override('FAS-2853')">Override — Allow</button>
-            <button class="btn btn-snooze" onclick="snooze('FAS-2853')">⏸ Snooze 1h</button>
-          </div>
-        </div>
-      </div>
-
+    <div class="case-list" id="needsReviewList">
+      <div class="empty-state">Loading queue…</div>
     </div>
   </div>
 
-  <!-- ── ACTIVE SECTION ── -->
-  <div class="queue-section" id="section-active">
+  <!-- ── REVIEWED SECTION ── -->
+  <div class="queue-section" id="section-reviewed">
     <div class="section-header">
-      <span class="section-title active">● Active</span>
-      <span class="section-count">9 cases pending review — within SLA</span>
+      <span class="section-title active">● Reviewed</span>
+      <span class="section-count" id="reviewedCount">—</span>
     </div>
-    <div class="case-list">
-
-      <!-- CASE 4 -->
-      <div class="case-card active-case" data-case="FAS-2856">
-        <div class="case-header">
-          <div class="case-header-left">
-            <span class="case-id">FAS-2856</span>
-            <span class="badge badge-risk-medium">Medium Risk</span>
-            <span class="badge badge-jurisdiction">EEOC</span>
-          </div>
-          <div class="case-header-right">
-            <span class="badge badge-timer-warning">⏱ 2.8h in queue</span>
-          </div>
-        </div>
-        <div class="case-body">
-          <div class="meta-block">
-            <div class="case-meta"><strong>Position</strong><br>Data Analyst — Customer Insights</div>
-            <div class="case-meta" style="margin-top:0.5rem"><strong>ATS</strong> iCIMS &nbsp;·&nbsp; <strong>Req ID</strong> IC-3301</div>
-            <div class="case-meta" style="margin-top:0.5rem"><strong>Candidate ID</strong> C-28856 &nbsp;·&nbsp; <strong>Applied</strong> May 4, 2026</div>
-            <div class="lane-badges" style="margin-top:0.6rem">
-              <span class="badge badge-lane">Keyword Mismatch</span>
-            </div>
-          </div>
-          <div class="case-flags">
-            <div class="case-flag">
-              <div class="case-flag-label">Lane 5 — Keyword Mismatch</div>
-              <p>ATS rejected on "Tableau" requirement vs candidate's listed "Power BI, Looker." Candidate has equivalent data visualization experience under a different tool name.</p>
-            </div>
-          </div>
-        </div>
-        <div class="case-footer">
-          <span>Flagged by F.A.S. engine · Audit ID AUD-9931 · Unassigned</span>
-          <div class="case-actions">
-            <button class="btn btn-review" onclick="openReview('FAS-2856')">Review →</button>
-            <button class="btn btn-delegate" onclick="delegate('FAS-2856')">Delegate</button>
-            <button class="btn btn-override" onclick="override('FAS-2856')">Override — Allow</button>
-            <button class="btn btn-snooze" onclick="snooze('FAS-2856')">⏸ Snooze 1h</button>
-          </div>
-        </div>
-      </div>
-
-      <!-- CASE 5 -->
-      <div class="case-card active-case" data-case="FAS-2858">
-        <div class="case-header">
-          <div class="case-header-left">
-            <span class="case-id">FAS-2858</span>
-            <span class="badge badge-risk-medium">Medium Risk</span>
-            <span class="badge badge-jurisdiction">OFCCP</span>
-          </div>
-          <div class="case-header-right">
-            <span class="badge badge-timer-warning">⏱ 2.1h in queue</span>
-          </div>
-        </div>
-        <div class="case-body">
-          <div class="meta-block">
-            <div class="case-meta"><strong>Position</strong><br>HR Business Partner — People Operations</div>
-            <div class="case-meta" style="margin-top:0.5rem"><strong>ATS</strong> Taleo &nbsp;·&nbsp; <strong>Req ID</strong> TL-0774</div>
-            <div class="case-meta" style="margin-top:0.5rem"><strong>Candidate ID</strong> C-28858 &nbsp;·&nbsp; <strong>Applied</strong> May 4, 2026</div>
-            <div class="lane-badges" style="margin-top:0.6rem">
-              <span class="badge badge-lane">Gap Penalty</span>
-              <span class="badge badge-lane">Legal Trigger</span>
-            </div>
-          </div>
-          <div class="case-flags">
-            <div class="case-flag">
-              <div class="case-flag-label">Lane 2 — Employment Gap Penalty</div>
-              <p>Candidate scored -12 for an 8-month gap. Gap corresponds to documented parental leave — penalization may violate FMLA-adjacent OFCCP guidelines.</p>
-            </div>
-          </div>
-        </div>
-        <div class="case-footer">
-          <span>Flagged by F.A.S. engine · Audit ID AUD-9934 · Assigned: M. Torres</span>
-          <div class="case-actions">
-            <button class="btn btn-review" onclick="openReview('FAS-2858')">Review →</button>
-            <button class="btn btn-delegate" onclick="delegate('FAS-2858')">Delegate</button>
-            <button class="btn btn-override" onclick="override('FAS-2858')">Override — Allow</button>
-            <button class="btn btn-snooze" onclick="snooze('FAS-2858')">⏸ Snooze 1h</button>
-          </div>
-        </div>
-      </div>
-
-      <!-- CASE 6 -->
-      <div class="case-card active-case" data-case="FAS-2861">
-        <div class="case-header">
-          <div class="case-header-left">
-            <span class="case-id">FAS-2861</span>
-            <span class="badge badge-risk-medium">Medium Risk</span>
-            <span class="badge badge-jurisdiction">NYC LL144</span>
-          </div>
-          <div class="case-header-right">
-            <span class="badge badge-timer-normal">⏱ 1.4h in queue</span>
-          </div>
-        </div>
-        <div class="case-body">
-          <div class="meta-block">
-            <div class="case-meta"><strong>Position</strong><br>Regional Sales Manager — Enterprise</div>
-            <div class="case-meta" style="margin-top:0.5rem"><strong>ATS</strong> Workday &nbsp;·&nbsp; <strong>Req ID</strong> WD-4478</div>
-            <div class="case-meta" style="margin-top:0.5rem"><strong>Candidate ID</strong> C-28861 &nbsp;·&nbsp; <strong>Applied</strong> May 4, 2026</div>
-            <div class="lane-badges" style="margin-top:0.6rem">
-              <span class="badge badge-lane">Age Proxy</span>
-            </div>
-          </div>
-          <div class="case-flags">
-            <div class="case-flag">
-              <div class="case-flag-label">Lane 1 — Age Proxy Signal</div>
-              <p>"Fast-rising career trajectory in last 3 years" scoring weights recency of promotions — may disproportionately exclude candidates 45+ under NYC LL144.</p>
-            </div>
-          </div>
-        </div>
-        <div class="case-footer">
-          <span>Flagged by F.A.S. engine · Audit ID AUD-9938 · Unassigned</span>
-          <div class="case-actions">
-            <button class="btn btn-review" onclick="openReview('FAS-2861')">Review →</button>
-            <button class="btn btn-delegate" onclick="delegate('FAS-2861')">Delegate</button>
-            <button class="btn btn-override" onclick="override('FAS-2861')">Override — Allow</button>
-            <button class="btn btn-snooze" onclick="snooze('FAS-2861')">⏸ Snooze 1h</button>
-          </div>
-        </div>
-      </div>
-
-      <!-- CASE 7 -->
-      <div class="case-card active-case" data-case="FAS-2863">
-        <div class="case-header">
-          <div class="case-header-left">
-            <span class="case-id">FAS-2863</span>
-            <span class="badge badge-risk-low">Low Risk</span>
-            <span class="badge badge-jurisdiction">EEOC</span>
-          </div>
-          <div class="case-header-right">
-            <span class="badge badge-timer-normal">⏱ 0.9h in queue</span>
-          </div>
-        </div>
-        <div class="case-body">
-          <div class="meta-block">
-            <div class="case-meta"><strong>Position</strong><br>Senior UX Designer — Mobile Products</div>
-            <div class="case-meta" style="margin-top:0.5rem"><strong>ATS</strong> Greenhouse &nbsp;·&nbsp; <strong>Req ID</strong> GH-1201</div>
-            <div class="case-meta" style="margin-top:0.5rem"><strong>Candidate ID</strong> C-28863 &nbsp;·&nbsp; <strong>Applied</strong> May 4, 2026</div>
-            <div class="lane-badges" style="margin-top:0.6rem">
-              <span class="badge badge-lane">Credential Inflation</span>
-            </div>
-          </div>
-          <div class="case-flags">
-            <div class="case-flag">
-              <div class="case-flag-label">Lane 4 — Credential Inflation</div>
-              <p>Master's degree in HCI or Design listed as required. Role analysis suggests Bachelor's + portfolio is the operative qualification. Flagged for review — low severity.</p>
-            </div>
-          </div>
-        </div>
-        <div class="case-footer">
-          <span>Flagged by F.A.S. engine · Audit ID AUD-9941 · Assigned: S. Chen</span>
-          <div class="case-actions">
-            <button class="btn btn-review" onclick="openReview('FAS-2863')">Review →</button>
-            <button class="btn btn-delegate" onclick="delegate('FAS-2863')">Delegate</button>
-            <button class="btn btn-override" onclick="override('FAS-2863')">Override — Allow</button>
-            <button class="btn btn-snooze" onclick="snooze('FAS-2863')">⏸ Snooze 1h</button>
-          </div>
-        </div>
-      </div>
-
+    <div class="case-list" id="reviewedList">
+      <div class="empty-state">Loading queue…</div>
     </div>
   </div>
 
 </main>
 
 <script>
-  function openReview(id) {
-    window.location.href = '/dashboard/rejection-detail.html?case=' + id;
+  const supabaseClient = supabase.createClient(
+    'https://znjvjofsfvxccmidfpgy.supabase.co',
+    'sb_publishable_9eXyp1KWa4g_uvM4TCliBg_XAwwSuwD'
+  );
+
+  const FLAG_LABELS = {
+    employment_gap_flagged:        'Employment Gap Penalty',
+    keyword_mismatch_flagged:      'Keyword Mismatch',
+    proxy_discrimination_detected: 'Proxy Discrimination Signal',
+    disparate_impact_detected:     'Disparate Impact Pattern',
+    legal_trigger_flagged:         'Legal Trigger Language',
+  };
+
+  const DECISION_LABELS = { approved: 'Approved', escalated: 'Escalated', confirmed: 'Confirmed' };
+
+  let allCases = [];
+
+  async function init() {
+    const { data: { session } } = await supabaseClient.auth.getSession();
+    if (!session) { window.location.href = 'login.html'; return; }
+
+    document.getElementById('userName').textContent = session.user.user_metadata?.name || session.user.email;
+    document.getElementById('userRole').textContent = session.user.user_metadata?.role || 'Reviewer';
+
+    const { data: userRow, error: userError } = await supabaseClient
+      .from('users').select('customer_id').eq('auth_id', session.user.id).single();
+
+    if (userError || !userRow?.customer_id) {
+      document.getElementById('needsReviewList').innerHTML = '<div class="empty-state">Could not resolve your organization — customer_id lookup failed.</div>';
+      document.getElementById('reviewedList').innerHTML = '';
+      return;
+    }
+
+    await loadQueue(userRow.customer_id);
   }
 
-  function delegate(id) {
-    alert('Case ' + id + ' delegated to next available reviewer.');
+  async function loadQueue(customerId) {
+    const { data, error } = await supabaseClient
+      .from('rejections')
+      .select(`
+        rejection_id, candidate_id, job_id, job_title, ats_source, created_at,
+        audits ( audit_id, risk_level, employment_gap_flagged, keyword_mismatch_flagged, proxy_discrimination_detected, disparate_impact_detected, legal_trigger_flagged, audit_timestamp, claude_output ),
+        overrides ( override_id, decision, reviewed_timestamp, justification_comment )
+      `)
+      .eq('customer_id', customerId)
+      .order('created_at', { ascending: false });
+
+    if (error) {
+      console.error('Queue load failed:', error);
+      document.getElementById('needsReviewList').innerHTML = '<div class="empty-state">Failed to load queue. Please refresh.</div>';
+      document.getElementById('reviewedList').innerHTML = '';
+      return;
+    }
+
+    allCases = (data || []).map(r => {
+      const audit = (r.audits || []).sort((a, b) => new Date(b.audit_timestamp) - new Date(a.audit_timestamp))[0] || null;
+      const override = (r.overrides || []).sort((a, b) => new Date(b.reviewed_timestamp) - new Date(a.reviewed_timestamp))[0] || null;
+      return { ...r, audit, override };
+    });
+
+    renderStats();
+    renderQueue(allCases);
   }
 
-  function override(id) {
-    if (confirm('Override audit flag for ' + id + '? This action will be logged and requires documented justification in the audit trail.')) {
-      alert('Override recorded for ' + id + '. Please document your justification in the case notes.');
+  function renderStats() {
+    const total = allCases.length;
+    const reviewed = allCases.filter(c => c.override).length;
+    const needsReview = total - reviewed;
+
+    document.getElementById('statTotal').textContent = total;
+    document.getElementById('statNeedsReview').textContent = needsReview;
+    document.getElementById('statReviewed').textContent = reviewed;
+
+    // A decision timestamped before its audit is a data-ordering artifact,
+    // not a real (negative) duration — exclude rather than display it.
+    const validDurations = allCases
+      .filter(c => c.audit?.audit_timestamp && c.override?.reviewed_timestamp)
+      .map(c => new Date(c.override.reviewed_timestamp) - new Date(c.audit.audit_timestamp))
+      .filter(ms => ms >= 0);
+    if (validDurations.length) {
+      const avgMs = validDurations.reduce((sum, ms) => sum + ms, 0) / validDurations.length;
+      document.getElementById('statAvgTime').textContent = formatDuration(avgMs);
+    } else {
+      document.getElementById('statAvgTime').textContent = '—';
     }
   }
 
-  function snooze(id) {
-    alert('Case ' + id + ' snoozed for 1 hour. You will be notified at ' + new Date(Date.now() + 3600000).toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'}) + '.');
+  function timeSince(iso) {
+    if (!iso) return '—';
+    return formatDuration(Date.now() - new Date(iso).getTime());
+  }
+
+  function formatDuration(ms) {
+    const hours = ms / 3600000;
+    if (hours < 24) return hours.toFixed(1) + 'h';
+    return (hours / 24).toFixed(1) + 'd';
+  }
+
+  function flagBadgesHtml(audit) {
+    if (!audit) return '';
+    const active = Object.keys(FLAG_LABELS).filter(k => audit[k]);
+    if (!active.length) return '';
+    return `<div class="lane-badges">${active.map(k => `<span class="badge badge-lane">${FLAG_LABELS[k]}</span>`).join('')}</div>`;
+  }
+
+  function flagDetailsHtml(audit) {
+    if (!audit) return '<div class="case-flag"><p>No audit record found for this rejection.</p></div>';
+    const active = Object.keys(FLAG_LABELS).filter(k => audit[k]);
+    if (!active.length) return '';
+    const narrative = audit.claude_output
+      ? `<div class="case-flag"><div class="case-flag-label">Audit Narrative</div><p style="white-space:pre-wrap;">${escapeHtml(unescapeNarrative(audit.claude_output)).slice(0, 400)}${audit.claude_output.length > 400 ? '…' : ''}</p></div>`
+      : '';
+    return narrative;
+  }
+
+  function escapeHtml(s) {
+    const div = document.createElement('div');
+    div.textContent = s;
+    return div.innerHTML;
+  }
+
+  // audits.claude_output stores literal backslash-n instead of real
+  // newlines (seed-data artifact) — unescape for readable display.
+  function unescapeNarrative(s) {
+    return s.replace(/\\n/g, '\n');
+  }
+
+  function caseCardHtml(c) {
+    const risk = c.audit?.risk_level || null;
+    const riskBadge = risk ? `<span class="badge badge-risk-${risk}">${risk.charAt(0).toUpperCase() + risk.slice(1)} Risk</span>` : '';
+    const timerClass = risk === 'red' ? 'badge-timer-critical' : (risk === 'orange' || risk === 'yellow') ? 'badge-timer-warning' : 'badge-timer-normal';
+    const cardClass = c.override ? 'reviewed-case' : (risk === 'red' ? 'escalated' : 'active-case');
+    const statusFooter = c.override
+      ? `Decision: <strong>${DECISION_LABELS[c.override.decision] || c.override.decision}</strong> · ${new Date(c.override.reviewed_timestamp).toLocaleString()}`
+      : 'Pending review';
+
+    return `
+      <div class="case-card ${cardClass}" data-case="${c.candidate_id}">
+        <div class="case-header">
+          <div class="case-header-left">
+            <span class="case-id">${c.candidate_id}</span>
+            ${riskBadge}
+          </div>
+          <div class="case-header-right">
+            ${c.audit ? `<span class="badge ${timerClass}">⏱ ${timeSince(c.audit.audit_timestamp)} since audit</span>` : ''}
+          </div>
+        </div>
+        <div class="case-body">
+          <div class="meta-block">
+            <div class="case-meta"><strong>Position</strong><br>${c.job_title || '—'}</div>
+            <div class="case-meta" style="margin-top:0.5rem"><strong>ATS</strong> ${c.ats_source || '—'} &nbsp;·&nbsp; <strong>Req ID</strong> ${c.job_id || '—'}</div>
+            <div class="case-meta" style="margin-top:0.5rem"><strong>Candidate ID</strong> ${c.candidate_id} &nbsp;·&nbsp; <strong>Applied</strong> ${c.created_at ? new Date(c.created_at).toLocaleDateString() : '—'}</div>
+            ${flagBadgesHtml(c.audit)}
+          </div>
+          <div class="case-flags">
+            ${flagDetailsHtml(c.audit)}
+          </div>
+        </div>
+        <div class="case-footer">
+          <span>Rejection ID ${c.rejection_id}${c.audit ? ' · Audit ID ' + c.audit.audit_id : ''} · ${statusFooter}</span>
+          <div class="case-actions">
+            <a class="btn btn-review" href="rejection-detail.html?id=${encodeURIComponent(c.candidate_id)}">Review →</a>
+          </div>
+        </div>
+      </div>`;
+  }
+
+  function renderQueue(cases) {
+    const needsReview = cases.filter(c => !c.override);
+    const reviewed = cases.filter(c => c.override);
+
+    document.getElementById('needsReviewCount').textContent = `${needsReview.length} case${needsReview.length === 1 ? '' : 's'}`;
+    document.getElementById('reviewedCount').textContent = `${reviewed.length} case${reviewed.length === 1 ? '' : 's'}`;
+
+    document.getElementById('needsReviewList').innerHTML = needsReview.length
+      ? needsReview.map(caseCardHtml).join('')
+      : '<div class="empty-state">No cases awaiting review.</div>';
+
+    document.getElementById('reviewedList').innerHTML = reviewed.length
+      ? reviewed.map(caseCardHtml).join('')
+      : '<div class="empty-state">No reviewed cases yet.</div>';
   }
 
   function setFilter(btn, filter) {
     document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
     btn.classList.add('active');
-    const cards = document.querySelectorAll('.case-card');
-    cards.forEach(card => {
-      if (filter === 'all') {
-        card.style.display = '';
-      } else if (filter === 'critical') {
-        card.style.display = card.classList.contains('escalated') ? '' : 'none';
-      } else if (filter === 'pending') {
-        card.style.display = card.classList.contains('active-case') ? '' : 'none';
-      } else {
-        card.style.display = 'none';
-      }
-    });
+    document.getElementById('section-needs-review').style.display = (filter === 'all' || filter === 'needs-review') ? '' : 'none';
+    document.getElementById('section-reviewed').style.display = (filter === 'all' || filter === 'reviewed') ? '' : 'none';
   }
 
   function filterSearch(query) {
@@ -885,6 +747,8 @@
       card.style.display = (!q || text.includes(q)) ? '' : 'none';
     });
   }
+
+  init();
 </script>
 
 </body>

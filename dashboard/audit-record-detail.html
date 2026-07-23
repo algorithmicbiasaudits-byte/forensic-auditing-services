@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Audit Record FAS-2847 — F.A.S. Dashboard</title>
+  <title>Audit Record Detail — F.A.S. Dashboard</title>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
     *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
@@ -31,8 +31,6 @@
       display: flex;
       flex-direction: column;
     }
-
-    body::before { display: none; }
 
     /* ── TOP NAV ── */
     .header {
@@ -123,18 +121,6 @@
     .sidebar-link.active { background: rgba(184,135,46,0.08); color: var(--gold); font-weight: 600; border-left: 3px solid var(--gold); padding-left: 13px; }
     .sidebar-link .icon { font-size: 14px; width: 18px; text-align: center; }
 
-    .sidebar-badge {
-      margin-left: auto;
-      background: var(--danger);
-      color: white;
-      font-size: 10px;
-      font-weight: 700;
-      padding: 2px 7px;
-      border-radius: 10px;
-      min-width: 20px;
-      text-align: center;
-    }
-
     /* ── MAIN ── */
     .main-content {
       margin-left: 220px;
@@ -169,6 +155,7 @@
       align-items: flex-start;
       justify-content: space-between;
       gap: 1.5rem;
+      flex-wrap: wrap;
     }
 
     .record-id-block { display: flex; align-items: center; gap: 14px; }
@@ -238,6 +225,7 @@
     .stat-value.gold    { color: var(--gold); }
     .stat-value.success { color: var(--success); }
     .stat-value.warning { color: var(--warning); }
+    .stat-value.muted   { color: var(--text-dim); }
 
     .stat-label { font-size: 0.7rem; color: #64748b; font-weight: 500; }
 
@@ -318,7 +306,7 @@
       word-break: break-all;
     }
 
-    .data-val.mono:hover { color: var(--gold); cursor: pointer; }
+    .data-val.muted { color: var(--text-dim); font-style: italic; }
 
     /* ── BADGES ── */
     .badge {
@@ -333,14 +321,15 @@
       white-space: nowrap;
     }
 
-    .badge-risk-high   { background: rgba(220,38,38,0.09);  color: #dc2626; border: 1px solid rgba(220,38,38,0.2); }
-    .badge-risk-medium { background: rgba(202,138,4,0.09);  color: #ca8a04; border: 1px solid rgba(202,138,4,0.2); }
-    .badge-risk-low    { background: rgba(22,163,74,0.09);  color: #16a34a; border: 1px solid rgba(22,163,74,0.2); }
+    .badge-risk-red    { background: rgba(220,38,38,0.09); color: #dc2626; border: 1px solid rgba(220,38,38,0.2); }
+    .badge-risk-orange { background: rgba(234,88,12,0.09); color: #ea580c; border: 1px solid rgba(234,88,12,0.2); }
+    .badge-risk-yellow { background: rgba(202,138,4,0.09); color: #ca8a04; border: 1px solid rgba(202,138,4,0.2); }
+    .badge-risk-green  { background: rgba(22,163,74,0.09); color: #16a34a; border: 1px solid rgba(22,163,74,0.2); }
 
-    .badge-status-pending  { background: rgba(202,138,4,0.09);  color: #ca8a04; border: 1px solid rgba(202,138,4,0.2); }
-    .badge-status-reviewed { background: rgba(22,163,74,0.09);  color: #16a34a; border: 1px solid rgba(22,163,74,0.2); }
-    .badge-status-delegated{ background: rgba(100,116,139,0.09); color: #64748b; border: 1px solid rgba(100,116,139,0.2); }
-    .badge-status-escalated{ background: rgba(220,38,38,0.09);  color: #dc2626; border: 1px solid rgba(220,38,38,0.2); }
+    .badge-status-pending   { background: rgba(202,138,4,0.09);  color: #ca8a04; border: 1px solid rgba(202,138,4,0.2); }
+    .badge-status-approved  { background: rgba(22,163,74,0.09);  color: #16a34a; border: 1px solid rgba(22,163,74,0.2); }
+    .badge-status-confirmed { background: rgba(100,116,139,0.09); color: #64748b; border: 1px solid rgba(100,116,139,0.2); }
+    .badge-status-escalated { background: rgba(220,38,38,0.09);  color: #dc2626; border: 1px solid rgba(220,38,38,0.2); }
 
     /* ── TIMELINE ── */
     .timeline { display: flex; flex-direction: column; gap: 0; }
@@ -432,8 +421,6 @@
     .lane-item.triggered .lane-item-header { background: rgba(220,38,38,0.03); border-bottom-color: rgba(220,38,38,0.15); }
     .lane-item.clear     .lane-item-header { background: rgba(22,163,74,0.03); border-bottom-color: rgba(22,163,74,0.1); }
 
-    .lane-icon { font-size: 13px; }
-
     .lane-name {
       font-size: 0.75rem;
       font-weight: 700;
@@ -452,31 +439,6 @@
 
     .lane-indicator.triggered { background: rgba(220,38,38,0.09); color: #dc2626; border: 1px solid rgba(220,38,38,0.2); }
     .lane-indicator.clear     { background: rgba(22,163,74,0.09); color: #16a34a; border: 1px solid rgba(22,163,74,0.2); }
-
-    .lane-score-bar { height: 3px; background: #f1f5f9; margin: 0; }
-    .lane-score-fill { height: 100%; border-radius: 0; transition: width 0.4s ease; }
-    .lane-score-fill.triggered { background: var(--danger); }
-    .lane-score-fill.clear     { background: var(--success); }
-
-    .lane-item-body { padding: 10px 14px; }
-
-    .lane-desc {
-      font-size: 0.75rem;
-      color: var(--text-muted);
-      line-height: 1.5;
-      margin-bottom: 6px;
-    }
-
-    .lane-score-row {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      font-size: 0.68rem;
-      color: var(--text-dim);
-    }
-
-    .lane-score-val { font-weight: 700; color: #475569; font-family: monospace; }
-    .lane-score-val.high { color: var(--danger); }
 
     /* ── EVIDENCE BOX ── */
     .evidence-box {
@@ -497,19 +459,12 @@
       margin-bottom: 8px;
     }
 
-    .evidence-item {
-      display: flex;
-      align-items: flex-start;
-      gap: 8px;
+    .evidence-text {
       font-size: 0.75rem;
       color: #475569;
-      line-height: 1.4;
-      padding: 5px 0;
-      border-bottom: 1px solid #f1f5f9;
+      line-height: 1.55;
+      white-space: pre-wrap;
     }
-
-    .evidence-item:last-child { border-bottom: none; padding-bottom: 0; }
-    .evidence-item::before { content: '›'; color: var(--gold); font-weight: 700; flex-shrink: 0; margin-top: 1px; }
 
     /* ── FLAG BOX ── */
     .flag-box {
@@ -520,14 +475,18 @@
       padding: 1rem 1.1rem;
     }
 
+    .flag-box.clear-box {
+      background: rgba(22,163,74,0.03);
+      border-color: rgba(22,163,74,0.2);
+      border-left-color: var(--success);
+    }
+
     .flag-box-header {
       display: flex;
       align-items: center;
       gap: 8px;
       margin-bottom: 10px;
     }
-
-    .flag-box-icon { font-size: 14px; }
 
     .flag-box-title {
       font-size: 0.75rem;
@@ -536,11 +495,7 @@
       flex: 1;
     }
 
-    .flag-box-body {
-      font-size: 0.75rem;
-      color: #475569;
-      line-height: 1.5;
-    }
+    .flag-box.clear-box .flag-box-title { color: var(--success); }
 
     .flag-detail-row {
       display: flex;
@@ -550,26 +505,19 @@
       border-top: 1px solid rgba(220,38,38,0.1);
     }
 
-    .flag-detail-key {
-      font-size: 0.68rem;
-      font-weight: 600;
-      color: var(--text-dim);
-      text-transform: uppercase;
-      letter-spacing: 0.07em;
-      min-width: 90px;
-    }
+    .flag-detail-row:first-child { border-top: none; }
 
     .flag-detail-val { font-size: 0.75rem; color: #475569; flex: 1; }
 
-    /* ── HASH CARD ── */
-    .hash-card {
+    /* ── DECISION CARD ── */
+    .decision-card {
       background: #f8fafc;
       border: 1px solid #e2e8f0;
       border-radius: 8px;
       padding: 1rem 1.25rem;
     }
 
-    .hash-label {
+    .decision-label {
       font-size: 0.62rem;
       font-weight: 700;
       letter-spacing: 0.12em;
@@ -577,46 +525,6 @@
       color: var(--text-dim);
       margin-bottom: 6px;
     }
-
-    .hash-value {
-      font-family: monospace;
-      font-size: 0.7rem;
-      color: #94a3b8;
-      word-break: break-all;
-      line-height: 1.6;
-      transition: color 0.15s;
-      cursor: pointer;
-    }
-
-    .hash-value:hover { color: var(--gold); }
-
-    .hash-status {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      margin-top: 8px;
-      font-size: 0.68rem;
-      color: var(--success);
-      font-weight: 600;
-    }
-
-    .hash-status::before { content: '✓'; font-weight: 800; }
-
-    /* ── ACTIONS BAR ── */
-    .actions-bar {
-      background: #ffffff;
-      border: 1px solid #e2e8f0;
-      border-radius: 8px;
-      padding: 1rem 1.25rem;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 1rem;
-      flex-wrap: wrap;
-    }
-
-    .actions-left  { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
-    .actions-right { display: flex; align-items: center; gap: 8px; }
 
     /* ── BUTTONS ── */
     .btn {
@@ -637,57 +545,21 @@
     .btn-primary    { background: #0a1628; color: #ffffff; }
     .btn-primary:hover { background: #162440; }
 
-    .btn-danger     { background: var(--danger); color: #ffffff; }
-    .btn-danger:hover { background: #b91c1c; }
-
     .btn-secondary  { background: #ffffff; color: #64748b; border: 1px solid #e2e8f0; }
     .btn-secondary:hover { border-color: var(--border-hover); color: #1e293b; }
 
-    .btn-ghost      { background: transparent; color: var(--text-muted); border: 1px solid transparent; }
-    .btn-ghost:hover { background: #f1f5f9; color: #1e293b; border-color: var(--border); }
-
-    .btn-sm { padding: 5px 12px; font-size: 0.68rem; }
-
-    /* ── DROPDOWN ── */
-    .dropdown { position: relative; }
-
-    .dropdown-menu {
-      display: none;
-      position: absolute;
-      right: 0;
-      top: calc(100% + 6px);
+    /* ── ACTIONS BAR ── */
+    .actions-bar {
       background: #ffffff;
       border: 1px solid #e2e8f0;
-      border-radius: 7px;
-      box-shadow: 0 8px 24px rgba(0,0,0,0.1);
-      min-width: 180px;
-      z-index: 200;
-      overflow: hidden;
-    }
-
-    .dropdown-menu.open { display: block; }
-
-    .dropdown-item {
+      border-radius: 8px;
+      padding: 1rem 1.25rem;
       display: flex;
       align-items: center;
-      gap: 8px;
-      padding: 9px 14px;
-      font-size: 0.75rem;
-      color: #475569;
-      cursor: pointer;
-      transition: background 0.1s;
-      border: none;
-      background: transparent;
-      width: 100%;
-      font-family: inherit;
-      text-align: left;
+      justify-content: space-between;
+      gap: 1rem;
+      flex-wrap: wrap;
     }
-
-    .dropdown-item:hover { background: #f5f8ff; color: var(--navy); }
-    .dropdown-item.danger { color: var(--danger); }
-    .dropdown-item.danger:hover { background: rgba(220,38,38,0.05); }
-
-    .dropdown-divider { height: 1px; background: var(--border); margin: 3px 0; }
 
     /* ── RESPONSIVE ── */
     @media (max-width: 1100px) {
@@ -717,521 +589,297 @@
 <!-- ── TOP NAV ── -->
 <nav class="header">
   <div class="header-left">
-    <a href="/dashboard/main.html" class="header-logo">F.A.S.</a>
+    <a href="main.html" class="header-logo">F.A.S.</a>
     <div class="nav-divider"></div>
     <span class="header-title">Audit Record Detail</span>
   </div>
   <div class="header-right">
-    <span class="nav-user">Sarah Chen</span>
-    <span class="nav-role">COMPLIANCE OFFICER</span>
-    <a href="/dashboard/login.html" class="nav-logout">Sign out</a>
+    <span class="nav-user" id="userName">—</span>
+    <span class="nav-role" id="userRole">—</span>
+    <a href="login.html" class="nav-logout">Sign out</a>
   </div>
 </nav>
 
 <!-- ── SIDEBAR ── -->
 <aside class="sidebar">
   <div class="sidebar-label">Dashboard</div>
-  <a href="/dashboard/main.html" class="sidebar-link">
-    <span class="icon">⬛</span> Overview
-  </a>
-  <a href="/dashboard/escalation-queue.html" class="sidebar-link">
-    <span class="icon">🚨</span> Escalation Queue
-    <span class="sidebar-badge">12</span>
-  </a>
-  <a href="/dashboard/rejection-detail.html" class="sidebar-link">
-    <span class="icon">📄</span> Rejection Detail
-  </a>
+  <a href="main.html" class="sidebar-link"><span class="icon">⬛</span> Overview</a>
+  <a href="escalation-queue.html" class="sidebar-link"><span class="icon">🚨</span> Escalation Queue</a>
+  <a href="rejection-detail.html" class="sidebar-link"><span class="icon">📄</span> Rejection Detail</a>
 
   <div class="sidebar-label" style="margin-top:12px;">Audit</div>
-  <a href="/dashboard/audit-trail.html" class="sidebar-link active">
-    <span class="icon">📋</span> Audit Trail
-  </a>
-  <a href="#" class="sidebar-link">
-    <span class="icon">📊</span> Compliance Reports
-  </a>
+  <a href="audit-trail.html" class="sidebar-link active"><span class="icon">📋</span> Audit Trail</a>
 
   <div class="sidebar-label" style="margin-top:12px;">Admin</div>
-  <a href="#" class="sidebar-link">
-    <span class="icon">⚙️</span> Settings
-  </a>
-  <a href="/security.html" class="sidebar-link">
-    <span class="icon">🔒</span> Security
-  </a>
+  <a href="settings.html" class="sidebar-link"><span class="icon">⚙️</span> Settings</a>
+  <a href="/security.html" class="sidebar-link"><span class="icon">🔒</span> Security</a>
 </aside>
 
 <!-- ── MAIN CONTENT ── -->
 <main class="main-content">
 
   <!-- Back link -->
-  <a href="/dashboard/audit-trail.html" class="back-link">Back to Audit Trail</a>
+  <a href="escalation-queue.html" class="back-link">Back to Escalation Queue</a>
 
-  <!-- Record header -->
-  <div class="record-header">
-    <div class="record-id-block">
-      <span class="record-id-badge">FAS-2847</span>
-      <div>
-        <div class="record-meta-title">Senior Accountant, Financial Controls</div>
-        <div class="record-meta-sub">
-          <span>Candidate C-28847</span>
-          <span style="color:var(--border)">|</span>
-          <span>Workday ATS</span>
-          <span style="color:var(--border)">|</span>
-          <span>Submitted May 3, 2026 · 09:14</span>
-        </div>
-      </div>
-    </div>
-    <div class="record-header-right">
-      <span class="badge badge-risk-high">High Risk</span>
-      <span class="badge badge-status-escalated">Escalated</span>
-    </div>
+  <div id="content">
+    <div style="padding:2rem;text-align:center;color:var(--text-dim);font-size:0.85rem;">Loading record…</div>
   </div>
-
-  <!-- Stats row -->
-  <div class="stats-row">
-    <div class="stat-card">
-      <div class="stat-value danger">2</div>
-      <div class="stat-label">Lanes Triggered</div>
-    </div>
-    <div class="stat-card">
-      <div class="stat-value warning">87</div>
-      <div class="stat-label">Risk Score</div>
-    </div>
-    <div class="stat-card">
-      <div class="stat-value gold">4</div>
-      <div class="stat-label">Active Flags</div>
-    </div>
-    <div class="stat-card">
-      <div class="stat-value">5</div>
-      <div class="stat-label">Audit Events</div>
-    </div>
-    <div class="stat-card">
-      <div class="stat-value success">✓</div>
-      <div class="stat-label">Hash Integrity</div>
-    </div>
-  </div>
-
-  <!-- Actions bar -->
-  <div class="actions-bar" style="margin-bottom:1.25rem;">
-    <div class="actions-left">
-      <button class="btn btn-danger">🚨 Escalate to Legal</button>
-      <button class="btn btn-primary" onclick="alert('Review submitted.')">✓ Mark Reviewed</button>
-      <button class="btn btn-secondary">Delegate</button>
-      <button class="btn btn-secondary">Override — Allow</button>
-    </div>
-    <div class="actions-right">
-      <button class="btn btn-ghost btn-sm" onclick="alert('Snooze set for 1 hour.')">⏱ Snooze 1h</button>
-      <div class="dropdown">
-        <button class="btn btn-secondary btn-sm" onclick="toggleDropdown(this)">More ▾</button>
-        <div class="dropdown-menu" id="more-dropdown">
-          <button class="dropdown-item" onclick="alert('Exported.')">↓ Export PDF</button>
-          <button class="dropdown-item" onclick="alert('Copied.')">⧉ Copy Hash</button>
-          <button class="dropdown-item" onclick="alert('Link copied.')">🔗 Share Record</button>
-          <div class="dropdown-divider"></div>
-          <button class="dropdown-item danger" onclick="alert('Suppressed.')">✕ Suppress Flag</button>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Detail grid -->
-  <div class="detail-grid">
-
-    <!-- ── LEFT / MAIN ── -->
-    <div class="detail-main">
-
-      <!-- Record metadata -->
-      <div class="detail-card">
-        <div class="detail-card-header">
-          <span class="detail-card-title">Record Metadata</span>
-        </div>
-        <div class="detail-card-body">
-          <div class="data-rows">
-            <div class="data-row">
-              <span class="data-key">Record ID</span>
-              <span class="data-val" style="font-family:monospace;font-weight:700;color:#0a1628;">FAS-2847</span>
-            </div>
-            <div class="data-row">
-              <span class="data-key">Candidate ID</span>
-              <span class="data-val">C-28847</span>
-            </div>
-            <div class="data-row">
-              <span class="data-key">Position</span>
-              <span class="data-val">Senior Accountant, Financial Controls</span>
-            </div>
-            <div class="data-row">
-              <span class="data-key">Department</span>
-              <span class="data-val">Finance &amp; Accounting</span>
-            </div>
-            <div class="data-row">
-              <span class="data-key">ATS</span>
-              <span class="data-val">Workday v34.2</span>
-            </div>
-            <div class="data-row">
-              <span class="data-key">Submitted</span>
-              <span class="data-val">May 3, 2026 · 09:14:07 UTC</span>
-            </div>
-            <div class="data-row">
-              <span class="data-key">Processed</span>
-              <span class="data-val">May 3, 2026 · 09:14:09 UTC <span style="color:var(--text-dim);font-size:0.68rem;">(1.9s)</span></span>
-            </div>
-            <div class="data-row">
-              <span class="data-key">Auditor Engine</span>
-              <span class="data-val">F.A.S. Core v2.4.1</span>
-            </div>
-            <div class="data-row">
-              <span class="data-key">Audit Hash</span>
-              <span class="data-val mono" onclick="copyHash(this)" title="Click to copy">a3f9d2c1e8b74f56ad920e3b17c54f82d6e91a40</span>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- 7-Lane Audit Results -->
-      <div class="detail-card">
-        <div class="detail-card-header">
-          <span class="detail-card-title">7-Lane Audit Results</span>
-          <span style="font-size:0.68rem;color:var(--text-dim);">2 triggered · 5 clear</span>
-        </div>
-        <div class="detail-card-body">
-          <div class="lane-list">
-
-            <!-- Lane 1: Age Proxy — TRIGGERED -->
-            <div class="lane-item triggered">
-              <div class="lane-item-header">
-                <span class="lane-icon">🕐</span>
-                <span class="lane-name">Age Proxy Detection</span>
-                <span class="lane-indicator triggered">Triggered</span>
-              </div>
-              <div class="lane-score-bar">
-                <div class="lane-score-fill triggered" style="width:91%;"></div>
-              </div>
-              <div class="lane-item-body">
-                <p class="lane-desc">Detects graduation year references, class cohort language, and degree-year calculations that may function as proxies for age in violation of the ADEA.</p>
-                <div class="lane-score-row">
-                  <span>Score:</span>
-                  <span class="lane-score-val high">91 / 100</span>
-                  <span style="color:var(--border);">·</span>
-                  <span>Threshold: 70</span>
-                </div>
-                <div class="evidence-box">
-                  <div class="evidence-label">Flagged Evidence</div>
-                  <div class="evidence-item">Requirement: "Minimum 15 years of progressive accounting experience" — functionally excludes candidates under ~37.</div>
-                  <div class="evidence-item">Language: "Long-tenured professional with deep institutional knowledge" — age-coded phrasing per EEOC guidance.</div>
-                  <div class="evidence-item">Job posting references "Class of [Year]" alumni network for required professional membership.</div>
-                </div>
-              </div>
-            </div>
-
-            <!-- Lane 2: Gap Penalty — TRIGGERED -->
-            <div class="lane-item triggered">
-              <div class="lane-item-header">
-                <span class="lane-icon">⏸</span>
-                <span class="lane-name">Employment Gap Penalty</span>
-                <span class="lane-indicator triggered">Triggered</span>
-              </div>
-              <div class="lane-score-bar">
-                <div class="lane-score-fill triggered" style="width:78%;"></div>
-              </div>
-              <div class="lane-item-body">
-                <p class="lane-desc">Identifies automatic disqualification or score penalization based on employment gaps, which disproportionately affects caregivers and persons with disabilities.</p>
-                <div class="lane-score-row">
-                  <span>Score:</span>
-                  <span class="lane-score-val high">78 / 100</span>
-                  <span style="color:var(--border);">·</span>
-                  <span>Threshold: 60</span>
-                </div>
-                <div class="evidence-box">
-                  <div class="evidence-label">Flagged Evidence</div>
-                  <div class="evidence-item">ATS auto-filter: "No employment gaps exceeding 6 months within the past 5 years" applied as hard knockout criterion.</div>
-                  <div class="evidence-item">Candidate C-28847 has a 9-month gap (2022–2023) listed as caregiving leave — disqualified at pre-screen.</div>
-                </div>
-              </div>
-            </div>
-
-            <!-- Lane 3: Disparate Impact — CLEAR -->
-            <div class="lane-item clear">
-              <div class="lane-item-header">
-                <span class="lane-icon">⚖️</span>
-                <span class="lane-name">Disparate Impact Analysis</span>
-                <span class="lane-indicator clear">Clear</span>
-              </div>
-              <div class="lane-score-bar">
-                <div class="lane-score-fill clear" style="width:22%;"></div>
-              </div>
-              <div class="lane-item-body">
-                <p class="lane-desc">Statistical 4/5ths rule analysis across protected class pass-through rates for this position's screening criteria.</p>
-                <div class="lane-score-row">
-                  <span>Score:</span>
-                  <span class="lane-score-val">22 / 100</span>
-                  <span style="color:var(--border);">·</span>
-                  <span>Threshold: 60</span>
-                </div>
-              </div>
-            </div>
-
-            <!-- Lane 4: Credential Inflation — CLEAR -->
-            <div class="lane-item clear">
-              <div class="lane-item-header">
-                <span class="lane-icon">🎓</span>
-                <span class="lane-name">Credential Inflation</span>
-                <span class="lane-indicator clear">Clear</span>
-              </div>
-              <div class="lane-score-bar">
-                <div class="lane-score-fill clear" style="width:34%;"></div>
-              </div>
-              <div class="lane-item-body">
-                <p class="lane-desc">Checks for degree or certification requirements that exceed legitimate job necessity, potentially acting as exclusionary credential barriers.</p>
-                <div class="lane-score-row">
-                  <span>Score:</span>
-                  <span class="lane-score-val">34 / 100</span>
-                  <span style="color:var(--border);">·</span>
-                  <span>Threshold: 60</span>
-                </div>
-              </div>
-            </div>
-
-            <!-- Lane 5: Keyword Mismatch — CLEAR -->
-            <div class="lane-item clear">
-              <div class="lane-item-header">
-                <span class="lane-icon">🔍</span>
-                <span class="lane-name">Keyword Mismatch</span>
-                <span class="lane-indicator clear">Clear</span>
-              </div>
-              <div class="lane-score-bar">
-                <div class="lane-score-fill clear" style="width:18%;"></div>
-              </div>
-              <div class="lane-item-body">
-                <p class="lane-desc">Detects ATS keyword scoring misalignment where resume terminology differs from job description language for identical skills.</p>
-                <div class="lane-score-row">
-                  <span>Score:</span>
-                  <span class="lane-score-val">18 / 100</span>
-                  <span style="color:var(--border);">·</span>
-                  <span>Threshold: 65</span>
-                </div>
-              </div>
-            </div>
-
-            <!-- Lane 6: Disability Exclusion — CLEAR -->
-            <div class="lane-item clear">
-              <div class="lane-item-header">
-                <span class="lane-icon">♿</span>
-                <span class="lane-name">Disability Exclusion</span>
-                <span class="lane-indicator clear">Clear</span>
-              </div>
-              <div class="lane-score-bar">
-                <div class="lane-score-fill clear" style="width:11%;"></div>
-              </div>
-              <div class="lane-item-body">
-                <p class="lane-desc">Identifies physical requirements, testing formats, or inaccessible application pathways that may unlawfully exclude persons with disabilities under the ADA.</p>
-                <div class="lane-score-row">
-                  <span>Score:</span>
-                  <span class="lane-score-val">11 / 100</span>
-                  <span style="color:var(--border);">·</span>
-                  <span>Threshold: 55</span>
-                </div>
-              </div>
-            </div>
-
-            <!-- Lane 7: Legal Trigger — CLEAR -->
-            <div class="lane-item clear">
-              <div class="lane-item-header">
-                <span class="lane-icon">⚠️</span>
-                <span class="lane-name">Legal Trigger Language</span>
-                <span class="lane-indicator clear">Clear</span>
-              </div>
-              <div class="lane-score-bar">
-                <div class="lane-score-fill clear" style="width:8%;"></div>
-              </div>
-              <div class="lane-item-body">
-                <p class="lane-desc">Scans job postings and rejection communications for statutory trigger phrases that carry explicit legal liability under ADEA, ADA, Title VII, or GINA.</p>
-                <div class="lane-score-row">
-                  <span>Score:</span>
-                  <span class="lane-score-val">8 / 100</span>
-                  <span style="color:var(--border);">·</span>
-                  <span>Threshold: 50</span>
-                </div>
-              </div>
-            </div>
-
-          </div>
-        </div>
-      </div>
-
-    </div><!-- /detail-main -->
-
-    <!-- ── RIGHT / ASIDE ── -->
-    <div class="detail-aside">
-
-      <!-- Active flags -->
-      <div class="flag-box">
-        <div class="flag-box-header">
-          <span class="flag-box-icon">🚩</span>
-          <span class="flag-box-title">Active Compliance Flags</span>
-          <span class="badge badge-risk-high">4 Open</span>
-        </div>
-        <div style="display:flex;flex-direction:column;gap:8px;">
-          <div class="flag-detail-row">
-            <span class="flag-detail-key">Flag 1</span>
-            <span class="flag-detail-val">ADEA §623(a) — Age-proxy language in minimum experience requirement</span>
-          </div>
-          <div class="flag-detail-row">
-            <span class="flag-detail-key">Flag 2</span>
-            <span class="flag-detail-val">EEOC Best Practice — Gap-based auto-disqualification without individualized review</span>
-          </div>
-          <div class="flag-detail-row">
-            <span class="flag-detail-key">Flag 3</span>
-            <span class="flag-detail-val">ADA §12112 — Caregiver leave gap treated as equivalent to unexcused absence</span>
-          </div>
-          <div class="flag-detail-row">
-            <span class="flag-detail-key">Flag 4</span>
-            <span class="flag-detail-val">Internal Policy §4.3 — Hard knockout criteria applied without documented business necessity</span>
-          </div>
-        </div>
-      </div>
-
-      <!-- Audit hash -->
-      <div class="hash-card">
-        <div class="hash-label">Tamper-Evident Audit Hash</div>
-        <div class="hash-value" onclick="copyHash(this)" title="Click to copy">a3f9d2c1e8b74f56<br>ad920e3b17c54f82<br>d6e91a40</div>
-        <div class="hash-status">Hash verified · SHA-256 · Immutable</div>
-      </div>
-
-      <!-- Audit timeline -->
-      <div class="detail-card">
-        <div class="detail-card-header">
-          <span class="detail-card-title">Audit Timeline</span>
-        </div>
-        <div class="detail-card-body">
-          <div class="timeline">
-
-            <div class="timeline-item">
-              <div class="timeline-track">
-                <div class="timeline-dot active"></div>
-                <div class="timeline-line"></div>
-              </div>
-              <div class="timeline-content">
-                <div class="timeline-event">Record Escalated</div>
-                <div class="timeline-meta">Escalated to compliance queue — awaiting legal review</div>
-                <div class="timeline-ts">May 3, 2026 · 09:22:14 UTC</div>
-              </div>
-            </div>
-
-            <div class="timeline-item">
-              <div class="timeline-track">
-                <div class="timeline-dot danger"></div>
-                <div class="timeline-line"></div>
-              </div>
-              <div class="timeline-content">
-                <div class="timeline-event">Flag Generated</div>
-                <div class="timeline-meta">4 compliance flags raised — Age Proxy + Gap Penalty lanes triggered</div>
-                <div class="timeline-ts">May 3, 2026 · 09:14:10 UTC</div>
-              </div>
-            </div>
-
-            <div class="timeline-item">
-              <div class="timeline-track">
-                <div class="timeline-dot danger"></div>
-                <div class="timeline-line"></div>
-              </div>
-              <div class="timeline-content">
-                <div class="timeline-event">Audit Complete — High Risk</div>
-                <div class="timeline-meta">7-lane audit complete · Risk score 87 · 2 lanes triggered</div>
-                <div class="timeline-ts">May 3, 2026 · 09:14:09 UTC</div>
-              </div>
-            </div>
-
-            <div class="timeline-item">
-              <div class="timeline-track">
-                <div class="timeline-dot"></div>
-                <div class="timeline-line"></div>
-              </div>
-              <div class="timeline-content">
-                <div class="timeline-event">Audit Initiated</div>
-                <div class="timeline-meta">ATS payload received from Workday · 7-lane scan started</div>
-                <div class="timeline-ts">May 3, 2026 · 09:14:07 UTC</div>
-              </div>
-            </div>
-
-            <div class="timeline-item">
-              <div class="timeline-track">
-                <div class="timeline-dot"></div>
-              </div>
-              <div class="timeline-content">
-                <div class="timeline-event">Application Submitted</div>
-                <div class="timeline-meta">Candidate C-28847 applied via Workday portal</div>
-                <div class="timeline-ts">May 3, 2026 · 09:13:51 UTC</div>
-              </div>
-            </div>
-
-          </div>
-        </div>
-      </div>
-
-      <!-- Reviewer notes -->
-      <div class="detail-card">
-        <div class="detail-card-header">
-          <span class="detail-card-title">Reviewer Notes</span>
-          <button class="btn btn-ghost btn-sm" onclick="toggleNotes()">+ Add Note</button>
-        </div>
-        <div class="detail-card-body" id="notes-area">
-          <p style="font-size:0.75rem;color:var(--text-dim);font-style:italic;">No reviewer notes yet. This record is pending initial review.</p>
-          <div id="note-form" style="display:none;margin-top:12px;">
-            <textarea id="note-input" rows="3" style="width:100%;background:#f8fafc;border:1px solid #e2e8f0;border-radius:5px;padding:8px 10px;font-size:0.75rem;font-family:inherit;color:#475569;resize:vertical;outline:none;" placeholder="Add a compliance note…"></textarea>
-            <div style="display:flex;gap:6px;margin-top:6px;justify-content:flex-end;">
-              <button class="btn btn-ghost btn-sm" onclick="toggleNotes()">Cancel</button>
-              <button class="btn btn-primary btn-sm" onclick="submitNote()">Save Note</button>
-            </div>
-          </div>
-        </div>
-      </div>
-
-    </div><!-- /detail-aside -->
-
-  </div><!-- /detail-grid -->
 
 </main>
 
 <script>
-  function toggleDropdown(btn) {
-    const menu = document.getElementById('more-dropdown');
-    menu.classList.toggle('open');
-    document.addEventListener('click', function closeMenu(e) {
-      if (!btn.contains(e.target) && !menu.contains(e.target)) {
-        menu.classList.remove('open');
-        document.removeEventListener('click', closeMenu);
-      }
-    });
+  const supabaseClient = supabase.createClient(
+    'https://znjvjofsfvxccmidfpgy.supabase.co',
+    'sb_publishable_9eXyp1KWa4g_uvM4TCliBg_XAwwSuwD'
+  );
+
+  const FLAG_LABELS = {
+    employment_gap_flagged:        'Employment Gap Penalty',
+    keyword_mismatch_flagged:      'Keyword Mismatch',
+    proxy_discrimination_detected: 'Proxy Discrimination Signal',
+    disparate_impact_detected:     'Disparate Impact Pattern',
+    legal_trigger_flagged:         'Legal Trigger Language',
+  };
+
+  const DECISION_LABELS = { approved: 'Approved', escalated: 'Escalated', confirmed: 'Confirmed' };
+
+  function escapeHtml(s) {
+    const div = document.createElement('div');
+    div.textContent = s;
+    return div.innerHTML;
   }
 
-  function copyHash(el) {
-    const text = el.innerText.replace(/\n/g, '');
-    navigator.clipboard.writeText(text).then(() => {
-      const orig = el.style.color;
-      el.style.color = 'var(--gold)';
-      setTimeout(() => { el.style.color = orig; }, 800);
-    }).catch(() => {});
+  // audits.claude_output stores literal backslash-n instead of real
+  // newlines (seed-data artifact) — unescape for readable display.
+  function unescapeNarrative(s) {
+    return s.replace(/\\n/g, '\n');
   }
 
-  function toggleNotes() {
-    const form = document.getElementById('note-form');
-    form.style.display = form.style.display === 'none' ? 'block' : 'none';
-    if (form.style.display === 'block') document.getElementById('note-input').focus();
+  async function init() {
+    const { data: { session } } = await supabaseClient.auth.getSession();
+    if (!session) { window.location.href = 'login.html'; return; }
+
+    document.getElementById('userName').textContent = session.user.user_metadata?.name || session.user.email;
+    document.getElementById('userRole').textContent = session.user.user_metadata?.role || 'Reviewer';
+
+    const params = new URLSearchParams(window.location.search);
+    const candidateId = params.get('id');
+    if (!candidateId) {
+      renderError('No record specified — missing ?id= parameter.');
+      return;
+    }
+
+    const { data: userRow, error: userError } = await supabaseClient
+      .from('users').select('customer_id').eq('auth_id', session.user.id).single();
+
+    if (userError || !userRow?.customer_id) {
+      renderError('Could not resolve your organization — customer_id lookup failed.');
+      return;
+    }
+
+    const { data: rejection, error: rejError } = await supabaseClient
+      .from('rejections')
+      .select(`
+        rejection_id, candidate_id, job_id, job_title, ats_source, created_at,
+        rejection_reason_from_ats, years_experience, education_level, protected_class_cohort,
+        audits ( audit_id, risk_level, employment_gap_flagged, keyword_mismatch_flagged, proxy_discrimination_detected, disparate_impact_detected, legal_trigger_flagged, audit_timestamp, claude_output ),
+        overrides ( override_id, decision, reviewed_timestamp, justification_comment, reviewed_by_user_id )
+      `)
+      .eq('candidate_id', candidateId)
+      .eq('customer_id', userRow.customer_id)
+      .single();
+
+    if (rejError || !rejection) {
+      renderError(`No record found for candidate ${escapeHtml(candidateId)}.`);
+      return;
+    }
+
+    const audit = (rejection.audits || []).sort((a, b) => new Date(b.audit_timestamp) - new Date(a.audit_timestamp))[0] || null;
+    const override = (rejection.overrides || []).sort((a, b) => new Date(b.reviewed_timestamp) - new Date(a.reviewed_timestamp))[0] || null;
+
+    render(rejection, audit, override);
   }
 
-  function submitNote() {
-    const val = document.getElementById('note-input').value.trim();
-    if (!val) return;
-    const area = document.getElementById('notes-area');
-    const now = new Date();
-    const ts = now.toLocaleString('en-US', { month:'short', day:'numeric', year:'numeric', hour:'2-digit', minute:'2-digit' });
-    const note = document.createElement('div');
-    note.style.cssText = 'background:#f8fafc;border:1px solid #e2e8f0;border-radius:5px;padding:10px 12px;margin-bottom:8px;';
-    note.innerHTML = `<div style="font-size:0.75rem;color:#475569;line-height:1.4;">${val}</div><div style="font-size:0.65rem;color:var(--text-dim);margin-top:5px;">Sarah Chen · ${ts}</div>`;
-    area.querySelector('p') && area.querySelector('p').remove();
-    document.getElementById('note-form').before(note);
-    document.getElementById('note-input').value = '';
-    toggleNotes();
+  function renderError(message) {
+    document.getElementById('content').innerHTML = `<div style="padding:2rem;text-align:center;color:var(--text-dim);font-size:0.85rem;">${escapeHtml(message)}</div>`;
   }
+
+  function render(r, audit, override) {
+    const risk = audit?.risk_level || null;
+    const riskBadge = risk ? `<span class="badge badge-risk-${risk}">${risk.charAt(0).toUpperCase() + risk.slice(1)} Risk</span>` : '';
+    const statusClass = override ? `badge-status-${override.decision}` : 'badge-status-pending';
+    const statusLabel = override ? (DECISION_LABELS[override.decision] || override.decision) : 'Pending Review';
+
+    const flagKeys = Object.keys(FLAG_LABELS);
+    const triggeredCount = audit ? flagKeys.filter(k => audit[k]).length : 0;
+
+    document.getElementById('content').innerHTML = `
+      <div class="record-header">
+        <div class="record-id-block">
+          <span class="record-id-badge">${escapeHtml(r.candidate_id)}</span>
+          <div>
+            <div class="record-meta-title">${escapeHtml(r.job_title || 'Unspecified role')}</div>
+            <div class="record-meta-sub">
+              <span>Rejection ID ${r.rejection_id}</span>
+              <span style="color:var(--border)">|</span>
+              <span>${escapeHtml(r.ats_source || 'Unknown ATS')}</span>
+              <span style="color:var(--border)">|</span>
+              <span>Submitted ${r.created_at ? new Date(r.created_at).toLocaleString() : '—'}</span>
+            </div>
+          </div>
+        </div>
+        <div class="record-header-right">
+          ${riskBadge}
+          <span class="badge ${statusClass}">${statusLabel}</span>
+        </div>
+      </div>
+
+      <div class="stats-row">
+        <div class="stat-card">
+          <div class="stat-value ${risk === 'red' ? 'danger' : (risk === 'orange' || risk === 'yellow') ? 'warning' : 'success'}">${risk ? risk.toUpperCase() : '—'}</div>
+          <div class="stat-label">Risk Level</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value ${triggeredCount > 0 ? 'danger' : 'success'}">${triggeredCount} / ${flagKeys.length}</div>
+          <div class="stat-label">Lanes Triggered</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value">${audit ? daysSince(audit.audit_timestamp) : '—'}</div>
+          <div class="stat-label">Days Since Audit</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value gold">${statusLabel}</div>
+          <div class="stat-label">Decision Status</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value muted">—</div>
+          <div class="stat-label">Cryptographic Hash</div>
+        </div>
+      </div>
+
+      <div class="actions-bar" style="margin-bottom:1.25rem;">
+        <span style="font-size:0.75rem;color:var(--text-muted);">${override ? 'This record has been reviewed.' : 'This record is awaiting human review.'}</span>
+        <a class="btn btn-primary" href="rejection-detail.html?id=${encodeURIComponent(r.candidate_id)}">Open in Rejection Detail →</a>
+      </div>
+
+      <div class="detail-grid">
+
+        <div class="detail-main">
+
+          <div class="detail-card">
+            <div class="detail-card-header"><span class="detail-card-title">Record Metadata</span></div>
+            <div class="detail-card-body">
+              <div class="data-rows">
+                <div class="data-row"><span class="data-key">Candidate ID</span><span class="data-val" style="font-family:monospace;font-weight:700;color:#0a1628;">${escapeHtml(r.candidate_id)}</span></div>
+                <div class="data-row"><span class="data-key">Position</span><span class="data-val">${escapeHtml(r.job_title || '—')}</span></div>
+                <div class="data-row"><span class="data-key">ATS</span><span class="data-val">${escapeHtml(r.ats_source || '—')}</span></div>
+                <div class="data-row"><span class="data-key">Req ID</span><span class="data-val">${escapeHtml(r.job_id || '—')}</span></div>
+                <div class="data-row"><span class="data-key">Submitted</span><span class="data-val">${r.created_at ? new Date(r.created_at).toLocaleString() : '—'}</span></div>
+                <div class="data-row"><span class="data-key">Audit Completed</span><span class="data-val">${audit?.audit_timestamp ? new Date(audit.audit_timestamp).toLocaleString() : '—'}</span></div>
+                <div class="data-row"><span class="data-key">Years Experience</span><span class="data-val">${r.years_experience ?? '—'}</span></div>
+                <div class="data-row"><span class="data-key">Education</span><span class="data-val">${escapeHtml(r.education_level || '—')}</span></div>
+                <div class="data-row"><span class="data-key">ATS Rejection Reason</span><span class="data-val">${escapeHtml(r.rejection_reason_from_ats || '—')}</span></div>
+                <div class="data-row"><span class="data-key">Audit Hash</span><span class="data-val muted">Not available — no cryptographic hash generated for this record</span></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="detail-card">
+            <div class="detail-card-header">
+              <span class="detail-card-title">5-Lane Audit Results</span>
+              <span style="font-size:0.68rem;color:var(--text-dim);">${audit ? `${triggeredCount} triggered · ${flagKeys.length - triggeredCount} clear` : 'No audit on file'}</span>
+            </div>
+            <div class="detail-card-body">
+              ${audit ? `
+              <div class="lane-list">
+                ${flagKeys.map(k => `
+                  <div class="lane-item ${audit[k] ? 'triggered' : 'clear'}">
+                    <div class="lane-item-header">
+                      <span class="lane-name">${FLAG_LABELS[k]}</span>
+                      <span class="lane-indicator ${audit[k] ? 'triggered' : 'clear'}">${audit[k] ? 'Triggered' : 'Clear'}</span>
+                    </div>
+                  </div>`).join('')}
+              </div>
+              ${audit.claude_output ? `
+              <div class="evidence-box">
+                <div class="evidence-label">Audit Narrative (F.A.S. Engine Output)</div>
+                <div class="evidence-text">${escapeHtml(unescapeNarrative(audit.claude_output))}</div>
+              </div>` : ''}
+              ` : '<p style="font-size:0.8rem;color:var(--text-dim);">No audit record found for this rejection.</p>'}
+            </div>
+          </div>
+
+        </div><!-- /detail-main -->
+
+        <div class="detail-aside">
+
+          <div class="flag-box ${triggeredCount > 0 ? '' : 'clear-box'}">
+            <div class="flag-box-header">
+              <span class="flag-box-title">Active Compliance Flags</span>
+              <span class="badge ${triggeredCount > 0 ? 'badge-risk-red' : 'badge-risk-green'}">${triggeredCount} Open</span>
+            </div>
+            <div>
+              ${triggeredCount > 0
+                ? flagKeys.filter(k => audit[k]).map(k => `<div class="flag-detail-row"><span class="flag-detail-val">${FLAG_LABELS[k]}</span></div>`).join('')
+                : '<div class="flag-detail-row"><span class="flag-detail-val">No flags triggered on this record.</span></div>'}
+            </div>
+          </div>
+
+          <div class="decision-card">
+            <div class="decision-label">Reviewer Decision</div>
+            ${override ? `
+              <div style="font-size:0.8rem;color:#1e293b;font-weight:700;margin-bottom:4px;">${DECISION_LABELS[override.decision] || override.decision}</div>
+              <div style="font-size:0.75rem;color:#475569;line-height:1.5;">${escapeHtml(override.justification_comment || 'No justification recorded.')}</div>
+              <div style="font-size:0.68rem;color:var(--text-dim);margin-top:8px;">${new Date(override.reviewed_timestamp).toLocaleString()}</div>
+            ` : `<p style="font-size:0.75rem;color:var(--text-dim);font-style:italic;">No reviewer decision yet. This record is pending initial review.</p>`}
+          </div>
+
+          <div class="detail-card">
+            <div class="detail-card-header"><span class="detail-card-title">Audit Timeline</span></div>
+            <div class="detail-card-body">
+              <div class="timeline">
+                ${override ? `
+                <div class="timeline-item">
+                  <div class="timeline-track"><div class="timeline-dot active"></div></div>
+                  <div class="timeline-content">
+                    <div class="timeline-event">Decision Recorded — ${DECISION_LABELS[override.decision] || override.decision}</div>
+                    <div class="timeline-ts">${new Date(override.reviewed_timestamp).toLocaleString()}</div>
+                  </div>
+                </div>` : ''}
+                ${audit ? `
+                <div class="timeline-item">
+                  <div class="timeline-track"><div class="timeline-dot ${triggeredCount > 0 ? 'danger' : 'success'}"></div><div class="timeline-line"></div></div>
+                  <div class="timeline-content">
+                    <div class="timeline-event">Audit Complete — ${risk ? risk.toUpperCase() + ' risk' : 'Risk level unavailable'}</div>
+                    <div class="timeline-meta">${triggeredCount} of ${flagKeys.length} lanes triggered</div>
+                    <div class="timeline-ts">${new Date(audit.audit_timestamp).toLocaleString()}</div>
+                  </div>
+                </div>` : ''}
+                <div class="timeline-item">
+                  <div class="timeline-track"><div class="timeline-dot"></div></div>
+                  <div class="timeline-content">
+                    <div class="timeline-event">Rejection Recorded</div>
+                    <div class="timeline-meta">ATS: ${escapeHtml(r.ats_source || 'Unknown')}</div>
+                    <div class="timeline-ts">${r.created_at ? new Date(r.created_at).toLocaleString() : '—'}</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div><!-- /detail-aside -->
+
+      </div><!-- /detail-grid -->
+    `;
+  }
+
+  function daysSince(iso) {
+    if (!iso) return '—';
+    const days = (Date.now() - new Date(iso).getTime()) / 86400000;
+    return days < 1 ? '<1' : Math.floor(days);
+  }
+
+  init();
 </script>
 
 </body>

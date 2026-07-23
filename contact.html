@@ -404,7 +404,7 @@
       <p>All fields marked <span style="color:var(--gold);">*</span> are required.</p>
     </div>
 
-    <form name="fas-contact" method="POST" action="apply-thank-you.html" data-netlify="true" netlify-honeypot="bot-field">
+    <form id="fas-contact-form" name="fas-contact" method="POST" data-netlify="true" netlify-honeypot="bot-field">
       <input type="hidden" name="form-name" value="fas-contact">
       <p style="display:none;"><label>Don't fill this out: <input name="bot-field"></label></p>
 
@@ -485,10 +485,14 @@
         <div class="char-count" id="char-count">0 / 1,500</div>
       </div>
 
-      <button type="submit" class="submit-btn">Send Message</button>
+      <button type="submit" class="submit-btn" id="fas-contact-submit-btn">Send Message</button>
       <p class="form-disclaimer">By submitting this form you agree to be contacted by ALS Consulting regarding F.A.S. We do not share your information with third parties. <a href="terms.html">Terms apply.</a></p>
 
     </form>
+    <div id="fas-contact-success" style="display:none;background:rgba(72,199,142,0.08);border:1px solid rgba(72,199,142,0.3);border-radius:8px;padding:1.5rem;text-align:center;margin-top:1rem;color:#48c78e;font-size:0.9rem;line-height:1.6;">
+      <strong style="display:block;font-size:1rem;margin-bottom:0.5rem">Message received.</strong>
+      We respond to all inquiries within one business day. For faster response, <a href="https://calendly.com/astargill-ih3e/30min" target="_blank" rel="noopener" style="color:#48c78e;text-decoration:underline;">book a call directly</a>.
+    </div>
   </div>
 </div>
 
@@ -500,7 +504,7 @@
     <a href="terms.html">Terms</a> &nbsp;|&nbsp;
     <a href="faq.html">FAQ</a> &nbsp;|&nbsp;
     <a href="subprocessors.html">Subprocessors</a> &nbsp;|&nbsp;
-    <a href="waitlist.html">Join Waitlist</a>
+    <a href="https://calendly.com/astargill-ih3e/30min" target="_blank" rel="noopener">Book a Call</a>
   </p>
   <p style="margin-top:14px;font-size:11px;color:rgba(255,255,255,0.25);">© 2026 ALS Consulting Services. All rights reserved.</p>
 </footer>
@@ -512,6 +516,34 @@
     counter.textContent = count.toLocaleString() + ' / 1,500';
     counter.classList.toggle('warn', count > 1400);
   }
+
+  (function() {
+    var form = document.getElementById('fas-contact-form');
+    form.addEventListener('submit', function(e) {
+      e.preventDefault();
+      var btn = document.getElementById('fas-contact-submit-btn');
+      btn.disabled = true;
+      btn.textContent = 'Sending...';
+
+      var formData = new FormData(form);
+      fetch('/', { method: 'POST', body: formData })
+        .then(function(r) {
+          if (r.ok) {
+            form.style.display = 'none';
+            document.getElementById('fas-contact-success').style.display = 'block';
+          } else {
+            btn.disabled = false;
+            btn.textContent = 'Send Message';
+            alert('Submission failed. Please try again or book a call directly.');
+          }
+        })
+        .catch(function() {
+          btn.disabled = false;
+          btn.textContent = 'Send Message';
+          alert('Submission failed. Please try again or book a call directly.');
+        });
+    });
+  })();
 </script>
 
 </body>

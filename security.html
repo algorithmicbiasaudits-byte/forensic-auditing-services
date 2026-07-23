@@ -165,15 +165,16 @@
     <div style="display: flex; justify-content: space-between; align-items: center; max-width: 900px; margin: 0 auto 1.5rem; flex-wrap: wrap; gap: 12px;">
       <a href="index.html" style="color: #C9A84C; text-decoration: none; font-size: 13px; letter-spacing: 1px;">← ALS Consulting</a>
       <nav style="display: flex; gap: 20px;">
-        <a href="fas.html" style="color: #ccc; text-decoration: none; font-size: 13px;">F.A.S.</a>
+        <a href="index.html" style="color: #ccc; text-decoration: none; font-size: 13px;">F.A.S.</a>
         <a href="demo.html" style="color: #ccc; text-decoration: none; font-size: 13px;">Demo</a>
         <a href="terms.html" style="color: #ccc; text-decoration: none; font-size: 13px;">Terms</a>
+        <a href="subprocessors.html" style="color: #ccc; text-decoration: none; font-size: 13px;">Subprocessors</a>
         <a href="/dashboard/login.html" style="color: #ccc; text-decoration: none; font-size: 13px;">Client Login</a>
       </nav>
     </div>
     <h1>F.A.S. Security Overview</h1>
     <p class="subtitle">Forensic Auditing Services — Security & Compliance</p>
-    <p style="color: #999; margin-top: 1rem; font-size: 0.9rem;">ALS Consulting | April 2026</p>
+    <p style="color: #999; margin-top: 1rem; font-size: 0.9rem;">ALS Consulting | Last updated: July 22, 2026</p>
   </header>
 
   <div class="container">
@@ -186,14 +187,14 @@
       <h3>Data at Rest</h3>
       <ul>
         <li><strong>AES-256 encryption</strong> — All candidate data, audit logs, and compliance records encrypted at rest on Supabase (PostgreSQL)</li>
-        <li><strong>Candidate identifiers hashed</strong> before storage — Names, emails, and SSNs never stored in plaintext</li>
-        <li>Database backups encrypted with same AES-256 standard</li>
+        <li><strong>Candidate identifiers hashed</strong> before storage — names and other direct identifiers are not stored in plaintext</li>
+        <li>Database backups encrypted with the same AES-256 standard</li>
       </ul>
 
       <h3>Data in Transit</h3>
       <ul>
         <li><strong>TLS 1.3</strong> — All API calls, webhook payloads, and client-server communication encrypted in transit</li>
-        <li>Enforced HTTPS across all endpoints (Render API, Netlify CDN, Auth0)</li>
+        <li>Enforced HTTPS across all endpoints (Supabase, Netlify)</li>
         <li>No fallback to HTTP; mixed-content requests blocked</li>
       </ul>
 
@@ -207,28 +208,27 @@
       <div class="section-number">2</div>
       <h2>Authentication & Access Control</h2>
 
-      <h3>Role-Based Access Control (RBAC)</h3>
+      <h3>Roles</h3>
       <ul>
-        <li><strong>Auth0 multi-tenant RBAC</strong> — Each organization isolated; no cross-tenant data leakage</li>
-        <li><strong>3 Roles:</strong>
+        <li><strong>Supabase Auth</strong> — organization data is scoped by customer via Row Level Security; reviewer accounts are isolated per organization</li>
+        <li><strong>Role types currently in use:</strong>
           <ul style="margin-top: 0.5rem; margin-left: 2rem;">
-            <li><strong>HR Lead:</strong> Run analyses, view own company's audit results</li>
-            <li><strong>Compliance Officer:</strong> Review all audits, override low/medium risk flags, escalate high-risk</li>
-            <li><strong>Executive Sponsor:</strong> View executive summary + high-risk escalations only (scoped elevation)</li>
+            <li><strong>Admin</strong></li>
+            <li><strong>Compliance Officer</strong></li>
+            <li><strong>Senior Reviewer</strong></li>
+            <li><strong>Viewer</strong></li>
           </ul>
         </li>
-      </ul>
-
-      <h3>Access Elevation & Dual Authorization</h3>
-      <ul>
-        <li><strong>Scoped elevation:</strong> Executives see candidate details only for HIGH-risk rejections requiring their override</li>
-        <li><strong>Dual authorization required:</strong> Baseline configuration changes require sign-off from both Compliance Officer + Executive Sponsor</li>
         <li>All access attempts logged with timestamp, user, and action taken</li>
       </ul>
 
+      <div class="callout">
+        <strong>What We Don't Yet Formalize:</strong> A dual-authorization requirement for configuration changes and scoped elevation for executive-level views are on our roadmap but not yet built or enforced — we're not claiming either as a current control.
+      </div>
+
       <h3>Multi-Factor Authentication (MFA)</h3>
       <div class="success">
-        <strong>Status:</strong> Auth0 supports MFA (TOTP, SMS, push notifications). MFA is available for enterprise clients on request; standard deployments use password + session-based authentication.
+        <strong>Status:</strong> Supabase Auth supports MFA. Current default deployments use password + session-based authentication; MFA enablement is available on request.
       </div>
     </div>
 
@@ -239,13 +239,13 @@
 
       <h3>Anonymization & Hashing</h3>
       <ul>
-        <li><strong>Candidate identifiers hashed before storage</strong> — Internal system uses hashed IDs; plaintext identifiers encrypted and isolated</li>
+        <li><strong>Candidate identifiers hashed before storage</strong> — direct identifiers are not stored in plaintext</li>
         <li>Audit reports display candidate reference numbers, not names (configurable by client preference)</li>
       </ul>
 
       <h3>Retention & Deletion</h3>
       <ul>
-        <li><strong>90-day deletion post-termination:</strong> Audit data auto-deletes after 90 days unless legal hold is requested</li>
+        <li><strong>4-year baseline retention</strong> — matches the sourced policy in <a href="privacy.html" class="contact-email">privacy.html</a> (anchored to California FEHA's 4-year requirement, the current highest binding minimum across our covered jurisdictions)</li>
         <li>Legal holds respected indefinitely</li>
         <li>Clients can request manual deletion at any time (subject to legal requirements)</li>
       </ul>
@@ -254,14 +254,13 @@
       <ul>
         <li><strong>GDPR Article 6 (Lawful Basis):</strong> Processing is legitimate interest + contract</li>
         <li><strong>GDPR Article 21 (Right to Object):</strong> Candidates can request exclusion from future audits</li>
-        <li>Data residency: EU candidate data stored on Supabase EU region (if requested)</li>
         <li>DPA available for enterprise customers</li>
       </ul>
 
       <h3>Audit Trail & Chain of Custody</h3>
       <ul>
         <li>All audit decisions logged with timestamp, user, and reasoning</li>
-        <li>Local encrypted backups maintained for 12 months for regulatory audits</li>
+        <li>Offline encrypted backups maintained for regulatory audits (see Infrastructure, below)</li>
       </ul>
     </div>
 
@@ -281,39 +280,19 @@
         </thead>
         <tbody>
           <tr>
-            <td>API Layer</td>
-            <td>Render (Node.js)</td>
-            <td>Stateless, autoscaling</td>
-          </tr>
-          <tr>
-            <td>Database</td>
+            <td>Database & Auth</td>
             <td>Supabase (PostgreSQL)</td>
-            <td>Encrypted, daily backups, HA failover</td>
+            <td>Encrypted storage, authentication, Row Level Security, daily backups</td>
           </tr>
           <tr>
             <td>CDN & Hosting</td>
             <td>Netlify</td>
-            <td>Edge caching, SSL/TLS termination</td>
-          </tr>
-          <tr>
-            <td>Identity & Auth</td>
-            <td>Auth0</td>
-            <td>Multi-tenant, SSO, RBAC enforcement</td>
-          </tr>
-          <tr>
-            <td>Payments</td>
-            <td>Stripe</td>
-            <td>PCI-DSS Level 1, tokenization only</td>
-          </tr>
-          <tr>
-            <td>Notifications</td>
-            <td>Resend</td>
-            <td>SMTP delivery, TLS encryption</td>
+            <td>Edge caching, SSL/TLS termination, static hosting</td>
           </tr>
           <tr>
             <td>Audit Engine</td>
-            <td>Anthropic (Claude API)</td>
-            <td>Structured classification for 7-lane forensic analysis</td>
+            <td>ALS Consulting proprietary code (`math/impactAnalysis.js`)</td>
+            <td>Deterministic 4/5ths rule + Z-score disparate impact math — no LLM involved</td>
           </tr>
           <tr>
             <td>Source Control</td>
@@ -323,38 +302,24 @@
         </tbody>
       </table>
 
-      <h3>Database Access & API Security</h3>
+      <div class="callout">
+        <strong>Anthropic (Claude API):</strong> planned, not yet deployed — see the full disclosure on <a href="subprocessors.html" class="contact-email">subprocessors.html</a>. It is not part of the live architecture table above because it is not currently processing any data.
+      </div>
+
+      <h3>Database & API Security</h3>
       <ul>
-        <li><strong>No direct public database access</strong> — All queries routed through authenticated Render API with tenant verification</li>
-        <li><strong>Webhook endpoint validation:</strong> Valid API key + tenant signature (HMAC-SHA256)</li>
-        <li><strong>Rate limiting:</strong> Burst 100 req/sec; sustained 1000 req/hour</li>
+        <li><strong>No direct public database access</strong> — access governed by Supabase Row Level Security policies, scoped per customer</li>
+        <li><strong>Webhook endpoint validation:</strong> API key resolved server-side against the customer record before any write is accepted</li>
         <li>SQL injection protection via parameterized queries</li>
       </ul>
 
-      <h3>Network Security</h3>
-      <ul>
-        <li>All inbound traffic routed through Netlify edge with bot detection</li>
-        <li>Outbound requests from Render use fixed IP ranges (Stripe, Resend, Auth0 whitelists)</li>
-        <li>VPC isolation: Internal services do not expose ports to public internet</li>
-      </ul>
+      <div class="callout">
+        <strong>What We Don't Yet Formalize:</strong> Specific rate-limiting thresholds and HMAC payload signing are not yet implemented or verified — not claimed as current controls.
+      </div>
 
       <h3>Offline Backups & Chain of Custody</h3>
       <div class="callout">
-        <strong>Offline Backup:</strong> ALS Consulting maintains AES-256 encrypted local backups of immutable audit trails and decision logs at our Winston-Salem, NC facility. Provides physical custody for chain-of-custody requirements and disaster recovery independent of cloud providers. Retrieval requires dual authorization.
-      </div>
-
-      <h3>Anthropic Claude API — Disclosure & Data Handling</h3>
-      <div class="callout">
-        <strong>Anthropic (Claude API) Disclosure:</strong>
-        <ul style="margin-top: 0.75rem; font-style: normal;">
-          <li>F.A.S. uses Anthropic's Claude API as a structured classification engine — not a generative decision-maker</li>
-          <li>The 7 compliance lanes are deterministic rule-based frameworks with fixed thresholds</li>
-          <li>Claude API parses rejection payloads and maps them to pre-defined categories</li>
-          <li>Final risk score, blocking decision, and escalation logic are determined by ALS Consulting's proprietary code</li>
-          <li>All Claude outputs are advisory; every flagged decision requires human review by a compliance officer before it binds</li>
-          <li>API inputs are processed in real-time and not retained by Anthropic beyond the session</li>
-          <li>ALS Consulting is actively negotiating a Data Processing Agreement (DPA) with Anthropic</li>
-        </ul>
+        <strong>Offline Backup:</strong> ALS Consulting maintains AES-256 encrypted local backups of audit trails and decision logs at our Winston-Salem, NC facility, per <a href="subprocessors.html" class="contact-email">subprocessors.html</a>'s subprocessor table. Provides physical custody for chain-of-custody requirements and disaster recovery independent of cloud providers. Retrieval requires dual authorization.
       </div>
     </div>
 
@@ -365,22 +330,18 @@
 
       <h3>Subprocessor Compliance & Certifications</h3>
       <div class="success">
-        <strong>Subprocessor Compliance:</strong> Core infrastructure subprocessors maintain current SOC 2 Type II or equivalent certification where applicable:
+        <strong>Subprocessor Compliance:</strong> matches the current, dated subprocessor table in <a href="subprocessors.html" class="contact-email">subprocessors.html</a> — the single source of truth for our active subprocessors:
         <ul style="margin-top: 0.75rem;">
-          <li><strong>Supabase</strong> — SOC 2 Type II (database, backups, infrastructure)</li>
-          <li><strong>Render</strong> — SOC 2 Type II (application hosting, compute)</li>
+          <li><strong>Supabase</strong> — SOC 2 Type II (database, auth, backups, infrastructure)</li>
           <li><strong>Netlify</strong> — SOC 2 Type II (CDN, hosting)</li>
-          <li><strong>Auth0</strong> — SOC 2 Type II (identity, authentication)</li>
-          <li><strong>Stripe</strong> — PCI-DSS Level 1 (payment processing)</li>
-          <li><strong>Resend</strong> — TLS 1.3 encryption (email notifications)</li>
           <li><strong>GitHub</strong> — SOC 2 Type II (source control, no candidate data)</li>
-          <li><strong>Anthropic</strong> — Structured classification engine. API inputs processed in real-time, not retained beyond session. DPA in negotiation.</li>
+          <li><strong>Anthropic</strong> — planned component, not yet active; no certification claim while it remains undeployed</li>
         </ul>
       </div>
 
       <h3>ALS Consulting Security Posture</h3>
       <div class="callout">
-        <strong>Current Status:</strong> ALS Consulting is preparing for SOC 2 Type I assessment in Q3 2026. We do not yet hold SOC 2 certification.
+        <strong>Current Status:</strong> ALS Consulting is preparing for a SOC 2 Type I assessment in Q3 2026. We do not yet hold SOC 2 certification ourselves.
       </div>
 
       <h3>Enterprise Audit Support</h3>
@@ -388,7 +349,6 @@
         <li>Subprocessor SOC 2 Type II reports available upon request</li>
         <li>DPA available for enterprise contracts</li>
         <li>Security questionnaires responded to within 5 business days</li>
-        <li>Penetration testing planned for Q3 2026</li>
       </ul>
 
       <h3>Regulatory Alignment</h3>
@@ -407,7 +367,7 @@
 
       <h3>Detection & Containment</h3>
       <ul>
-        <li><strong>Continuous monitoring:</strong> Render, Supabase, and Auth0 configured with real-time alerts</li>
+        <li><strong>Continuous monitoring:</strong> Supabase configured with real-time alerts</li>
         <li><strong>Incident classification:</strong> Low / Medium / High</li>
         <li><strong>High-severity containment:</strong> Isolate systems, preserve logs, revoke credentials, block endpoints</li>
       </ul>
@@ -422,7 +382,7 @@
       <h3>Remediation & Recovery</h3>
       <ul>
         <li>Full forensic review post-incident</li>
-        <li>Public incident summary within 5 business days (if impact >50 users)</li>
+        <li>Public incident summary within 5 business days (if impact affects &gt;50 users)</li>
         <li>Remediation status shared bi-weekly until resolved</li>
       </ul>
 
@@ -462,12 +422,11 @@
   <footer>
     <h3>Security & Compliance Statement</h3>
     <p>F.A.S. is built with enterprise security standards in mind.</p>
-    <p>We prioritize honest communication over inflated claims. This document reflects our current posture, roadmap, and commitments.</p>
+    <p>We prioritize honest communication over inflated claims. This document reflects our current posture, roadmap, and commitments — and is kept in sync with <a href="subprocessors.html" class="contact-email">subprocessors.html</a>, the source of truth for active subprocessors.</p>
     <p style="margin-top: 1.5rem; font-size: 0.9rem;">
       ALS Consulting | <a href="mailto:algorithmicbiasaudits@gmail.com" class="contact-email">algorithmicbiasaudits@gmail.com</a>
     </p>
-    <p style="margin-top: 1.5rem; font-size: 0.95rem; color: #ccc; font-style: italic;">F.A.S. is built on the same production infrastructure trusted by millions of businesses worldwide.</p>
-    <p style="margin-top: 1rem; color: #666; font-size: 0.85rem;">Last updated: April 2026 | Version 1.0</p>
+    <p style="margin-top: 1rem; color: #666; font-size: 0.85rem;">Last updated: July 22, 2026 | Version 2.0</p>
   </footer>
 
 </body>
