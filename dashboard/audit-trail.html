@@ -8,8 +8,62 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
+    <style>
+      :root {
+        --navy: #0a1628; --gold: #b8872e; --gold-light: #d4a040; --gold-bg: rgba(184,135,46,0.08);
+        --white: #ffffff; --text-primary: #1e293b; --text-secondary: #475569;
+        --text-muted: #64748b; --text-dim: #94a3b8; --border: #e2e8f0;
+        --bg-page: #f8fafc; --bg-sidebar: #ffffff;
+      }
+      .topnav { position: fixed; top: 0; left: 0; right: 0; height: 56px; background: var(--white); border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; padding: 0 24px; z-index: 100; }
+      .topnav-left { display: flex; align-items: center; gap: 12px; }
+      .logo { font-size: 18px; font-weight: 700; color: var(--navy); letter-spacing: -0.5px; }
+      .topnav-divider { color: var(--text-dim); font-weight: 300; }
+      .topnav-title { font-size: 14px; font-weight: 500; color: var(--text-secondary); }
+      .topnav-right { display: flex; align-items: center; gap: 12px; }
+      .user-name { font-size: 13px; color: var(--text-secondary); }
+      .role-badge { font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; padding: 3px 10px; border-radius: 100px; background: var(--gold-bg); color: var(--gold); border: 1px solid rgba(184,135,46,0.15); }
+      .sidebar { position: fixed; top: 56px; left: 0; bottom: 0; width: 220px; background: var(--bg-sidebar); border-right: 1px solid var(--border); padding: 16px 0; overflow-y: auto; z-index: 90; }
+      .sidebar-section-label { font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-dim); padding: 16px 20px 8px; }
+      .sidebar-link { display: flex; align-items: center; gap: 10px; padding: 10px 16px; margin: 2px 12px; border-radius: 6px; font-size: 13px; color: var(--text-secondary); text-decoration: none; transition: all 0.15s ease; }
+      .sidebar-link:hover { background: var(--bg-page); color: var(--text-primary); }
+      .sidebar-link.active { background: var(--gold-bg); color: var(--gold); font-weight: 600; border-left: 3px solid var(--gold); padding-left: 13px; margin-left: 9px; }
+      .sidebar-link .icon { font-size: 16px; width: 20px; text-align: center; }
+      .main-content { margin-left: 220px; margin-top: 56px; }
+      @media (max-width: 768px) {
+        .sidebar { display: none; }
+        .main-content { margin-left: 0; }
+      }
+    </style>
 </head>
 <body class="bg-gray-50 text-gray-900 font-sans antialiased min-h-screen">
+
+<nav class="topnav">
+  <div class="topnav-left">
+    <span class="logo">FAS</span>
+    <span class="topnav-divider">|</span>
+    <span class="topnav-title">Audit Trail</span>
+  </div>
+  <div class="topnav-right">
+    <span class="user-name" id="userName">—</span>
+    <span class="role-badge" id="userRole">—</span>
+  </div>
+</nav>
+
+<aside class="sidebar">
+  <div class="sidebar-section-label">MAIN</div>
+  <a href="main.html" class="sidebar-link"><span class="icon">📊</span> Dashboard</a>
+  <a href="rejections.html" class="sidebar-link"><span class="icon">🚨</span> Rejections</a>
+  <a href="reports.html" class="sidebar-link"><span class="icon">📋</span> Reports</a>
+  <div class="sidebar-section-label">COMPLIANCE</div>
+  <a href="audit-trail.html" class="sidebar-link active"><span class="icon">🔒</span> Audit Trail</a>
+  <a href="reviewers.html" class="sidebar-link"><span class="icon">👥</span> Reviewers</a>
+  <div class="sidebar-section-label">SYSTEM</div>
+  <a href="settings.html" class="sidebar-link"><span class="icon">⚙️</span> Settings</a>
+  <a href="it-setup-docs.html" class="sidebar-link"><span class="icon">📄</span> IT Setup Docs</a>
+</aside>
+
+<main class="main-content">
 
     <div id="connectionErrorBanner" class="hidden bg-red-600 text-white px-4 py-3 text-center text-sm font-medium sticky top-0 z-50 shadow-md">
         <span class="flex items-center justify-center gap-2">
@@ -121,6 +175,8 @@
 
     </div>
 
+</main>
+
     <script type="module">
         import { analyze, buildDemographicMatrix } from '../math/impactAnalysis.js';
 
@@ -156,6 +212,9 @@
                     window.location.href = 'login.html';
                     return;
                 }
+
+                document.getElementById('userName').textContent = session.user.user_metadata?.name || session.user.email;
+                document.getElementById('userRole').textContent = session.user.user_metadata?.role || 'Reviewer';
 
                 const { data: userRow, error: userError } = await supabaseClient
                     .from('users')
