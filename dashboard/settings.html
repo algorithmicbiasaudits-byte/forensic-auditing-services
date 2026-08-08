@@ -429,6 +429,7 @@
       <a class="settings-nav-item active" onclick="scrollTo('section-contractor')">🏛️ Federal Contractor</a>
       <a class="settings-nav-item" onclick="scrollTo('section-jurisdictions')">⚖️ Jurisdictions</a>
       <a class="settings-nav-item" onclick="scrollTo('section-alerts')">🔔 Alerts</a>
+      <a class="settings-nav-item" onclick="scrollTo('section-sla')">⏱ Review SLA</a>
     </div>
 
     <div class="settings-sections">
@@ -629,6 +630,42 @@
         </div>
       </div>
 
+      <div class="settings-section" id="section-sla">
+        <div class="section-header">
+          <div>
+            <div class="section-title">⏱ Review SLA</div>
+            <div class="section-subtitle">How long a flagged rejection can sit before it needs attention. F.A.S. never finalizes a decision automatically — a case that exceeds the escalation threshold is surfaced to your Admin/Compliance Officer for human review, not decided by the system.</div>
+          </div>
+        </div>
+        <div class="section-body">
+
+          <div class="setting-row">
+            <div>
+              <div class="setting-label">Review Target</div>
+              <div class="setting-desc">Informational goal for how quickly reviewers should act on a new flagged rejection. Not enforced — no action is taken automatically at this threshold.</div>
+            </div>
+            <div style="width:160px; flex-shrink:0;">
+              <input type="number" min="1" class="input-field mono" id="sla-review-hours" placeholder="24"> hours
+            </div>
+          </div>
+
+          <div class="setting-row">
+            <div>
+              <div class="setting-label">Escalation Threshold</div>
+              <div class="setting-desc">If a rejection is still unreviewed past this many hours, F.A.S. notifies your Admin and Compliance Officer roles so a human can act. Checked hourly.</div>
+            </div>
+            <div style="width:160px; flex-shrink:0;">
+              <input type="number" min="1" class="input-field mono" id="sla-escalation-hours" placeholder="72"> hours
+            </div>
+          </div>
+
+        </div>
+        <div class="save-bar">
+          <button class="btn-outline" onclick="resetSection('sla')">Reset</button>
+          <button class="btn-primary" onclick="saveSection('sla')">Save SLA Settings</button>
+        </div>
+      </div>
+
     </div><!-- end settings-sections -->
   </div><!-- end settings-layout -->
 
@@ -663,8 +700,12 @@
     if (userRow) {
       currentCustomerId = userRow.customer_id;
       const { data: customer } = await supabaseClient
-        .from('customers').select('company_name').eq('customer_id', currentCustomerId).single();
-      if (customer) document.getElementById('org-name').textContent = customer.company_name;
+        .from('customers').select('company_name, review_sla_hours, escalation_sla_hours').eq('customer_id', currentCustomerId).single();
+      if (customer) {
+        document.getElementById('org-name').textContent = customer.company_name;
+        document.getElementById('sla-review-hours').value = customer.review_sla_hours ?? '';
+        document.getElementById('sla-escalation-hours').value = customer.escalation_sla_hours ?? '';
+      }
     }
 
     await loadSettings();
@@ -754,6 +795,20 @@
   }
 
   async function saveSection(section) {
+    if (section === 'sla') {
+      const reviewHours = document.getElementById('sla-review-hours').value;
+      const escalationHours = document.getElementById('sla-escalation-hours').value;
+      const { error } = await supabaseClient
+        .from('customers')
+        .update({
+          review_sla_hours: reviewHours ? Number(reviewHours) : null,
+          escalation_sla_hours: escalationHours ? Number(escalationHours) : null,
+        })
+        .eq('customer_id', currentCustomerId);
+      showToast(error ? '✗ Save failed — ' + error.message : '✓ SLA settings saved');
+      return;
+    }
+
     let payload = {};
 
     if (section === 'contractor') {

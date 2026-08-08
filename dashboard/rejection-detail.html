@@ -505,6 +505,12 @@
         </div>
       </div>
 
+      <!-- Review target (informational only, no auto-action) -->
+      <div class="left-section" id="reviewTargetSection" style="display:none;">
+        <div class="left-section-label">Review Target</div>
+        <div style="font-size:12px;color:var(--text-secondary);padding:4px 0;" id="reviewTargetText"></div>
+      </div>
+
       <!-- Flag summary list -->
       <div class="left-section">
         <div class="left-section-label">Flags — click to review</div>
@@ -718,6 +724,8 @@
   let currentCustomerPlan  = null;
   let currentUserRole      = null;
   let hasOverrideAccess    = false;
+  let currentReviewSlaHours = null;
+  const DEFAULT_REVIEW_SLA_HOURS = 24;
 
   let candidateId        = null; // from ?id=
   let currentRejectionId  = null; // real rejections.rejection_id (bigint)
@@ -783,8 +791,9 @@
     hasOverrideAccess    = ['admin', 'compliance_officer'].includes(currentUserRole);
 
     const { data: customerRow } = await supabaseClient
-      .from('customers').select('plan').eq('customer_id', currentCustomerId).single();
+      .from('customers').select('plan, review_sla_hours').eq('customer_id', currentCustomerId).single();
     currentCustomerPlan = customerRow?.plan || null;
+    currentReviewSlaHours = customerRow?.review_sla_hours ?? DEFAULT_REVIEW_SLA_HOURS;
 
     const { data: rejection, error: rejError } = await supabaseClient
       .from('rejections')
@@ -815,6 +824,7 @@
     activeFlagId = (FLAGS.find(f => f.severity === 'critical') || FLAGS[0])?.id || null;
 
     renderRecord();
+    if (!override) renderReviewTarget();
 
     if (currentCustomerPlan === 'auditing_only') applyRestrictedState();
     else if (!hasOverrideAccess) applyDraftOnlyState();
@@ -827,6 +837,20 @@
 
     await loadDraft();
     startDraftAutosave();
+  }
+
+  // Purely informational — no countdown, no auto-action. Replaces the
+  // removed fake auto-finalize timer per Aisha's explicit direction that
+  // the system must never make this decision itself.
+  function renderReviewTarget() {
+    if (!currentRecord?.created_at || !currentReviewSlaHours) return;
+    const dueAt = new Date(new Date(currentRecord.created_at).getTime() + currentReviewSlaHours * 60 * 60 * 1000);
+    const overdue = dueAt.getTime() < Date.now();
+    const section = document.getElementById('reviewTargetSection');
+    const text = document.getElementById('reviewTargetText');
+    text.textContent = (overdue ? 'Past target — ' : 'Due by ') + dueAt.toLocaleString();
+    text.style.color = overdue ? 'var(--danger)' : 'var(--text-secondary)';
+    section.style.display = 'block';
   }
 
   function renderRecord() {

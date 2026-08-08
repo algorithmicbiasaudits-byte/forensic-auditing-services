@@ -590,7 +590,7 @@
     const { data, error } = await supabaseClient
       .from('rejections')
       .select(`
-        rejection_id, candidate_id, job_id, job_title, ats_source, created_at,
+        rejection_id, candidate_id, job_id, job_title, ats_source, created_at, escalated_at,
         audits ( audit_id, risk_level, employment_gap_flagged, keyword_mismatch_flagged, proxy_discrimination_detected, disparate_impact_detected, legal_trigger_flagged, audit_timestamp, claude_output ),
         overrides ( override_id, decision, reviewed_timestamp, justification_comment )
       `)
@@ -680,11 +680,15 @@
   function caseCardHtml(c) {
     const risk = c.audit?.risk_level || null;
     const riskBadge = risk ? `<span class="badge badge-risk-${risk}">${risk.charAt(0).toUpperCase() + risk.slice(1)} Risk</span>` : '';
-    const timerClass = risk === 'red' ? 'badge-timer-critical' : (risk === 'orange' || risk === 'yellow') ? 'badge-timer-warning' : 'badge-timer-normal';
-    const cardClass = c.override ? 'reviewed-case' : (risk === 'red' ? 'escalated' : 'active-case');
+    const isEscalated = !c.override && !!c.escalated_at;
+    const escalatedBadge = isEscalated ? `<span class="badge badge-status-escalated">⏱ Escalated — awaiting Admin/Compliance Officer</span>` : '';
+    const timerClass = isEscalated ? 'badge-timer-critical' : risk === 'red' ? 'badge-timer-critical' : (risk === 'orange' || risk === 'yellow') ? 'badge-timer-warning' : 'badge-timer-normal';
+    const cardClass = c.override ? 'reviewed-case' : (isEscalated || risk === 'red' ? 'escalated' : 'active-case');
     const statusFooter = c.override
       ? `Decision: <strong>${DECISION_LABELS[c.override.decision] || c.override.decision}</strong> · ${new Date(c.override.reviewed_timestamp).toLocaleString()}`
-      : 'Pending review';
+      : isEscalated
+        ? `Escalated <strong>${new Date(c.escalated_at).toLocaleString()}</strong> — SLA exceeded with no reviewer action`
+        : 'Pending review';
 
     return `
       <div class="case-card ${cardClass}" data-case="${c.candidate_id}">
@@ -692,6 +696,7 @@
           <div class="case-header-left">
             <span class="case-id">${c.candidate_id}</span>
             ${riskBadge}
+            ${escalatedBadge}
           </div>
           <div class="case-header-right">
             ${c.audit ? `<span class="badge ${timerClass}">⏱ ${timeSince(c.audit.audit_timestamp)} since audit</span>` : ''}
@@ -718,7 +723,8 @@
   }
 
   function renderQueue(cases) {
-    const needsReview = cases.filter(c => !c.override);
+    const needsReview = cases.filter(c => !c.override)
+      .sort((a, b) => (b.escalated_at ? 1 : 0) - (a.escalated_at ? 1 : 0));
     const reviewed = cases.filter(c => c.override);
 
     document.getElementById('needsReviewCount').textContent = `${needsReview.length} case${needsReview.length === 1 ? '' : 's'}`;
