@@ -435,19 +435,6 @@
   </div>
 </nav>
 
-<!-- ── LIVE BANNER ── -->
-<div class="live-banner" id="liveBanner">
-  <div class="live-banner__left">
-    <span class="live-badge">● Live Interception</span>
-    <span class="live-timer" id="countdown">3.0s</span>
-    <span style="font-size:12px;color:var(--text-secondary);">remaining — submit your decision before the window closes</span>
-  </div>
-  <div class="live-banner__actions">
-    <button class="btn btn-sm btn-secondary" onclick="requestExtension()">⏸ Request 30s Extension</button>
-    <button class="btn btn-sm btn-danger-sm" onclick="forceFinalize()">⚠ Force Finalize</button>
-  </div>
-</div>
-
 <!-- ── SIDEBAR ── -->
 <aside class="sidebar">
   <div class="sidebar-section-label">MAIN</div>
@@ -465,7 +452,7 @@
 <!-- ══════════════════════════════════════
      MAIN CONTENT
 ══════════════════════════════════════ -->
-<main class="main-content has-banner" id="mainContent">
+<main class="main-content" id="mainContent">
 
   <!-- Breadcrumb bar -->
   <div class="breadcrumb-bar">
@@ -514,19 +501,6 @@
               <div class="cand-meta-text" id="candAuditTime">—</div>
               <div class="cand-meta-sub" id="candAtsReason">ATS reason: —</div>
             </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Timer widget -->
-      <div class="left-section" id="timerSection">
-        <div class="left-section-label">Review Window</div>
-        <div class="timer-widget">
-          <div class="timer-big" id="timerBig">3.0s</div>
-          <div class="timer-label">remaining before auto-finalize</div>
-          <div class="timer-actions">
-            <button class="btn btn-sm btn-secondary" onclick="requestExtension()">⏸ +30s</button>
-            <button class="btn btn-sm btn-danger-sm" onclick="forceFinalize()">⚠ Force</button>
           </div>
         </div>
       </div>
@@ -712,15 +686,6 @@
   </div>
 </div>
 
-<!-- ── MODE TOGGLE (demo) ── -->
-<div class="mode-toggle">
-  <div class="mode-toggle-label">Demo Mode</div>
-  <div class="mode-btns">
-    <button class="btn-mode active" id="liveModeBtn" onclick="setMode('live')">Live</button>
-    <button class="btn-mode" id="postHocModeBtn" onclick="setMode('posthoc')">Post-Hoc</button>
-  </div>
-</div>
-
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
   const { createClient } = supabase;
@@ -731,7 +696,6 @@
 
   const FAS_CONFIG = {
     mode: 'demo',
-    reviewWindow: 3.0,
     upgradeAlertEndpoint: 'https://znjvjofsfvxccmidfpgy.supabase.co/functions/v1/upgrade-request'
   };
 
@@ -745,9 +709,6 @@
 
   const DECISION_LABELS = { approved: 'Approved', escalated: 'Escalated', confirmed: 'Confirmed' };
 
-  let currentMode       = 'live';
-  let timeRemaining     = FAS_CONFIG.reviewWindow;
-  let countdownInterval = null;
   let selectedAction    = null;
   let decisionSubmitted = false;
   let currentUserId       = null; // auth uuid
@@ -755,6 +716,8 @@
   let currentUserName   = '—';
   let currentCustomerId    = null;
   let currentCustomerPlan  = null;
+  let currentUserRole      = null;
+  let hasOverrideAccess    = false;
 
   let candidateId        = null; // from ?id=
   let currentRejectionId  = null; // real rejections.rejection_id (bigint)
@@ -794,8 +757,6 @@
     document.querySelector('.audit-trail-card').style.display = 'none';
     document.querySelector('.tech-details').style.display = 'none';
     document.getElementById('decisionPane').style.display = 'none';
-    document.getElementById('liveBanner').style.display = 'none';
-    document.getElementById('timerSection').style.display = 'none';
   }
 
   // ════════════════════════════════════════
@@ -814,10 +775,12 @@
     if (!candidateId) { showRecordError('No record specified — missing ?id= parameter.'); return; }
 
     const { data: userRow, error: userError } = await supabaseClient
-      .from('users').select('user_id, customer_id').eq('auth_id', currentUserId).single();
+      .from('users').select('user_id, customer_id, role').eq('auth_id', currentUserId).single();
     if (userError || !userRow) { showRecordError('Could not resolve your organization — customer_id lookup failed.'); return; }
     currentUserRecordId = userRow.user_id;
     currentCustomerId   = userRow.customer_id;
+    currentUserRole      = userRow.role || null;
+    hasOverrideAccess    = ['admin', 'compliance_officer'].includes(currentUserRole);
 
     const { data: customerRow } = await supabaseClient
       .from('customers').select('plan').eq('customer_id', currentCustomerId).single();
@@ -854,19 +817,16 @@
     renderRecord();
 
     if (currentCustomerPlan === 'auditing_only') applyRestrictedState();
+    else if (!hasOverrideAccess) applyDraftOnlyState();
 
     if (override) {
       decisionSubmitted = true;
-      clearInterval(countdownInterval);
-      document.getElementById('liveBanner').style.display = 'none';
-      document.getElementById('timerSection').style.display = 'none';
       renderFinalizedState(DECISION_LABELS[override.decision] || override.decision, override.reviewed_timestamp, false);
       return;
     }
 
     await loadDraft();
     startDraftAutosave();
-    startCountdown();
   }
 
   function renderRecord() {
@@ -954,6 +914,18 @@
     submitBtn.onclick = openUpgradeModal;
 
     showExposureBanner();
+  }
+
+  function applyDraftOnlyState() {
+    showDraftOnlyBanner();
+  }
+
+  function showDraftOnlyBanner() {
+    const banner = document.createElement('div');
+    banner.id = 'draftOnlyBanner';
+    banner.style.cssText = 'position:sticky;top:0;z-index:50;background:#eff6ff;border-left:4px solid #3b82f6;padding:12px 16px;font-size:13px;font-weight:600;color:#1e3a8a;';
+    banner.textContent = 'Your role can draft a decision but cannot finalize it — override authority is limited to Admin and Compliance Officer roles on this account.';
+    (document.querySelector('.evidence-panel')?.parentElement ?? document.body).prepend(banner);
   }
 
   function showExposureBanner() {
@@ -1055,55 +1027,6 @@
   }
 
   // ════════════════════════════════════════
-  // COUNTDOWN (review window)
-  // ════════════════════════════════════════
-  function startCountdown() {
-    if (countdownInterval) clearInterval(countdownInterval);
-    countdownInterval = setInterval(() => {
-      timeRemaining -= 0.1;
-      if (timeRemaining <= 0) { timeRemaining = 0; clearInterval(countdownInterval); autoFinalize(); }
-      updateCountdownDisplay();
-    }, 100);
-  }
-
-  function updateCountdownDisplay() {
-    const val = Math.max(0, timeRemaining).toFixed(1) + 's';
-    document.getElementById('countdown').textContent = val;
-    document.getElementById('timerBig').textContent  = val;
-    const crit = timeRemaining <= 1.0;
-    document.getElementById('liveBanner').classList.toggle('critical', crit);
-    document.getElementById('timerBig').classList.toggle('critical', crit);
-  }
-
-  function autoFinalize() {
-    if (decisionSubmitted) return;
-    showToast('⏱ Time expired — rejection automatically finalized and logged.', false);
-    const btn = document.getElementById('submitBtn');
-    btn.disabled     = true;
-    btn.textContent  = 'Window Closed';
-    logAudit('Review window expired — auto-finalized');
-  }
-
-  function requestExtension() {
-    const reason = prompt('Reason for extension (required for audit trail):');
-    if (reason?.trim()) {
-      timeRemaining += 30;
-      updateCountdownDisplay();
-      startCountdown();
-      logAudit('Extension requested: ' + reason.substring(0, 50));
-    }
-  }
-
-  function forceFinalize() {
-    if (confirm('⚠ Force-finalize the rejection immediately? This is irreversible and will be logged.')) {
-      timeRemaining = 0;
-      clearInterval(countdownInterval);
-      updateCountdownDisplay();
-      autoFinalize();
-    }
-  }
-
-  // ════════════════════════════════════════
   // TAG PILLS
   // ════════════════════════════════════════
   function toggleTag(pill, tagId) {
@@ -1147,6 +1070,11 @@
     const btn  = document.getElementById('submitBtn');
     const hint = document.getElementById('submitHint');
     if (decisionSubmitted) { btn.disabled = true; return; }
+    if (!hasOverrideAccess) {
+      hint.textContent = 'Draft only — finalizing requires Admin or Compliance Officer access';
+      btn.disabled = true;
+      return;
+    }
     if (!selectedAction) {
       hint.textContent = 'Select a decision above, then review and finalize';
       btn.disabled = true;
@@ -1225,6 +1153,10 @@
   // FINALIZATION MODAL
   // ════════════════════════════════════════
   function openFinalizeModal() {
+    if (!hasOverrideAccess) {
+      showToast('Your role can draft a decision but cannot finalize it.', false);
+      return;
+    }
     if (!selectedAction || decisionSubmitted) return;
     const justification = document.getElementById('justificationText').value.trim();
     if (selectedAction !== 'confirm' && justification.length < 10) {
@@ -1404,25 +1336,6 @@
     entry.className = 'audit-entry';
     entry.innerHTML = `<span class="audit-time">${time}</span><span class="audit-action"><strong>${escapeHtml(currentUserName)}</strong> — ${action}</span>`;
     log.insertBefore(entry, log.firstChild);
-  }
-
-  function setMode(mode) {
-    currentMode = mode;
-    const banner = document.getElementById('liveBanner');
-    const main   = document.getElementById('mainContent');
-    document.getElementById('liveModeBtn').classList.toggle('active',    mode === 'live');
-    document.getElementById('postHocModeBtn').classList.toggle('active', mode === 'posthoc');
-    if (mode === 'live') {
-      banner.style.display = 'flex';
-      main.classList.add('has-banner');
-      timeRemaining = FAS_CONFIG.reviewWindow;
-      startCountdown();
-    } else {
-      banner.style.display = 'none';
-      main.classList.remove('has-banner');
-      clearInterval(countdownInterval);
-      document.getElementById('timerSection').style.display = 'none';
-    }
   }
 
   document.addEventListener('DOMContentLoaded', init);
