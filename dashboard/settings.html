@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>F.A.S. Dashboard — Settings</title>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="jurisdictions.js"></script>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
 
@@ -546,144 +547,8 @@
         </div>
         <div class="section-body">
 
-          <div class="jurisdiction-list">
-
-            <!-- UGESP — always on -->
-            <div class="jurisdiction-row">
-              <div class="j-info">
-                <div class="j-emoji">⚖️</div>
-                <div>
-                  <div class="j-name">EEOC UGESP</div>
-                  <div class="j-citation">29 C.F.R. Part 1607 — Uniform Guidelines on Employee Selection Procedures</div>
-                  <div class="j-note">4/5ths rule · job-relatedness · 2-year applicant flow retention</div>
-                </div>
-              </div>
-              <div class="j-controls">
-                <span class="j-status-badge active">● ACTIVE</span>
-                <span class="j-always-on">Always on</span>
-              </div>
-            </div>
-
-            <!-- NYC LL144 -->
-            <div class="jurisdiction-row">
-              <div class="j-info">
-                <div class="j-emoji">🗽</div>
-                <div>
-                  <div class="j-name">NYC Local Law 144</div>
-                  <div class="j-citation">NYC Admin. Code §20-870 — Automated Employment Decision Tools</div>
-                  <div class="j-note">Annual bias audit · 10-day candidate notice · $500–$1,500/day penalty</div>
-                </div>
-              </div>
-              <div class="j-controls">
-                <span class="j-status-badge active">● ACTIVE</span>
-                <label class="toggle">
-                  <input type="checkbox" id="j-nycll144" checked>
-                  <div class="toggle-track"></div>
-                  <div class="toggle-thumb"></div>
-                </label>
-              </div>
-            </div>
-
-            <!-- CO SB 189 -->
-            <div class="jurisdiction-row">
-              <div class="j-info">
-                <div class="j-emoji">🏔️</div>
-                <div>
-                  <div class="j-name">Colorado SB 189</div>
-                  <div class="j-citation">C.R.S. §6-1-1801 et seq. — ADMT Act (replaces SB 205)</div>
-                  <div class="j-note">Signed May 14, 2026 · Effective Jan 1, 2027 · Pre-use notice + 30-day disclosure · SB 205 NEVER takes effect</div>
-                </div>
-              </div>
-              <div class="j-controls">
-                <span class="j-status-badge delayed">⚠ JAN 2027</span>
-                <label class="toggle">
-                  <input type="checkbox" id="j-cosb189" checked>
-                  <div class="toggle-track"></div>
-                  <div class="toggle-thumb"></div>
-                </label>
-              </div>
-            </div>
-
-            <!-- IL HB 3773 -->
-            <div class="jurisdiction-row">
-              <div class="j-info">
-                <div class="j-emoji">🌾</div>
-                <div>
-                  <div class="j-name">Illinois HB 3773</div>
-                  <div class="j-citation">Pub. Act 103-0795 — AI Video Interview Act (expanded)</div>
-                  <div class="j-note">Active Jan 1, 2026 · Strict liability · Zip code proxy ban · 4-year retention</div>
-                </div>
-              </div>
-              <div class="j-controls">
-                <span class="j-status-badge active">● ACTIVE</span>
-                <label class="toggle">
-                  <input type="checkbox" id="j-ilhb3773" checked>
-                  <div class="toggle-track"></div>
-                  <div class="toggle-thumb"></div>
-                </label>
-              </div>
-            </div>
-
-            <!-- CA AB-1018 -->
-            <div class="jurisdiction-row">
-              <div class="j-info">
-                <div class="j-emoji">🌉</div>
-                <div>
-                  <div class="j-name">California AB-1018</div>
-                  <div class="j-citation">AB-1018 (2025) — Automated Decision Systems Accountability Act</div>
-                  <div class="j-note">Effective Jan 1, 2027 · Bias impact assessment · Human appeal mechanism · 4-year retention</div>
-                </div>
-              </div>
-              <div class="j-controls">
-                <span class="j-status-badge building">◑ BUILDING</span>
-                <label class="toggle">
-                  <input type="checkbox" id="j-caab1018">
-                  <div class="toggle-track"></div>
-                  <div class="toggle-thumb"></div>
-                </label>
-              </div>
-            </div>
-
-            <!-- OFCCP -->
-            <div class="jurisdiction-row">
-              <div class="j-info">
-                <div class="j-emoji">🏛️</div>
-                <div>
-                  <div class="j-name">OFCCP</div>
-                  <div class="j-citation">41 C.F.R. Parts 60-1, 60-300, 60-741 — Federal Contractor Compliance</div>
-                  <div class="j-note">Federal contractors only · AAP · VEVRAA 5.1% benchmark · Internet Applicant Rule</div>
-                </div>
-              </div>
-              <div class="j-controls">
-                <span class="j-status-badge active">● ACTIVE</span>
-                <label class="toggle">
-                  <input type="checkbox" id="j-ofccp">
-                  <div class="toggle-track"></div>
-                  <div class="toggle-thumb"></div>
-                </label>
-              </div>
-            </div>
-
-            <!-- EU AI Act -->
-            <div class="jurisdiction-row">
-              <div class="j-info">
-                <div class="j-emoji">🇪🇺</div>
-                <div>
-                  <div class="j-name">EU AI Act</div>
-                  <div class="j-citation">Regulation (EU) 2024/1689 — High-Risk Employment AI</div>
-                  <div class="j-note">High-risk employment AI effective Aug 2, 2026 · Conformity assessment · Up to €35M or 7% global turnover</div>
-                </div>
-              </div>
-              <div class="j-controls">
-                <span class="j-status-badge building">◑ AUG 2026</span>
-                <label class="toggle">
-                  <input type="checkbox" id="j-euaiact">
-                  <div class="toggle-track"></div>
-                  <div class="toggle-thumb"></div>
-                </label>
-              </div>
-            </div>
-
+          <div class="jurisdiction-list" id="jurisdictionList">
+            <!-- rendered by renderJurisdictionList() from jurisdictions.js — single source of truth -->
           </div>
         </div>
         <div class="save-bar">
@@ -735,7 +600,7 @@
           <div class="setting-row">
             <div>
               <div class="setting-label">Jurisdiction Effective Date Reminders</div>
-              <div class="setting-desc">Send reminders 90 days and 30 days before an enabled jurisdiction becomes effective. Covers upcoming deadlines: CO SB 189 (Jan 1, 2027), CA AB-1018 (Jan 1, 2027), EU AI Act (Aug 2, 2026).</div>
+              <div class="setting-desc">Send reminders 90 days and 30 days before an enabled jurisdiction becomes effective. Covers upcoming deadlines: CO SB 189 (Jan 1, 2027), CA CPPA ADMT (Jan 1, 2027), EU AI Act (Dec 2, 2027).</div>
             </div>
             <div class="toggle-wrap">
               <label class="toggle">
@@ -791,17 +656,67 @@
     document.getElementById('user-email').textContent = currentUser.email;
     document.getElementById('alert-email').value = currentUser.email;
 
-    const { data } = await supabaseClient
-      .from('customers')
-      .select('customer_id, company_name')
-      .eq('contact_email', currentUser.email)
-      .single();
-    if (data) {
-      currentCustomerId = data.customer_id;
-      document.getElementById('org-name').textContent = data.company_name;
+    renderJurisdictionList();
+
+    const { data: userRow } = await supabaseClient
+      .from('users').select('customer_id').eq('auth_id', currentUser.id).single();
+    if (userRow) {
+      currentCustomerId = userRow.customer_id;
+      const { data: customer } = await supabaseClient
+        .from('customers').select('company_name').eq('customer_id', currentCustomerId).single();
+      if (customer) document.getElementById('org-name').textContent = customer.company_name;
     }
 
     await loadSettings();
+  }
+
+  // Maps jurisdictions.js keys to this page's existing org_settings checkbox ids.
+  const J_CHECKBOX_ID = {
+    nycll144: 'j-nycll144',
+    coloradoSB189: 'j-cosb189',
+    illinoisHB3773: 'j-ilhb3773',
+    californiaAB1018: 'j-caab1018',
+    ofccp: 'j-ofccp',
+    euAIAct: 'j-euaiact',
+  };
+
+  function jurisdictionBadge(j) {
+    const s = FAS_STATUS_LABELS[j.status] || FAS_STATUS_LABELS.pending;
+    if (j.status === 'active') return `<span class="j-status-badge active">${s.icon} ACTIVE</span>`;
+    const cls = j.status === 'delayed_rewritten' ? 'delayed' : 'building';
+    if (j.effectiveDate) {
+      const label = new Date(j.effectiveDate + 'T00:00:00').toLocaleDateString('en-US', { month: 'short', year: 'numeric' }).toUpperCase();
+      return `<span class="j-status-badge ${cls}">${s.icon} ${label}</span>`;
+    }
+    return `<span class="j-status-badge ${cls}">${s.icon} ${s.label.toUpperCase()}</span>`;
+  }
+
+  // Renders the jurisdiction list from jurisdictions.js's FAS_JURISDICTIONS —
+  // single source of truth, replacing what used to be hand-duplicated static
+  // HTML here (same citations/notes, maintained in two places).
+  function renderJurisdictionList() {
+    const container = document.getElementById('jurisdictionList');
+    container.innerHTML = FAS_JURISDICTION_ORDER.map(id => {
+      const j = FAS_JURISDICTIONS[id];
+      const checkboxId = J_CHECKBOX_ID[id];
+      const controls = j.alwaysActive
+        ? `${jurisdictionBadge(j)}<span class="j-always-on">Always on</span>`
+        : `${jurisdictionBadge(j)}<label class="toggle"><input type="checkbox" id="${checkboxId}"><div class="toggle-track"></div><div class="toggle-thumb"></div></label>`;
+      return `
+        <div class="jurisdiction-row">
+          <div class="j-info">
+            <div class="j-emoji">${j.icon}</div>
+            <div>
+              <div class="j-name">${j.label}</div>
+              <div class="j-citation">${j.citation} — ${j.fullName}</div>
+              <div class="j-note">${j.coreRules.slice(0, 3).join(' · ')}</div>
+            </div>
+          </div>
+          <div class="j-controls">
+            ${controls}
+          </div>
+        </div>`;
+    }).join('');
   }
 
   async function loadSettings() {

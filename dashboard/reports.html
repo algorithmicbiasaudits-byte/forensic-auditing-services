@@ -214,6 +214,7 @@
         <div class="export-menu-item" onclick="exportCSV()">📊 Export CSV</div>
         <div class="export-menu-item" onclick="exportPDF()">📄 Export PDF (Regulatory)</div>
         <div class="export-menu-item" onclick="exportQuarterlyPDF()">📑 Export Quarterly Report</div>
+        <div class="export-menu-item" onclick="exportCertificate()">🎖️ Certificate of Audit Completion</div>
       </div>
     </div>
   </div>
@@ -254,7 +255,7 @@
     <div class="report-card" data-report="ugesp-report" onclick="selectReportType(this, 'ugesp-report')">
       <div class="report-icon">⚖️</div>
       <div class="report-title">EEOC UGESP Compliance Report</div>
-      <div class="report-desc">4/5ths rule analysis by protected class, job-relatedness documentation status, validation study tracking, and 2-year applicant flow data. Applies to all covered employers.</div>
+      <div class="report-desc">4/5ths rule selection-rate analysis by protected class, computed from real applicant outcome data. Applies to all covered employers.</div>
       <div class="report-meta">
         <span>Last run: <span id="lastRunUgesp">Never</span></span>
         <span class="report-status ready" id="statusUgesp">Ready</span>
@@ -263,7 +264,7 @@
     <div class="report-card" data-report="ofccp-package" onclick="selectReportType(this, 'ofccp-package')">
       <div class="report-icon">🏛️</div>
       <div class="report-title">OFCCP Compliance Package</div>
-      <div class="report-desc">Federal contractor audit package: AAP status, VEVRAA hiring benchmark (5.1%), self-ID invitation rates, Internet Applicant Rule logs, and vendor audit access clause verification.</div>
+      <div class="report-desc">Federal contractor audit record export (risk levels, flags, reviewer decisions). AAP/VEVRAA benchmark tracking and self-ID rates are not yet part of this report.</div>
       <div class="report-meta">
         <span>Last run: <span id="lastRunOfccp">Never</span></span>
         <span class="report-status pending" id="statusOfccp">Contractors Only</span>
@@ -272,7 +273,7 @@
     <div class="report-card" data-report="regulatory-package" onclick="selectReportType(this, 'regulatory-package')">
       <div class="report-icon">📑</div>
       <div class="report-title">Regulatory Filing Package</div>
-      <div class="report-desc">Complete audit trail export with immutable hashes, reviewer attestations, and decision justifications for DOL or AG inquiry response.</div>
+      <div class="report-desc">Complete audit trail export with reviewer decisions and justifications for DOL or AG inquiry response.</div>
       <div class="report-meta">
         <span>Last run: <span id="lastRunRegulatory">Never</span></span>
         <span class="report-status ready" id="statusRegulatory">Ready</span>
@@ -281,7 +282,7 @@
     <div class="report-card" data-report="system-integrity" onclick="selectReportType(this, 'system-integrity')">
       <div class="report-icon">🔍</div>
       <div class="report-title">System Integrity Log</div>
-      <div class="report-desc">Baseline version tracking, model drift detection, and 3-second rejection window compliance across all reviewer sessions.</div>
+      <div class="report-desc">Full audit and reviewer-decision record export for this organization. Baseline version tracking and model drift detection are not yet implemented.</div>
       <div class="report-meta">
         <span>Last run: <span id="lastRunIntegrity">Never</span></span>
         <span class="report-status ready" id="statusIntegrity">Ready</span>
@@ -303,10 +304,6 @@
           <option value="highRisk">High Risk Rate</option>
           <option value="overrides">Override Rate</option>
           <option value="compliance">Compliance Score</option>
-          <option value="ugesp_fourfifths">UGESP 4/5ths Pass Rate</option>
-          <option value="ugesp_jobrelated">UGESP Job-Relatedness Docs</option>
-          <option value="ofccp_selfid">OFCCP Self-ID Rate</option>
-          <option value="ofccp_vevraa">OFCCP VEVRAA Benchmark</option>
         </select>
       </div>
     </div>
@@ -455,7 +452,7 @@
     const { data: { session } } = await supabaseClient.auth.getSession();
     if (!session) { window.location.href = 'login.html'; return; }
     injectUserInfo(session.user);
-    await resolveCustomer(session.user.email);
+    await resolveCustomer(session.user.id);
     await loadReportsData();
   }
 
@@ -464,16 +461,24 @@
     document.getElementById('userRole').textContent = user.user_metadata?.role || 'Reviewer';
   }
 
-  async function resolveCustomer(email) {
+  let userNameById = {};
+  let companyName = null;
+
+  async function resolveCustomer(authUserId) {
+    const { data: userRow } = await supabaseClient
+      .from('users').select('customer_id').eq('auth_id', authUserId).single();
+    if (!userRow) return;
+    customerId = userRow.customer_id;
     const { data: customer } = await supabaseClient
-      .from('customers')
-      .select('customer_id, company_name')
-      .eq('contact_email', email)
-      .single();
-    if (customer) customerId = customer.customer_id;
+      .from('customers').select('company_name').eq('customer_id', customerId).single();
+    companyName = customer?.company_name || null;
   }
 
   async function loadReportsData() {
+    const { data: users } = await supabaseClient
+      .from('users').select('user_id, name').eq('customer_id', customerId);
+    userNameById = Object.fromEntries((users || []).map(u => [u.user_id, u.name]));
+
     const { data: rejections, error } = await supabaseClient
       .from('rejections')
       .select(`
@@ -483,8 +488,8 @@
         rejection_reason_from_ats,
         created_at,
         customer_id,
-        audits (audit_id, risk_level, score, lanes_triggered, created_at, flags),
-        overrides (override_id, decision, reviewed_timestamp, reviewer_name)
+        audits (audit_id, risk_level, employment_gap_flagged, keyword_mismatch_flagged, proxy_discrimination_detected, disparate_impact_detected, legal_trigger_flagged, audit_timestamp),
+        overrides (override_id, decision, reviewed_timestamp, reviewed_by_user_id)
       `)
       .eq('customer_id', customerId)
       .order('created_at', { ascending: false });
@@ -495,17 +500,44 @@
       return;
     }
 
-    allRecords = rejections || [];
+    allRecords = (rejections || []).map(r => ({
+      ...r,
+      audits: [...(r.audits || [])].sort((a, b) => new Date(b.audit_timestamp) - new Date(a.audit_timestamp)),
+      overrides: [...(r.overrides || [])].sort((a, b) => new Date(b.reviewed_timestamp) - new Date(a.reviewed_timestamp)),
+    }));
     computeStats(allRecords);
     updateTabCounts(allRecords);
     renderAllCharts(allRecords);
-    renderQuarterlyComparison();
+    await renderQuarterlyComparison();
+    await renderDisparateChart();
     applyFilters();
+  }
+
+  // Real risk_level values are red/orange/yellow/green — bucketed into the
+  // page's 3-tier high/medium/low UI (red=high, orange+yellow=medium, green=low).
+  function riskBucket(level) {
+    if (level === 'red') return 'high';
+    if (level === 'orange' || level === 'yellow') return 'medium';
+    if (level === 'green') return 'low';
+    return 'unknown';
+  }
+
+  const FLAG_KEYS = ['employment_gap_flagged', 'keyword_mismatch_flagged', 'proxy_discrimination_detected', 'disparate_impact_detected', 'legal_trigger_flagged'];
+  const FLAG_LABELS = {
+    employment_gap_flagged: 'Employment Gap Penalty',
+    keyword_mismatch_flagged: 'Keyword Mismatch',
+    proxy_discrimination_detected: 'Proxy Discrimination Signal',
+    disparate_impact_detected: 'Disparate Impact Pattern',
+    legal_trigger_flagged: 'Legal Trigger Language',
+  };
+  function flagsTriggeredCount(audit) {
+    if (!audit) return 0;
+    return FLAG_KEYS.filter(k => audit[k]).length;
   }
 
   function computeStats(records) {
     const total = records.length;
-    const highRisk = records.filter(r => r.audits?.[0]?.risk_level === 'red' || r.audits?.[0]?.risk_level === 'high').length;
+    const highRisk = records.filter(r => riskBucket(r.audits?.[0]?.risk_level) === 'high').length;
     const overrides = records.filter(r => r.overrides && r.overrides.length > 0).length;
     const complianceScore = total > 0 ? Math.round(((total - highRisk) / total) * 100) : 100;
 
@@ -517,9 +549,9 @@
 
   function updateTabCounts(records) {
     document.getElementById('tabAll').textContent = records.length;
-    document.getElementById('tabHigh').textContent = records.filter(r => r.audits?.[0]?.risk_level === 'red' || r.audits?.[0]?.risk_level === 'high').length;
-    document.getElementById('tabMedium').textContent = records.filter(r => r.audits?.[0]?.risk_level === 'orange' || r.audits?.[0]?.risk_level === 'medium').length;
-    document.getElementById('tabLow').textContent = records.filter(r => r.audits?.[0]?.risk_level === 'green' || r.audits?.[0]?.risk_level === 'low').length;
+    document.getElementById('tabHigh').textContent = records.filter(r => riskBucket(r.audits?.[0]?.risk_level) === 'high').length;
+    document.getElementById('tabMedium').textContent = records.filter(r => riskBucket(r.audits?.[0]?.risk_level) === 'medium').length;
+    document.getElementById('tabLow').textContent = records.filter(r => riskBucket(r.audits?.[0]?.risk_level) === 'low').length;
   }
 
   // ─── QUARTERLY COMPARISON ───
@@ -530,20 +562,22 @@
     renderQuarterlyComparison();
   }
 
-  function renderQuarterlyComparison() {
+  async function renderQuarterlyComparison() {
     const metric = document.getElementById('compareMetric').value;
     const quarters = ['Q1', 'Q2', 'Q3', 'Q4'];
     const prevYear = selectedYear - 1;
-    const currentData = generateQuarterlyData(selectedYear, metric);
-    const previousData = generateQuarterlyData(prevYear, metric);
+    const currentData = computeQuarterlyMetrics(allRecords, selectedYear, metric);
+    const previousData = computeQuarterlyMetrics(allRecords, prevYear, metric);
+    const nowQ = Math.floor(new Date().getMonth() / 3);
+    const nowYear = new Date().getFullYear();
 
     const container = document.getElementById('quarterlyGrid');
     container.innerHTML = quarters.map((q, i) => {
       const current = currentData[i];
       const previous = previousData[i];
-      const change = previous > 0 ? ((current - previous) / previous * 100).toFixed(1) : 0;
+      const change = previous > 0 ? ((current - previous) / previous * 100).toFixed(1) : (current > 0 ? 100 : 0);
       const isUp = change >= 0;
-      const isCurrentQuarter = (selectedYear === 2026 && i === 1);
+      const isCurrentQuarter = (selectedYear === nowYear && i === nowQ);
 
       return `
         <div class="quarter-card ${isCurrentQuarter ? 'current' : ''}">
@@ -552,7 +586,7 @@
             <span class="quarter-metric-value">${formatMetric(current, metric)}</span>
             <span class="quarter-metric-change ${isUp ? 'up' : 'down'}">${isUp ? '↑' : '↓'} ${Math.abs(change)}%</span>
           </div>
-          <div class="quarter-metric-label">vs ${q} ${prevYear}</div>
+          <div class="quarter-metric-label">vs ${q} ${prevYear} (real records)</div>
           <div class="quarter-sparkline">
             <canvas id="spark-${q}" width="200" height="40"></canvas>
           </div>
@@ -564,23 +598,52 @@
       quarters.forEach((q, i) => {
         const canvas = document.getElementById(`spark-${q}`);
         if (canvas) {
-          const sparkData = Array.from({length: 12}, () => Math.max(0, currentData[i] + (Math.random() - 0.5) * currentData[i] * 0.3));
+          const sparkData = computeWeeklyVolume(allRecords, selectedYear, i);
           renderSparkline(canvas, sparkData);
         }
       });
     }, 0);
   }
 
-  function generateQuarterlyData(year, metric) {
-    const base = year === 2026 ? [142, 128, 0, 0] : [98, 112, 135, 156];
-    if (metric === 'highRisk') return base.map(v => Math.round(v * 0.15));
-    if (metric === 'overrides') return base.map(v => Math.round(v * 0.25));
-    if (metric === 'compliance') return base.map(v => 85 + Math.random() * 10);
-    return base;
+  // Real per-quarter metrics computed from allRecords — no synthetic data.
+  function computeQuarterlyMetrics(records, year, metric) {
+    const buckets = [0, 1, 2, 3].map(() => ({ total: 0, highRisk: 0, overrides: 0 }));
+    records.forEach(r => {
+      if (!r.created_at) return;
+      const d = new Date(r.created_at);
+      if (d.getFullYear() !== year) return;
+      const q = Math.floor(d.getMonth() / 3);
+      buckets[q].total++;
+      if (riskBucket(r.audits?.[0]?.risk_level) === 'high') buckets[q].highRisk++;
+      if (r.overrides && r.overrides.length > 0) buckets[q].overrides++;
+    });
+    return buckets.map(b => {
+      if (metric === 'highRisk') return b.total > 0 ? roundTo1(b.highRisk / b.total * 100) : 0;
+      if (metric === 'overrides') return b.total > 0 ? roundTo1(b.overrides / b.total * 100) : 0;
+      if (metric === 'compliance') return b.total > 0 ? Math.round(((b.total - b.highRisk) / b.total) * 100) : 100;
+      return b.total; // 'audits'
+    });
   }
 
+  // Real weekly record volume within a given quarter (for sparkline shape) —
+  // not the selected metric, just real audit-count trend within the quarter.
+  function computeWeeklyVolume(records, year, quarter) {
+    const weeks = Array(13).fill(0);
+    const qStart = new Date(year, quarter * 3, 1);
+    records.forEach(r => {
+      if (!r.created_at) return;
+      const d = new Date(r.created_at);
+      if (d.getFullYear() !== year || Math.floor(d.getMonth() / 3) !== quarter) return;
+      const week = Math.min(12, Math.floor((d - qStart) / (7 * 24 * 3600 * 1000)));
+      weeks[week]++;
+    });
+    return weeks;
+  }
+
+  function roundTo1(v) { return Math.round(v * 10) / 10; }
+
   function formatMetric(value, metric) {
-    if (metric === 'compliance') return Math.round(value) + '%';
+    if (metric === 'compliance' || metric === 'highRisk' || metric === 'overrides') return value + '%';
     return value.toLocaleString();
   }
 
@@ -621,14 +684,16 @@
     renderTrendChart(records);
     renderOverrideChart(records);
     renderLaneChart(records);
-    renderDisparateChart(records);
+    // Disparate Impact chart is customer-wide demographic data from a
+    // separate table (applications), not filtered by the rejections tab —
+    // rendered once independently, see renderDisparateChart() below.
   }
 
   function renderRiskChart(records) {
     const ctx = document.getElementById('riskChart').getContext('2d');
-    const high = records.filter(r => r.audits?.[0]?.risk_level === 'red' || r.audits?.[0]?.risk_level === 'high').length;
-    const medium = records.filter(r => r.audits?.[0]?.risk_level === 'orange' || r.audits?.[0]?.risk_level === 'medium').length;
-    const low = records.filter(r => r.audits?.[0]?.risk_level === 'green' || r.audits?.[0]?.risk_level === 'low').length;
+    const high = records.filter(r => riskBucket(r.audits?.[0]?.risk_level) === 'high').length;
+    const medium = records.filter(r => riskBucket(r.audits?.[0]?.risk_level) === 'medium').length;
+    const low = records.filter(r => riskBucket(r.audits?.[0]?.risk_level) === 'low').length;
     const unclassified = records.length - high - medium - low;
 
     if (riskChartInst) riskChartInst.destroy();
@@ -662,7 +727,7 @@
       const key = `${d.getFullYear()}-W${String(Math.ceil((d.getDate()) / 7)).padStart(2, '0')}`;
       if (!weekly[key]) weekly[key] = { total: 0, high: 0 };
       weekly[key].total++;
-      if (r.audits?.[0]?.risk_level === 'red' || r.audits?.[0]?.risk_level === 'high') weekly[key].high++;
+      if (riskBucket(r.audits?.[0]?.risk_level) === 'high') weekly[key].high++;
     });
 
     const labels = Object.keys(weekly).slice(-12);
@@ -718,22 +783,14 @@
   function renderLaneChart(records) {
     const ctx = document.getElementById('laneChart').getContext('2d');
     const laneCounts = {};
+    FLAG_KEYS.forEach(k => { laneCounts[FLAG_LABELS[k]] = 0; });
     records.forEach(r => {
-      const flags = r.audits?.[0]?.flags || [];
-      flags.forEach(f => {
-        const lane = f.lane || 'Unknown Lane';
-        laneCounts[lane] = (laneCounts[lane] || 0) + 1;
-      });
+      const audit = r.audits?.[0];
+      if (!audit) return;
+      FLAG_KEYS.forEach(k => { if (audit[k]) laneCounts[FLAG_LABELS[k]]++; });
     });
 
-    if (Object.keys(laneCounts).length === 0) {
-      laneCounts['Age Proxy Detection'] = records.filter(r => r.audits?.[0]?.score > 70).length;
-      laneCounts['Employment Gap Penalty'] = records.filter(r => r.audits?.[0]?.score > 50).length;
-      laneCounts['Credential Mismatch'] = records.filter(r => r.audits?.[0]?.score > 40).length;
-      laneCounts['Pattern Anomaly'] = records.filter(r => r.audits?.[0]?.score > 30).length;
-    }
-
-    const labels = Object.keys(laneCounts).slice(0, 7);
+    const labels = Object.keys(laneCounts);
     const data = labels.map(l => laneCounts[l]);
 
     if (laneChartInst) laneChartInst.destroy();
@@ -751,27 +808,77 @@
     });
   }
 
-  function renderDisparateChart(records) {
-    const ctx = document.getElementById('disparateChart').getContext('2d');
-    const categories = ['Overall', 'Age 40+', 'Female', 'Minority', 'Veteran', 'Disability'];
-    const selectionRates = [0.72, 0.58, 0.68, 0.55, 0.61, 0.52];
-    const thresholds = categories.map(() => 0.576);
+  const COHORT_LABELS = {
+    hispanic_or_latino: 'Hispanic or Latino',
+    white: 'White',
+    black_or_african_american: 'Black or African American',
+    native_hawaiian_or_pacific_islander: 'Native Hawaiian/Pacific Islander',
+    asian: 'Asian',
+    american_indian_or_alaska_native: 'American Indian/Alaska Native',
+    two_or_more_races: 'Two or More Races',
+    undisclosed: 'Undisclosed',
+    protected_veteran: 'Protected Veteran',
+    individual_with_disability: 'Individual with Disability',
+    non_protected_veteran: 'Non-Protected Veteran',
+    no_disability: 'No Disability',
+  };
 
-    if (disparateChartInst) disparateChartInst.destroy();
+  // Real disparate-impact analysis via math/impactAnalysis.js, computed
+  // from the applications table's actual hired/rejected outcomes by
+  // protected_class_cohort — not the rejections list (rejections alone
+  // have no "hired" comparison group, so a real selection rate can't be
+  // computed from them). Customer-wide, not affected by the table filters.
+  async function renderDisparateChart() {
+    const canvas = document.getElementById('disparateChart');
+    const container = canvas.closest('.chart-canvas-container');
+    const existingMsg = document.getElementById('disparateEmptyState');
+    if (existingMsg) existingMsg.remove();
+
+    const { data: applications, error } = await supabaseClient
+      .from('applications')
+      .select('protected_class_cohort, outcome')
+      .eq('customer_id', customerId);
+
+    if (disparateChartInst) { disparateChartInst.destroy(); disparateChartInst = null; }
+
+    const { buildDemographicMatrix, computeDisparateImpactRatio } = await import('../math/impactAnalysis.js');
+    const matrix = error ? {} : buildDemographicMatrix(applications || []);
+    const { ratios, referenceGroup } = computeDisparateImpactRatio(matrix);
+
+    if (!ratios.length) {
+      canvas.style.display = 'none';
+      document.getElementById('disparateLegend').innerHTML = '';
+      const msg = document.createElement('div');
+      msg.id = 'disparateEmptyState';
+      msg.style.cssText = 'padding:60px 20px;text-align:center;color:var(--text-dim);font-size:12px;line-height:1.6;';
+      msg.textContent = 'No resolved (hired/rejected) applications recorded yet for this organization — disparate impact ratios require real applicant-pool outcome data, not just rejection records.';
+      container.appendChild(msg);
+      return;
+    }
+
+    canvas.style.display = '';
+    const refRate = matrix[referenceGroup].selected / matrix[referenceGroup].total;
+    const threshold = refRate * 0.8;
+
+    const labels = ratios.map(r => COHORT_LABELS[r.cohort] || r.cohort);
+    const selectionRates = ratios.map(r => r.selectionRate);
+    const thresholdLine = ratios.map(() => threshold);
+
+    const ctx = canvas.getContext('2d');
     disparateChartInst = new Chart(ctx, {
       type: 'bar',
       data: {
-        labels: categories,
+        labels,
         datasets: [
-          { label: 'Selection Rate', data: selectionRates, backgroundColor: selectionRates.map((v, i) => v < thresholds[i] ? '#dc2626' : '#16a34a'), borderRadius: 4, barThickness: 36, order: 2 },
-          { label: '4/5ths Threshold', data: thresholds, type: 'line', borderColor: '#ca8a04', borderWidth: 2, borderDash: [6, 4], pointRadius: 0, fill: false, order: 1 }
+          { label: 'Selection Rate', data: selectionRates, backgroundColor: ratios.map(r => r.belowFourFifths ? '#dc2626' : '#16a34a'), borderRadius: 4, barThickness: 36, order: 2 },
+          { label: '4/5ths Threshold', data: thresholdLine, type: 'line', borderColor: '#ca8a04', borderWidth: 2, borderDash: [6, 4], pointRadius: 0, fill: false, order: 1 }
         ]
       },
       options: {
         responsive: true, maintainAspectRatio: false,
         plugins: {
           legend: { position: 'top', align: 'end', labels: { boxWidth: 10, usePointStyle: true, font: { size: 11 } } },
-          tooltip: { backgroundColor: '#1e293b', padding: 10, cornerRadius: 6, callbacks: { afterLabel: (ctx) => { if (ctx.datasetIndex === 0) { const rate = ctx.raw; const threshold = thresholds[ctx.dataIndex]; return rate < threshold ? '⚠️ Below 4/5ths threshold' : '✓ Within compliance'; } } } }
+          tooltip: { backgroundColor: '#1e293b', padding: 10, cornerRadius: 6, callbacks: { afterLabel: (ctx) => { if (ctx.datasetIndex === 0) { return ratios[ctx.dataIndex].belowFourFifths ? '⚠️ Below 4/5ths threshold' : '✓ Within compliance'; } } } }
         },
         scales: {
           x: { grid: { display: false }, ticks: { font: { size: 11 }, color: '#475569' } },
@@ -783,7 +890,7 @@
     document.getElementById('disparateLegend').innerHTML = `
       <div class="legend-item"><span class="legend-dot" style="background:#16a34a"></span>Pass</div>
       <div class="legend-item"><span class="legend-dot" style="background:#dc2626"></span>Fail</div>
-      <div class="legend-item"><span class="legend-dot" style="background:#ca8a04;border:1px dashed #ca8a04"></span>80% Rule</div>
+      <div class="legend-item"><span class="legend-dot" style="background:#ca8a04;border:1px dashed #ca8a04"></span>80% of ${COHORT_LABELS[referenceGroup] || referenceGroup}</div>
     `;
   }
 
@@ -812,10 +919,10 @@
 
     if (activeTab !== 'all') {
       filtered = filtered.filter(r => {
-        const level = r.audits?.[0]?.risk_level;
-        if (activeTab === 'high') return level === 'red' || level === 'high';
-        if (activeTab === 'medium') return level === 'orange' || level === 'medium';
-        if (activeTab === 'low') return level === 'green' || level === 'low';
+        const bucket = riskBucket(r.audits?.[0]?.risk_level);
+        if (activeTab === 'high') return bucket === 'high';
+        if (activeTab === 'medium') return bucket === 'medium';
+        if (activeTab === 'low') return bucket === 'low';
         return true;
       });
     }
@@ -865,9 +972,9 @@
 
     tbody.innerHTML = records.map(r => {
       const audit = r.audits?.[0];
-      const riskLevel = audit?.risk_level || 'low';
-      const riskLabel = riskLevel === 'red' || riskLevel === 'high' ? 'HIGH' : riskLevel === 'orange' || riskLevel === 'medium' ? 'MEDIUM' : 'LOW';
-      const lanes = audit?.lanes_triggered || 0;
+      const bucket = riskBucket(audit?.risk_level);
+      const riskLabel = bucket === 'unknown' ? '—' : bucket.toUpperCase();
+      const lanes = flagsTriggeredCount(audit);
       const hasOverride = r.overrides && r.overrides.length > 0;
       const overrideDecision = hasOverride ? r.overrides[0].decision : null;
       const statusBadge = hasOverride
@@ -879,10 +986,10 @@
         <td>${formatTimestamp(r.created_at)}</td>
         <td><span class="mono">${r.candidate_id}</span></td>
         <td>${r.job_title || '—'}</td>
-        <td><span class="risk-badge risk-${riskLevel}">${riskLabel}</span></td>
-        <td>${lanes}/7 lanes</td>
+        <td><span class="risk-badge risk-${bucket}">${riskLabel}</span></td>
+        <td>${lanes}/5 lanes</td>
         <td>${statusBadge}</td>
-        <td><a href="rejection-detail.html?id=${r.rejection_id}" class="link-gold">View →</a></td>
+        <td><a href="rejection-detail.html?id=${r.candidate_id}" class="link-gold">View →</a></td>
       </tr>`;
     }).join('');
   }
@@ -922,7 +1029,7 @@
     const rows = filteredRecords.map(r => {
       const audit = r.audits?.[0];
       const override = r.overrides?.[0];
-      return [audit?.audit_id || '', r.created_at, r.candidate_id, r.job_title || '', audit?.risk_level || 'low', audit?.lanes_triggered || 0, r.rejection_reason_from_ats || '', override?.decision || 'pending', override?.reviewer_name || '', override?.reviewed_timestamp || '']
+      return [audit?.audit_id || '', r.created_at, r.candidate_id, r.job_title || '', audit?.risk_level || '', flagsTriggeredCount(audit), r.rejection_reason_from_ats || '', override?.decision || 'pending', override ? (userNameById[override.reviewed_by_user_id] || '') : '', override?.reviewed_timestamp || '']
         .map(v => `"${String(v).replace(/"/g, '""')}"`).join(',');
     });
     const csv = [headers.join(','), ...rows].join('\n');
@@ -957,7 +1064,7 @@
     doc.setTextColor(255, 255, 255);
     doc.setFontSize(9);
     doc.setFont('helvetica', 'normal');
-    doc.text(`Generated: ${new Date().toLocaleString()} | Baseline v1.0 | Immutable Audit Trail`, margin, 21);
+    doc.text(`Generated: ${new Date().toLocaleString()}`, margin, 21);
 
     let y = 35;
 
@@ -970,7 +1077,7 @@
     doc.setFontSize(10);
     doc.setFont('helvetica', 'normal');
     const total = filteredRecords.length;
-    const highRisk = filteredRecords.filter(r => r.audits?.[0]?.risk_level === 'red' || r.audits?.[0]?.risk_level === 'high').length;
+    const highRisk = filteredRecords.filter(r => riskBucket(r.audits?.[0]?.risk_level) === 'high').length;
     const overrides = filteredRecords.filter(r => r.overrides && r.overrides.length > 0).length;
     const complianceScore = total > 0 ? Math.round(((total - highRisk) / total) * 100) : 100;
     doc.text(`Total Records Audited: ${total}`, margin, y);
@@ -980,13 +1087,13 @@
     doc.text(`Compliance Score: ${complianceScore}%`, margin + 60, y);
     y += 10;
 
-    // Compliance Statement
+    // Data source note
     doc.setFillColor(248, 250, 252);
     doc.rect(margin, y, pageWidth - margin * 2, 20, 'F');
     doc.setTextColor(100, 116, 139);
     doc.setFontSize(9);
-    doc.text('This report contains immutable audit hashes and reviewer attestations as required by', margin + 3, y + 7);
-    doc.text('Colorado SB 189, NYC Local Law 144, and EEOC guidance on AI-influenced employment decisions.', margin + 3, y + 13);
+    doc.text('This report reflects the current F.A.S. platform audit and reviewer-decision records for', margin + 3, y + 7);
+    doc.text('this organization, relevant to Colorado SB 189 and NYC Local Law 144 filing requirements.', margin + 3, y + 13);
     y += 28;
 
     // Audit Table
@@ -1004,8 +1111,8 @@
         formatDateShort(r.created_at),
         r.candidate_id,
         r.job_title?.substring(0, 25) || '—',
-        audit?.risk_level?.toUpperCase() || 'LOW',
-        audit?.lanes_triggered || 0,
+        audit?.risk_level?.toUpperCase() || '—',
+        flagsTriggeredCount(audit),
         override?.decision?.toUpperCase() || 'PENDING'
       ];
     });
@@ -1069,28 +1176,26 @@
 
     doc.setTextColor(30, 41, 59);
     doc.setFontSize(12);
-    doc.text('System Integrity Declaration', margin, y);
+    doc.text('Reviewer Decision Status', margin, y);
     y += 8;
     doc.setFontSize(10);
     doc.setFont('helvetica', 'normal');
-    doc.text('I hereby certify that:', margin, y);
+    doc.text('As of the generation timestamp below:', margin, y);
     y += 6;
+    const pendingCount = total - overrides;
     const attestations = [
-      '• All audit records in this package are immutable and hash-verified.',
-      '• The 3-second rejection review window was enforced for all flagged decisions.',
-      '• Human-in-the-loop (HITL) review was conducted by authorized compliance officers.',
-      '• Baseline v1.0 was active during the reporting period with no unauthorized modifications.',
-      '• This report is prepared in accordance with Colorado SB 189 and NYC Local Law 144 requirements.'
+      `• ${overrides} of ${total} record${total === 1 ? '' : 's'} have a completed human-in-the-loop reviewer decision on file.`,
+      `• ${pendingCount} record${pendingCount === 1 ? '' : 's'} ${pendingCount === 1 ? 'is' : 'are'} still pending reviewer decision.`,
+      '• This report is generated directly from the F.A.S. platform\'s live audit and reviewer-decision',
+      '  records, intended to support Colorado SB 189 and NYC Local Law 144 filing preparation.'
     ];
     attestations.forEach(line => { doc.text(line, margin, y); y += 5; });
     y += 10;
 
     doc.setFont('helvetica', 'bold');
-    doc.text('Digital Signature Block', margin, y);
+    doc.text('Report Details', margin, y);
     y += 6;
     doc.setFont('helvetica', 'normal');
-    doc.text('Report Hash: ' + generateReportHash(), margin, y);
-    y += 5;
     doc.text('Generated by: ' + (document.getElementById('userName').textContent || 'System'), margin, y);
     y += 5;
     doc.text('Timestamp: ' + new Date().toISOString(), margin, y);
@@ -1133,8 +1238,8 @@
     y += 10;
 
     const metric = document.getElementById('compareMetric').value;
-    const currentData = generateQuarterlyData(selectedYear, metric);
-    const prevData = generateQuarterlyData(selectedYear - 1, metric);
+    const currentData = computeQuarterlyMetrics(allRecords, selectedYear, metric);
+    const prevData = computeQuarterlyMetrics(allRecords, selectedYear - 1, metric);
     const quarters = ['Q1', 'Q2', 'Q3', 'Q4'];
 
     const tableBody = quarters.map((q, i) => [
@@ -1175,6 +1280,160 @@
     hidePDFProgress();
   }
 
+  // ─── CERTIFICATE OF INDEPENDENT AUDIT COMPLETION ───
+  // Certifies that an independent audit was PERFORMED — every line is a
+  // real, verifiable fact from the platform's own data. Deliberately does
+  // NOT certify legal compliance with any statute — that is a legal
+  // determination for courts/regulators, not something an audit-trail
+  // export can assert.
+  async function exportCertificate() {
+    if (!allRecords.length) { alert('No audit records on file yet — nothing to certify.'); return; }
+    showPDFProgress('Generating Certificate of Audit Completion...');
+
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'letter' });
+    const pageWidth = doc.internal.pageSize.getWidth();
+    const margin = 20;
+
+    const dates = allRecords.map(r => new Date(r.created_at)).filter(d => !isNaN(d));
+    const periodStart = new Date(Math.min(...dates));
+    const periodEnd = new Date(Math.max(...dates));
+    const total = allRecords.length;
+    const reviewed = allRecords.filter(r => r.overrides && r.overrides.length > 0).length;
+    const dateFmt = (d) => d.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+
+    let y = 22;
+    doc.setTextColor(10, 22, 40);
+    doc.setFontSize(11);
+    doc.setFont('helvetica', 'bold');
+    doc.text('F.A.S. — FORENSIC AUDITING SERVICES', margin, y);
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(9);
+    doc.setTextColor(100, 116, 139);
+    doc.text('An ALS Consulting Company', pageWidth - margin, y, { align: 'right' });
+    y += 6;
+    doc.setDrawColor(184, 135, 46);
+    doc.setLineWidth(0.5);
+    doc.line(margin, y, pageWidth - margin, y);
+    y += 18;
+
+    doc.setTextColor(10, 22, 40);
+    doc.setFontSize(20);
+    doc.setFont('helvetica', 'bold');
+    doc.text('Certificate of Independent', pageWidth / 2, y, { align: 'center' });
+    y += 9;
+    doc.text('Algorithmic Bias Audit Completion', pageWidth / 2, y, { align: 'center' });
+    y += 16;
+
+    doc.setFontSize(11);
+    doc.setFont('helvetica', 'normal');
+    doc.setTextColor(30, 41, 59);
+    doc.text('This certifies that', pageWidth / 2, y, { align: 'center' });
+    y += 9;
+    doc.setFontSize(16);
+    doc.setFont('helvetica', 'bold');
+    doc.text(companyName || 'This Organization', pageWidth / 2, y, { align: 'center' });
+    y += 9;
+    doc.setFontSize(11);
+    doc.setFont('helvetica', 'normal');
+    doc.text('has completed an independent algorithmic bias audit of its', pageWidth / 2, y, { align: 'center' });
+    y += 6;
+    doc.text('AI-influenced hiring decisions, conducted by F.A.S., covering', pageWidth / 2, y, { align: 'center' });
+    y += 6;
+    doc.setFont('helvetica', 'bold');
+    doc.text(`${dateFmt(periodStart)} through ${dateFmt(periodEnd)}.`, pageWidth / 2, y, { align: 'center' });
+    y += 20;
+
+    // Real summary stats box
+    doc.setFillColor(248, 250, 252);
+    doc.setDrawColor(226, 232, 240);
+    doc.rect(margin, y, pageWidth - margin * 2, 30, 'FD');
+    doc.setFontSize(9);
+    doc.setTextColor(100, 116, 139);
+    doc.setFont('helvetica', 'normal');
+    const col1 = margin + 8, col2 = margin + (pageWidth - margin * 2) / 2 + 8;
+    doc.text('Hiring decisions audited', col1, y + 10);
+    doc.text('Completed human review', col2, y + 10);
+    doc.setFontSize(16);
+    doc.setFont('helvetica', 'bold');
+    doc.setTextColor(10, 22, 40);
+    doc.text(String(total), col1, y + 22);
+    doc.text(`${reviewed} of ${total}`, col2, y + 22);
+    y += 42;
+
+    // Disparate impact summary — real, from applications data (may be empty)
+    doc.setFontSize(10);
+    doc.setFont('helvetica', 'bold');
+    doc.setTextColor(30, 41, 59);
+    doc.text('Disparate Impact Analysis (4/5ths Rule)', margin, y);
+    y += 6;
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(9);
+    doc.setTextColor(71, 85, 105);
+    try {
+      const { buildDemographicMatrix, computeDisparateImpactRatio } = await import('../math/impactAnalysis.js');
+      const { data: applications } = await supabaseClient
+        .from('applications').select('protected_class_cohort, outcome').eq('customer_id', customerId);
+      const matrix = buildDemographicMatrix(applications || []);
+      const { ratios } = computeDisparateImpactRatio(matrix);
+      if (ratios.length) {
+        const failing = ratios.filter(r => r.belowFourFifths).length;
+        doc.text(`${ratios.length} demographic cohorts analyzed; ${failing} below the 4/5ths threshold.`, margin, y);
+      } else {
+        doc.text('Insufficient resolved (hired/rejected) applicant-outcome data to compute selection-rate ratios.', margin, y);
+      }
+    } catch (e) {
+      doc.text('Insufficient resolved (hired/rejected) applicant-outcome data to compute selection-rate ratios.', margin, y);
+    }
+    y += 14;
+
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(10);
+    doc.setTextColor(30, 41, 59);
+    doc.text('Audit Methodology', margin, y);
+    y += 6;
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(9);
+    doc.setTextColor(71, 85, 105);
+    const methodology = [
+      'Each rejection was screened by the F.A.S. audit engine across five detection lanes:',
+      'employment gap penalty, keyword mismatch, proxy discrimination signal, disparate',
+      'impact pattern, and legal trigger language. Records with active flags require human-in-',
+      'the-loop reviewer decision before certification.'
+    ];
+    methodology.forEach(line => { doc.text(line, margin, y); y += 5; });
+    y += 12;
+
+    // Explicit scope disclaimer — precision matters here
+    doc.setFillColor(254, 252, 232);
+    doc.setDrawColor(253, 230, 138);
+    doc.rect(margin, y, pageWidth - margin * 2, 22, 'FD');
+    doc.setFontSize(8);
+    doc.setTextColor(120, 90, 10);
+    doc.text('This certificate confirms that an independent audit was performed. It does not constitute a', margin + 4, y + 8);
+    doc.text('determination of legal compliance with any specific statute or regulation — compliance is a', margin + 4, y + 13);
+    doc.text('legal determination made by courts or regulators, not by an audit-trail export.', margin + 4, y + 18);
+    y += 34;
+
+    doc.setFontSize(9);
+    doc.setTextColor(100, 116, 139);
+    doc.setFont('helvetica', 'normal');
+    doc.text('Generated by: ' + (document.getElementById('userName').textContent || 'System'), margin, y);
+    y += 5;
+    doc.text('Generated: ' + new Date().toLocaleString(), margin, y);
+    y += 16;
+
+    doc.setDrawColor(184, 135, 46);
+    doc.line(margin, y, margin + 80, y);
+    y += 5;
+    doc.setFontSize(9);
+    doc.setTextColor(71, 85, 105);
+    doc.text('Authorized F.A.S. Reviewer Signature', margin, y);
+
+    doc.save(`FAS_Certificate_of_Audit_Completion_${new Date().toISOString().slice(0,10)}.pdf`);
+    hidePDFProgress();
+  }
+
   function showPDFProgress(msg) {
     document.getElementById('pdfOverlay').classList.add('show');
     document.querySelector('.pdf-modal-title').textContent = msg;
@@ -1192,10 +1451,6 @@
       document.getElementById('pdfOverlay').classList.remove('show');
       document.getElementById('pdfProgressBar').style.width = '0%';
     }, 500);
-  }
-
-  function generateReportHash() {
-    return '0x' + Array.from({length: 40}, () => '0123456789abcdef'[Math.floor(Math.random() * 16)]).join('');
   }
 
   function formatDateShort(iso) {

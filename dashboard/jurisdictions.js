@@ -1,7 +1,7 @@
 /**
  * F.A.S. Canonical Jurisdiction Data Model
  * Single source of truth for all compliance pages.
- * Last verified: May 2026
+ * Last verified: July 23, 2026
  */
 
 const FAS_JURISDICTIONS = {
@@ -135,29 +135,34 @@ const FAS_JURISDICTIONS = {
   },
 
   californiaAB1018: {
+    // Object key/id kept as-is (internal identifier only, never rendered to
+    // users) to avoid a schema migration on org_settings.j_caab1018 — content
+    // below was corrected 2026-07-23. AB-1018 and the earlier AB-2930 both
+    // stalled/were ordered inactive; neither is law. California's real
+    // framework is the FEHA/CPPA regulatory track below. See California.md.
     id:         'californiaAB1018',
-    label:      'California AB-1018',
-    fullName:   'California AB-1018 — Automated Decision Systems Accountability Act',
-    citation:   'AB-1018 (2025)',
-    scope:      'Employers using automated decision systems affecting California workers',
+    label:      'California — CRC FEHA + CPPA ADMT',
+    fullName:   'California FEHA Automated-Decision-System Regulations + CPPA ADMT Regulations',
+    citation:   '2 CCR §11008 et seq. (FEHA) · Cal. Code Regs. tit. 11 (CPPA)',
+    scope:      'FEHA: employers with 5+ CA employees, no revenue threshold. CPPA: businesses with $26.6M+ revenue or high-volume consumer data processing.',
     icon:       '🌉',
     color:      'warning',
-    status:     'active_building',
-    statusNote: 'Passed — requirements building for 2027 effective date',
-    effectiveDate: '2027-01-01',
+    status:     'active',
+    statusNote: 'FEHA ADS regulations in force since October 1, 2025; CPPA ADMT regulations effective January 1, 2027',
+    effectiveDate: '2025-10-01',
     burden:     'high',
-    penalty:    'TBD (rulemaking in progress)',
+    penalty:    'FEHA: standard disparate-impact liability (back pay, damages). CPPA: up to $2,500/violation, $7,500 if intentional.',
     coreRules: [
-      'Bias impact assessment required before deployment',
-      '4-year record retention',
-      'Candidate notice of automated decision system use',
-      'Human appeal mechanism required',
+      'FEHA: disparate impact prohibited on any ADS-derived selection criterion, 5+ employee threshold',
+      'FEHA: absence of anti-bias testing is evidence of liability; independent audits strengthen the affirmative defense',
+      'FEHA: 4-year retention for all ADS inputs, outputs, and decision criteria',
+      'CPPA (eff. Jan 1, 2027): pre-use notice, risk assessments, opt-out rights for "significant decisions"',
     ],
     fasCapabilities: [
-      'Impact assessment generation',
-      '4-year retention tracking',
-      'Readiness gap analysis',
-      'Appeals workflow documentation',
+      'FEHA disparate-impact testing and documentation',
+      'Independent-audit affirmative-defense evidence package',
+      '4-year retention enforcement',
+      'CPPA readiness tracking ahead of January 1, 2027',
     ],
   },
 
@@ -203,10 +208,10 @@ const FAS_JURISDICTIONS = {
     icon:       '🇪🇺',
     color:      'info',
     status:     'active_building',
-    statusNote: 'High-risk employment AI requirements effective August 2026',
-    effectiveDate: '2026-08-02',
+    statusNote: 'High-risk employment AI requirements pushed to December 2, 2027 under the EU Digital Omnibus agreement (pending formal EU adoption)',
+    effectiveDate: '2027-12-02',
     burden:     'high',
-    penalty:    'Up to €35M or 7% of global annual turnover',
+    penalty:    'Up to €15M or 3% of global annual turnover (high-risk-system tier)',
     coreRules: [
       'High-risk classification for employment AI systems',
       'Human oversight of high-risk AI decisions required',

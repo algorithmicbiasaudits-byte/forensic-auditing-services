@@ -1,0 +1,472 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>F.A.S. Dashboard — IT Setup Docs</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #f8fafc;
+      color: #1e293b;
+      min-height: 100vh;
+    }
+
+    .topnav {
+      background: #ffffff;
+      padding: 0 32px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      height: 56px;
+      border-bottom: 1px solid #e2e8f0;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 100;
+    }
+
+    .topnav-left { display: flex; align-items: center; gap: 24px; }
+    .nav-logo { font-size: 16px; font-weight: 700; color: #0a1628; letter-spacing: 2px; }
+    .nav-logo span { color: #b8872e; }
+    .nav-divider { width: 1px; height: 20px; background: #e2e8f0; }
+    .nav-org { font-size: 12px; color: #64748b; font-family: monospace; letter-spacing: 1px; }
+    .topnav-right { display: flex; align-items: center; gap: 20px; }
+    .nav-user { font-size: 12px; color: #64748b; }
+    .nav-user span { color: #1e293b; font-weight: 500; }
+    .nav-role { font-family: monospace; font-size: 10px; letter-spacing: 1px; padding: 4px 10px; border-radius: 2px; background: rgba(184,135,46,0.1); color: #b8872e; border: 1px solid rgba(184,135,46,0.25); }
+    .nav-logout { font-size: 12px; color: #94a3b8; cursor: pointer; text-decoration: none; transition: color 0.2s; }
+    .nav-logout:hover { color: #1e293b; }
+
+    .sidebar {
+      position: fixed;
+      top: 56px; left: 0; bottom: 0;
+      width: 220px;
+      background: white;
+      border-right: 1px solid #e8e8e8;
+      padding: 24px 0;
+      overflow-y: auto;
+      z-index: 90;
+    }
+
+    .sidebar-section-label {
+      font-family: monospace;
+      font-size: 9px;
+      letter-spacing: 2px;
+      color: #bbb;
+      text-transform: uppercase;
+      padding: 8px 12px 6px 28px;
+    }
+
+    .sidebar-link {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 12px 10px 28px;
+      font-size: 13px;
+      color: #555;
+      text-decoration: none;
+      transition: all 0.15s;
+      margin-bottom: 2px;
+    }
+
+    .sidebar-link:hover { background: #f5f8ff; color: #0a1628; }
+    .sidebar-link.active { background: rgba(184,135,46,0.08); color: #b8872e; font-weight: 600; border-left: 3px solid #b8872e; }
+    .sidebar-link .icon { font-size: 15px; width: 20px; text-align: center; }
+
+    .main-content {
+      margin-left: 220px;
+      margin-top: 56px;
+      padding: 32px;
+    }
+
+    .page-header { margin-bottom: 28px; }
+    .page-title { font-size: 22px; font-weight: 700; color: #1e293b; margin-bottom: 4px; }
+    .page-subtitle { font-size: 13px; color: #888; }
+
+    .docs-layout {
+      display: grid;
+      grid-template-columns: 200px 1fr;
+      gap: 24px;
+      align-items: start;
+    }
+
+    .docs-nav {
+      background: white;
+      border: 1px solid #e8e8e8;
+      border-radius: 4px;
+      overflow: hidden;
+      position: sticky;
+      top: 80px;
+    }
+
+    .docs-nav-item {
+      display: block;
+      padding: 12px 16px;
+      font-size: 13px;
+      color: #555;
+      text-decoration: none;
+      border-bottom: 1px solid #f0f0f0;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+
+    .docs-nav-item:last-child { border-bottom: none; }
+    .docs-nav-item:hover { background: #f8fafc; color: #1e293b; }
+    .docs-nav-item.active { background: rgba(184,135,46,0.06); color: #b8872e; font-weight: 600; border-left: 3px solid #b8872e; }
+
+    .docs-sections { display: flex; flex-direction: column; gap: 24px; }
+
+    .docs-section {
+      background: white;
+      border: 1px solid #e8e8e8;
+      border-radius: 4px;
+      overflow: hidden;
+    }
+
+    .section-header { padding: 16px 24px; border-bottom: 1px solid #e8e8e8; }
+    .section-title { font-size: 15px; font-weight: 600; color: #1e293b; }
+    .section-subtitle { font-size: 12px; color: #888; margin-top: 2px; }
+    .section-body { padding: 24px; font-size: 13px; line-height: 1.8; color: #334155; }
+    .section-body p { margin-bottom: 12px; }
+    .section-body p:last-child { margin-bottom: 0; }
+    .section-body strong { color: #1e293b; }
+
+    .info-callout {
+      background: rgba(184,135,46,0.06);
+      border: 1px solid rgba(184,135,46,0.2);
+      border-radius: 4px;
+      padding: 12px 16px;
+      font-size: 12px;
+      color: #555;
+      line-height: 1.7;
+      margin-bottom: 16px;
+    }
+    .info-callout strong { color: #b8872e; }
+
+    .warn-callout {
+      background: #fef2f2;
+      border: 1px solid #fecaca;
+      border-radius: 4px;
+      padding: 12px 16px;
+      font-size: 12px;
+      color: #7f1d1d;
+      line-height: 1.7;
+      margin-top: 16px;
+    }
+    .warn-callout strong { color: #dc2626; }
+
+    code {
+      font-family: 'SF Mono', Consolas, monospace;
+      background: #f1f5f9;
+      padding: 2px 6px;
+      border-radius: 3px;
+      font-size: 12px;
+      color: #b8872e;
+    }
+
+    pre {
+      background: #0f172a;
+      color: #e2e8f0;
+      padding: 16px 20px;
+      border-radius: 4px;
+      overflow-x: auto;
+      font-family: 'SF Mono', Consolas, monospace;
+      font-size: 12px;
+      line-height: 1.7;
+      margin: 12px 0;
+    }
+
+    table.doc-table { width: 100%; border-collapse: collapse; margin: 12px 0 20px; font-size: 12px; }
+    table.doc-table th {
+      text-align: left;
+      padding: 8px 10px;
+      background: #f8fafc;
+      border-bottom: 2px solid #e2e8f0;
+      font-family: monospace;
+      font-size: 10px;
+      letter-spacing: 0.5px;
+      color: #888;
+      text-transform: uppercase;
+    }
+    table.doc-table td {
+      padding: 8px 10px;
+      border-bottom: 1px solid #f0f0f0;
+      vertical-align: top;
+    }
+    table.doc-table td:first-child { font-family: monospace; color: #b8872e; white-space: nowrap; }
+
+    .status-code { font-family: monospace; font-weight: 700; }
+    .status-200 { color: #16a34a; }
+    .status-400, .status-401, .status-403, .status-500 { color: #dc2626; }
+
+    ul.plain-list { margin-left: 18px; margin-bottom: 12px; }
+    ul.plain-list li { margin-bottom: 6px; }
+
+    @media (max-width: 900px) {
+      .sidebar { display: none; }
+      .main-content { margin-left: 0; }
+      .docs-layout { grid-template-columns: 1fr; }
+      .docs-nav { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- TOP NAV -->
+<nav class="topnav">
+  <div class="topnav-left">
+    <div class="nav-logo">F<span>.</span>A<span>.</span>S<span>.</span></div>
+    <div class="nav-divider"></div>
+    <div class="nav-org" id="org-name">Loading...</div>
+  </div>
+  <div class="topnav-right">
+    <div class="nav-user">Signed in as <span id="user-email">—</span></div>
+    <div class="nav-role" id="user-role">—</div>
+    <a class="nav-logout" onclick="handleLogout()">Sign Out</a>
+  </div>
+</nav>
+
+<!-- SIDEBAR -->
+<aside class="sidebar">
+  <div class="sidebar-section-label">MAIN</div>
+  <a href="main.html" class="sidebar-link"><span class="icon">📊</span> Dashboard</a>
+  <a href="rejections.html" class="sidebar-link"><span class="icon">🚨</span> Rejections</a>
+  <a href="reports.html" class="sidebar-link"><span class="icon">📋</span> Reports</a>
+
+  <div class="sidebar-section-label">COMPLIANCE</div>
+  <a href="audit-trail.html" class="sidebar-link"><span class="icon">🔒</span> Audit Trail</a>
+  <a href="reviewers.html" class="sidebar-link"><span class="icon">👥</span> Reviewers</a>
+
+  <div class="sidebar-section-label">SYSTEM</div>
+  <a href="settings.html" class="sidebar-link"><span class="icon">⚙️</span> Settings</a>
+  <a href="it-setup-docs.html" class="sidebar-link active"><span class="icon">📄</span> IT Setup Docs</a>
+</aside>
+
+<!-- MAIN CONTENT -->
+<div class="main-content">
+
+  <div class="page-header">
+    <div class="page-title">IT Setup Docs</div>
+    <div class="page-subtitle">Give this page to your IT team — everything they need to connect your ATS to F.A.S.</div>
+  </div>
+
+  <div class="docs-layout">
+
+    <div class="docs-nav">
+      <a class="docs-nav-item active" onclick="scrollToSection('section-overview', this)">📖 Overview</a>
+      <a class="docs-nav-item" onclick="scrollToSection('section-auth', this)">🔑 Authentication</a>
+      <a class="docs-nav-item" onclick="scrollToSection('section-request', this)">📤 Request Format</a>
+      <a class="docs-nav-item" onclick="scrollToSection('section-proxy', this)">🔍 Proxy Flags</a>
+      <a class="docs-nav-item" onclick="scrollToSection('section-response', this)">📥 Response Format</a>
+      <a class="docs-nav-item" onclick="scrollToSection('section-example', this)">💻 Example</a>
+      <a class="docs-nav-item" onclick="scrollToSection('section-limits', this)">⚠️ Not Built Yet</a>
+    </div>
+
+    <div class="docs-sections">
+
+      <!-- OVERVIEW -->
+      <div class="docs-section" id="section-overview">
+        <div class="section-header">
+          <div class="section-title">📖 Overview</div>
+          <div class="section-subtitle">How this integration works, in one paragraph</div>
+        </div>
+        <div class="section-body">
+          <p>Your ATS sends an HTTP POST to F.A.S.'s webhook endpoint every time a candidate is hired, rejected, or left pending on a job. F.A.S. validates the request, resolves your organization from your API key (never from anything in the request body), runs a deterministic (non-AI) check for a couple of common bias-proxy patterns in the rejection reason, and stores the event. <strong>No changes to your ATS's own code are required</strong> beyond adding this one outbound webhook call.</p>
+          <div class="info-callout"><strong>Endpoint:</strong> <code>POST https://znjvjofsfvxccmidfpgy.supabase.co/functions/v1/candidate-event-intake</code></div>
+        </div>
+      </div>
+
+      <!-- AUTHENTICATION -->
+      <div class="docs-section" id="section-auth">
+        <div class="section-header">
+          <div class="section-title">🔑 Authentication</div>
+          <div class="section-subtitle">Every request must include your API key</div>
+        </div>
+        <div class="section-body">
+          <pre>Authorization: Bearer &lt;your-api-key&gt;</pre>
+          <ul class="plain-list">
+            <li>Your API key is issued directly by ALS Consulting during onboarding — there is no self-service signup or key-generation UI. Contact your F.A.S. point of contact to receive it.</li>
+            <li>The key identifies your organization server-side. You never need to send your organization ID or name in the request — it's resolved from the key.</li>
+            <li>Missing or malformed <code>Authorization</code> header → <span class="status-code status-401">401</span>.</li>
+            <li>A key that doesn't match any organization on file → <span class="status-code status-403">403</span>.</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- REQUEST FORMAT -->
+      <div class="docs-section" id="section-request">
+        <div class="section-header">
+          <div class="section-title">📤 Request Format</div>
+          <div class="section-subtitle">Fields, required/optional, and valid enum values</div>
+        </div>
+        <div class="section-body">
+          <table class="doc-table">
+            <thead><tr><th>Field</th><th>Type</th><th>Required</th><th>Notes</th></tr></thead>
+            <tbody>
+              <tr><td>candidate_id</td><td>string</td><td>Yes</td><td>Your own internal candidate identifier.</td></tr>
+              <tr><td>job_id</td><td>string</td><td>Yes</td><td>Your own internal job/requisition identifier.</td></tr>
+              <tr><td>job_title</td><td>string</td><td>Yes</td><td>Free text.</td></tr>
+              <tr><td>outcome</td><td>string</td><td>Yes</td><td>Must be exactly one of <code>hired</code>, <code>rejected</code>, <code>pending</code>.</td></tr>
+              <tr><td>occurred_at</td><td>timestamp</td><td>Yes</td><td>ISO 8601.</td></tr>
+              <tr><td>rejection_reason_from_ats</td><td>string</td><td>No</td><td>Used for the automatic proxy-flag check below.</td></tr>
+              <tr><td>years_experience</td><td>number</td><td>No</td><td></td></tr>
+              <tr><td>education_level</td><td>string</td><td>No</td><td>Free text.</td></tr>
+              <tr><td>skills</td><td>array of strings</td><td>No</td><td>Defaults to empty array.</td></tr>
+              <tr><td>ats_source</td><td>string</td><td>No</td><td>Defaults to <code>"unknown_api"</code>.</td></tr>
+              <tr><td>protected_class_cohort</td><td>string</td><td>No</td><td>See enum below. Defaults to <code>"undisclosed"</code>.</td></tr>
+              <tr><td>demographic_source</td><td>string</td><td>No</td><td>See enum below. Defaults to <code>"not_collected"</code>.</td></tr>
+              <tr><td>event_id</td><td>string</td><td>No</td><td>Echoed back as <code>tracking_id</code> — for your own logs only, not used for deduplication.</td></tr>
+            </tbody>
+          </table>
+
+          <p><strong>protected_class_cohort</strong> — valid values (standard EEO-1 categories plus OFCCP veteran/disability categories, added 2026-07-22):</p>
+          <pre>hispanic_or_latino
+white
+black_or_african_american
+native_hawaiian_or_pacific_islander
+asian
+american_indian_or_alaska_native
+two_or_more_races
+undisclosed
+protected_veteran
+individual_with_disability
+non_protected_veteran
+no_disability</pre>
+          <p>Any other value → <span class="status-code status-400">400</span>. Enforced both in this function and at the database level, kept in sync.</p>
+
+          <p><strong>demographic_source</strong> — valid values:</p>
+          <pre>candidate_self_id
+inferred
+not_collected</pre>
+          <p>Any other value → <span class="status-code status-400">400</span>.</p>
+        </div>
+      </div>
+
+      <!-- PROXY FLAGS -->
+      <div class="docs-section" id="section-proxy">
+        <div class="section-header">
+          <div class="section-title">🔍 Automatic Proxy-Flag Detection</div>
+          <div class="section-subtitle">Deterministic keyword matching — not AI, no LLM call</div>
+        </div>
+        <div class="section-body">
+          <p>If <code>rejection_reason_from_ats</code> is provided, F.A.S. automatically checks it for two categories of language before storing the record:</p>
+          <ul class="plain-list">
+            <li><strong>employment_gap_flagged</strong>: true if the text contains any of <code>gap</code>, <code>unemployed</code>, <code>inactivity</code>, <code>break in employment</code>, <code>resume hiatus</code>.</li>
+            <li><strong>keyword_mismatch_flagged</strong>: true if the text contains any of <code>mismatch</code>, <code>missing core skills</code>, <code>insufficient keywords</code>, <code>fail qualification filter</code>, <code>mismatched criteria</code>.</li>
+          </ul>
+          <div class="info-callout"><strong>This is a first-pass heuristic</strong>, not a finished classifier — the keyword lists are a starting baseline, expected to be tuned against real rejection-reason text from your specific ATS over time. Don't treat either flag as a final determination; they surface records for human review in F.A.S.'s dashboard.</div>
+        </div>
+      </div>
+
+      <!-- RESPONSE FORMAT -->
+      <div class="docs-section" id="section-response">
+        <div class="section-header">
+          <div class="section-title">📥 Response Format</div>
+          <div class="section-subtitle">Success and every error case</div>
+        </div>
+        <div class="section-body">
+          <p><strong>Success — <span class="status-code status-200">200</span></strong></p>
+          <pre>{ "status": "success", "tracking_id": "your-event_id-or-null" }</pre>
+
+          <table class="doc-table">
+            <thead><tr><th>Status</th><th>Meaning</th></tr></thead>
+            <tbody>
+              <tr><td><span class="status-code status-400">400</span></td><td>A required field is missing, or <code>outcome</code>/<code>protected_class_cohort</code>/<code>demographic_source</code> failed enum validation.</td></tr>
+              <tr><td><span class="status-code status-401">401</span></td><td>Missing or malformed <code>Authorization</code> header.</td></tr>
+              <tr><td><span class="status-code status-403">403</span></td><td>API key doesn't match any organization on file.</td></tr>
+              <tr><td><span class="status-code status-500">500</span></td><td>Unexpected server-side error. Response body includes the error message.</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- EXAMPLE -->
+      <div class="docs-section" id="section-example">
+        <div class="section-header">
+          <div class="section-title">💻 Example Request</div>
+        </div>
+        <div class="section-body">
+          <pre>curl -X POST \
+  -H "Authorization: Bearer &lt;your-api-key&gt;" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "candidate_id": "CAND-48213",
+    "job_id": "REQ-1029",
+    "job_title": "Senior Operations Manager",
+    "outcome": "rejected",
+    "rejection_reason_from_ats": "Candidate has a gap in employment history",
+    "years_experience": 7,
+    "protected_class_cohort": "protected_veteran",
+    "demographic_source": "candidate_self_id",
+    "occurred_at": "2026-07-22T14:30:00Z"
+  }' \
+  https://znjvjofsfvxccmidfpgy.supabase.co/functions/v1/candidate-event-intake</pre>
+        </div>
+      </div>
+
+      <!-- NOT BUILT YET -->
+      <div class="docs-section" id="section-limits">
+        <div class="section-header">
+          <div class="section-title">⚠️ What's Not Built Yet</div>
+          <div class="section-subtitle">Don't assume these exist</div>
+        </div>
+        <div class="section-body">
+          <ul class="plain-list">
+            <li><strong>No self-service signup.</strong> API keys are issued by ALS Consulting directly as part of onboarding.</li>
+            <li><strong>No sandbox/test API key mechanism.</strong> There is currently no separate test environment distinct from your production key — coordinate directly with your F.A.S. contact before sending your first real events. Test with a few clearly-fake candidate IDs against your real key, and we'll clean them up together before you go live.</li>
+            <li><strong>No idempotency/deduplication</strong> based on <code>event_id</code> or any other field — sending the same event twice creates two rows.</li>
+            <li><strong>CORS is fully open</strong> (<code>Access-Control-Allow-Origin: *</code>) — this endpoint is designed for server-to-server calls from your ATS backend, not browser-side JavaScript. Authentication is enforced via the API key regardless of origin.</li>
+          </ul>
+          <div class="warn-callout"><strong>Questions?</strong> Contact your F.A.S. point of contact directly — there is no public support ticketing system for this integration yet.</div>
+        </div>
+      </div>
+
+    </div><!-- end docs-sections -->
+  </div><!-- end docs-layout -->
+
+</div><!-- end main-content -->
+
+<script>
+  const { createClient } = supabase;
+  const supabaseClient = createClient(
+    'https://znjvjofsfvxccmidfpgy.supabase.co',
+    'sb_publishable_9eXyp1KWa4g_uvM4TCliBg_XAwwSuwD'
+  );
+
+  async function init() {
+    const { data: { session } } = await supabaseClient.auth.getSession();
+    if (!session) {
+      window.location.href = '/dashboard/login.html';
+      return;
+    }
+    const currentUser = session.user;
+    document.getElementById('user-email').textContent = currentUser.email;
+
+    const { data: userRow } = await supabaseClient
+      .from('users').select('customer_id').eq('auth_id', currentUser.id).single();
+    if (userRow) {
+      const { data: customer } = await supabaseClient
+        .from('customers').select('company_name').eq('customer_id', userRow.customer_id).single();
+      if (customer) document.getElementById('org-name').textContent = customer.company_name;
+    }
+  }
+
+  function scrollToSection(id, el) {
+    document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    document.querySelectorAll('.docs-nav-item').forEach(item => item.classList.remove('active'));
+    el.classList.add('active');
+  }
+
+  async function handleLogout() {
+    await supabaseClient.auth.signOut();
+    window.location.href = '/dashboard/login.html';
+  }
+
+  init();
+</script>
+</body>
+</html>

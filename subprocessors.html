@@ -192,7 +192,7 @@ body{font-family:var(--sans);background:var(--white);color:var(--gray-800);line-
       <a href="/demo">Demo</a>
       <a href="/terms">Terms</a>
       <a href="/faq">FAQ</a>
-      <a href="/apply" class="nav-cta">Apply for Beta</a>
+      <a href="https://calendly.com/astargill-ih3e/30min" target="_blank" rel="noopener" class="nav-cta">Speak to an Auditor</a>
     </div>
   </div>
 </nav>
@@ -204,8 +204,8 @@ body{font-family:var(--sans);background:var(--white);color:var(--gray-800);line-
     <h1 class="hero-title">Subprocessors &amp; <em>Third-Party</em><br>Service Providers</h1>
     <p class="hero-sub">ALS Consulting Services uses the following subprocessors to deliver F.A.S. and JD Analyzer services. All subprocessors are bound by data protection agreements and comply with applicable privacy frameworks.</p>
     <div class="hero-meta">
-      <span class="meta-pill pill-updated">Last Updated: April 29, 2026</span>
-      <span class="meta-pill pill-count">9 Subprocessors Listed</span>
+      <span class="meta-pill pill-updated">Last Updated: July 22, 2026</span>
+      <span class="meta-pill pill-count">4 Active Subprocessors</span>
     </div>
   </div>
 </section>
@@ -245,22 +245,9 @@ body{font-family:var(--sans);background:var(--white);color:var(--gray-800);line-
         <tbody>
 
           <tr>
-            <td><div class="sp-name">Stripe <span class="sp-badge badge-core">Billing</span></div></td>
-            <td>Payment processing</td>
-            <td>Billing info, payment tokens. Card data handled by Stripe directly — ALS does not store card numbers.</td>
-            <td><span class="loc-tag">🇺🇸 United States</span></td>
-            <td>
-              <div class="security-tags">
-                <span class="sec-tag">PCI DSS Level 1</span>
-                <span class="sec-tag">SOC 1/2</span>
-              </div>
-            </td>
-          </tr>
-
-          <tr>
             <td><div class="sp-name">Netlify <span class="sp-badge badge-infra">Hosting</span></div></td>
             <td>Static hosting, CDN, form capture</td>
-            <td>IP addresses, browser metadata, form submissions (beta applications, email gate)</td>
+            <td>IP addresses, browser metadata, contact form submissions</td>
             <td><span class="loc-tag">🌐 Global edge</span></td>
             <td>
               <div class="security-tags">
@@ -285,57 +272,14 @@ body{font-family:var(--sans);background:var(--white);color:var(--gray-800);line-
           </tr>
 
           <tr>
-            <td><div class="sp-name">Render <span class="sp-badge badge-core">API</span></div></td>
-            <td>API hosting, webhook processing</td>
-            <td>Rejection payloads from client ATS (via client-configured webhooks), audit results, system metrics</td>
-            <td><span class="loc-tag">🇺🇸 United States</span></td>
-            <td>
-              <div class="security-tags">
-                <span class="sec-tag">SOC 2 Type II</span>
-                <span class="sec-tag">TLS 1.3</span>
-              </div>
-            </td>
-          </tr>
-
-          <tr class="sp-highlight">
-            <td>
-              <div class="sp-name">Anthropic <span class="sp-badge badge-ai">AI Engine</span></div>
-              <div class="dpa-note">DPA in negotiation</div>
-            </td>
-            <td>Structured classification engine — parses rejections against 7 pre-defined compliance lanes</td>
-            <td>Rejection reasons, job metadata, candidate attributes (hashed), baseline references. See detailed disclosure below.</td>
-            <td><span class="loc-tag">🇺🇸 United States</span></td>
-            <td>
-              <div class="security-tags">
-                <span class="sec-tag pending">DPA Pending</span>
-                <span class="sec-tag">No Training Use</span>
-              </div>
-              <div style="font-size:11px;color:var(--gray-500);margin-top:5px;font-family:var(--mono)">API-only processing</div>
-            </td>
-          </tr>
-
-          <tr>
-            <td><div class="sp-name">Auth0 <span class="sp-badge badge-core">Auth</span></div></td>
+            <td><div class="sp-name">Supabase <span class="sp-badge badge-core">Auth</span></div></td>
             <td>Authentication, role management</td>
             <td>Reviewer identities, role assignments (HR Lead / Compliance Officer / Executive Sponsor), session tokens</td>
-            <td><span class="loc-tag">🇺🇸 United States</span></td>
+            <td><span class="loc-tag">🇺🇸 AWS US-East</span></td>
             <td>
               <div class="security-tags">
                 <span class="sec-tag">SOC 2 Type II</span>
                 <span class="sec-tag">TLS 1.3</span>
-              </div>
-            </td>
-          </tr>
-
-          <tr>
-            <td><div class="sp-name">Resend <span class="sp-badge badge-infra">Email</span></div></td>
-            <td>Transactional email notifications</td>
-            <td>Reviewer emails, escalation alerts, deadline notifications, decision confirmations</td>
-            <td><span class="loc-tag">🇺🇸 United States</span></td>
-            <td>
-              <div class="security-tags">
-                <span class="sec-tag">TLS 1.3</span>
-                <span class="sec-tag">SPF/DKIM</span>
               </div>
             </td>
           </tr>
@@ -376,37 +320,37 @@ body{font-family:var(--sans);background:var(--white);color:var(--gray-800);line-
 
   <!-- ANTHROPIC DISCLOSURE -->
   <div class="section fade-in">
-    <div class="section-label">Detailed Disclosure</div>
-    <h2 class="section-title">Anthropic (Claude API) — Extended Disclosure</h2>
-    <p class="section-body">Given the sensitivity of using an AI classification engine to process candidate rejection data, ALS Consulting provides the following detailed disclosure about how Anthropic's Claude API is used within the F.A.S. platform.</p>
+    <div class="section-label">Planned — Not Yet Active</div>
+    <h2 class="section-title">Anthropic (Claude API) — Planned Component</h2>
+    <p class="section-body">F.A.S.'s rejection-reason classifier is designed to use Anthropic's Claude API to convert free-text ATS rejection reasons into structured categories ahead of disparate-impact analysis. <strong>This component is not yet deployed</strong> — it is not currently processing any client or candidate data. The design intent is described below and this page will be updated the moment it goes live, at which point Anthropic will be added to the active subprocessor table above.</p>
 
     <div class="disclosure-card">
       <div class="dc-header">
-        <div class="dc-title">How <em>Claude API</em> Is Used in F.A.S.</div>
-        <span class="dc-badge">Structured Classification Only</span>
+        <div class="dc-title">How <em>Claude API</em> Will Be Used in F.A.S.</div>
+        <span class="dc-badge">Structured Classification Only — Planned</span>
       </div>
       <div class="dc-body">
         <div class="dc-block">
-          <div class="dc-label">Role in the Platform</div>
-          <div class="dc-text">F.A.S. uses the Claude API as a <strong style="color:var(--gold-2)">structured classification engine</strong>, not a generative decision-maker. The 7 compliance lanes are deterministic, rule-based frameworks with fixed thresholds. Claude parses the rejection payload and maps it to these pre-defined categories.</div>
+          <div class="dc-label">Planned Role in the Platform</div>
+          <div class="dc-text">F.A.S. is designed to use the Claude API as a <strong style="color:var(--gold-2)">structured classification engine</strong>, not a generative decision-maker. The 7 compliance lanes are deterministic, rule-based frameworks with fixed thresholds. Claude will parse the rejection payload and map it to these pre-defined categories under a tightly bounded prompt — it will not be given open-ended latitude to interpret, summarize, or draw conclusions beyond that fixed classification task, to prevent drift or hallucination outside the defined categories.</div>
         </div>
         <div class="dc-block">
-          <div class="dc-label">What Claude Does Not Do</div>
+          <div class="dc-label">What Claude Will Not Do</div>
           <ul class="dc-list">
-            <li>Claude does not make final rejection or advancement decisions</li>
-            <li>Claude does not generate the risk score independently</li>
-            <li>Claude outputs are advisory — all flagged decisions require human review</li>
+            <li>Claude will not make final rejection or advancement decisions</li>
+            <li>Claude will not generate the risk score independently</li>
+            <li>Claude outputs will be advisory only — all flagged decisions require human review</li>
             <li>The Compliance Officer, not Claude, makes the final determination</li>
             <li>Escalation logic is determined by ALS proprietary code, not Claude output</li>
           </ul>
         </div>
         <div class="dc-block">
-          <div class="dc-label">Data Handling</div>
+          <div class="dc-label">Planned Data Handling</div>
           <ul class="dc-list">
-            <li>Candidate data sent to Claude API is hashed and stripped of direct identifiers where possible</li>
-            <li>API inputs are processed in real-time and not retained beyond the session</li>
+            <li>Candidate data sent to the Claude API will be hashed and stripped of direct identifiers where possible</li>
+            <li>API inputs will be processed in real-time and not retained beyond the session</li>
             <li>Anthropic's API terms prohibit using API inputs for model training</li>
-            <li>ALS Consulting is actively negotiating a Data Processing Agreement (DPA) with Anthropic</li>
+            <li>ALS Consulting will execute a Data Processing Agreement (DPA) with Anthropic before this component goes live</li>
           </ul>
         </div>
         <div class="dc-block">
@@ -419,7 +363,7 @@ body{font-family:var(--sans);background:var(--white);color:var(--gray-800);line-
           </ul>
         </div>
         <div class="dc-note">
-          <p class="dc-note-text"><strong>Important:</strong> The final risk score, blocking decision, and escalation logic are determined by ALS Consulting's proprietary code — not by Claude's generative output. Every flagged rejection is reviewed and decided by a designated human compliance officer before the candidate is notified. Claude is a classification layer, not a decision-maker.</p>
+          <p class="dc-note-text"><strong>Important:</strong> Once deployed, the final risk score, blocking decision, and escalation logic will be determined by ALS Consulting's proprietary code — not by Claude's output. Every flagged rejection will still be reviewed and decided by a designated human compliance officer before the candidate is notified. Claude will be a bounded classification layer, not a decision-maker.</p>
         </div>
       </div>
     </div>
@@ -431,13 +375,13 @@ body{font-family:var(--sans);background:var(--white);color:var(--gray-800);line-
   <div class="section fade-in">
     <div class="section-label">Data Residency &amp; Transfers</div>
     <h2 class="section-title">Where Your Data Is Processed</h2>
-    <p class="section-body">Primary data processing occurs in the United States (Supabase on AWS US-East, Render US regions). For EU-based candidate data, all processing complies with GDPR Article 6 (lawfulness) and Article 21 (individual rights). Data is encrypted at rest (AES-256) and in transit (TLS 1.3).</p>
+    <p class="section-body">Primary data processing occurs in the United States (Supabase on AWS US-East). For EU-based candidate data, all processing complies with GDPR Article 6 (lawfulness) and Article 21 (individual rights). Data is encrypted at rest (AES-256) and in transit (TLS 1.3).</p>
     <p class="section-body" style="margin-top:12px">Where required by client contract or applicable law, data residency restrictions can be configured on Enterprise plans.</p>
 
     <div class="info-grid">
       <div class="info-card">
         <div class="ic-title">US-Based Processing</div>
-        <p class="ic-body">All primary infrastructure operates in US regions. Supabase (AWS US-East), Render (US), Auth0 (US), Stripe (US), Resend (US).</p>
+        <p class="ic-body">All primary infrastructure operates in US regions: Supabase (AWS US-East), Netlify (global edge), GitHub (US).</p>
       </div>
       <div class="info-card">
         <div class="ic-title">EU Compliance</div>
@@ -540,8 +484,8 @@ body{font-family:var(--sans);background:var(--white);color:var(--gray-800);line-
     <div class="footer-links">
       <a href="/terms">Terms &amp; Conditions</a>
       <a href="/faq">FAQ</a>
-      <a href="/apply">Apply for Beta</a>
-      <a href="https://calendly.com/astargill-ih3e/30min">Book a Call</a>
+      <a href="privacy.html">Privacy Policy</a>
+      <a href="https://calendly.com/astargill-ih3e/30min">Speak to an Auditor</a>
     </div>
   </div>
 </footer>
