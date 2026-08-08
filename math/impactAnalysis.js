@@ -159,6 +159,73 @@ export function computeZScore(group, referenceGroup) {
 }
 
 /**
+ * Chi-square test of independence across the full cohort x outcome
+ * contingency table -- tests whether selection outcome is independent of
+ * protected-class membership across ALL cohorts at once (omnibus), rather
+ * than pairwise against a single reference group like computeZScore().
+ * Standard 2 x k contingency table: each cohort's (selected, not-selected)
+ * counts vs. the pooled total.
+ *
+ * Validity assumption (standard chi-square requirement, not a stylistic
+ * choice): every expected cell count must be >= 5. Below that, the
+ * chi-square approximation is unreliable -- same discipline as
+ * computeZScore()'s n>=30 floor, just the correct threshold for this test.
+ */
+const CHI_SQUARE_CRITICAL_VALUES_ALPHA_05 = {
+  1: 3.841, 2: 5.991, 3: 7.815, 4: 9.488, 5: 11.070,
+  6: 12.592, 7: 14.067, 8: 15.507, 9: 16.919, 10: 18.307,
+  11: 19.675, 12: 21.026, 13: 22.362, 14: 23.685, 15: 24.996,
+};
+
+export function computeChiSquare(matrix) {
+  const cohorts = Object.entries(matrix)
+    .map(([key, c]) => ({ key, total: c.total, selected: c.selected, notSelected: c.total - c.selected }))
+    .filter(c => c.total > 0);
+
+  if (cohorts.length < 2) {
+    return { chiSquare: null, degreesOfFreedom: null, significant: null, reason: 'fewer than 2 cohorts with data' };
+  }
+
+  const grandSelected = cohorts.reduce((s, c) => s + c.selected, 0);
+  const grandNotSelected = cohorts.reduce((s, c) => s + c.notSelected, 0);
+  const grandTotal = grandSelected + grandNotSelected;
+
+  if (grandTotal === 0) {
+    return { chiSquare: null, degreesOfFreedom: null, significant: null, reason: 'no resolved outcomes' };
+  }
+
+  let chiSquare = 0;
+  let minExpected = Infinity;
+
+  for (const c of cohorts) {
+    const expectedSelected = (c.total * grandSelected) / grandTotal;
+    const expectedNotSelected = (c.total * grandNotSelected) / grandTotal;
+    minExpected = Math.min(minExpected, expectedSelected, expectedNotSelected);
+    if (expectedSelected > 0) chiSquare += ((c.selected - expectedSelected) ** 2) / expectedSelected;
+    if (expectedNotSelected > 0) chiSquare += ((c.notSelected - expectedNotSelected) ** 2) / expectedNotSelected;
+  }
+
+  const degreesOfFreedom = cohorts.length - 1;
+
+  if (minExpected < 5) {
+    return {
+      chiSquare: roundTo(chiSquare),
+      degreesOfFreedom,
+      significant: null,
+      reason: 'expected cell count below 5 in at least one cohort — chi-square validity assumption not met',
+    };
+  }
+
+  const critical = CHI_SQUARE_CRITICAL_VALUES_ALPHA_05[degreesOfFreedom];
+  return {
+    chiSquare: roundTo(chiSquare),
+    degreesOfFreedom,
+    significant: critical !== undefined ? chiSquare >= critical : null,
+    reason: critical === undefined ? 'degrees of freedom exceed critical-value table range (>15 cohorts)' : null,
+  };
+}
+
+/**
  * Unified calculation orchestrator interface.
  * No external baseline input — the real applicant pool is derived directly
  * from applicationRecords (see buildDemographicMatrix()).
@@ -169,11 +236,13 @@ export function analyze(applicationRecords) {
   const hasResolvedData = Object.keys(matrix).length > 0;
 
   const disparateImpact = hasResolvedData ? computeDisparateImpactRatio(matrix) : null;
+  const chiSquare = hasResolvedData ? computeChiSquare(matrix) : null;
   const pendingByCohort = computePendingByCohort(applicationRecords);
 
   return {
     proxyRatios,
     disparateImpact,
+    chiSquare,
     pendingByCohort,
     dataQualityWarning: hasResolvedData
       ? null

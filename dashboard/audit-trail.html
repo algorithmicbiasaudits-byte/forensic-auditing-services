@@ -141,6 +141,16 @@
             </div>
         </div>
 
+        <div class="bg-white shadow rounded-lg border border-gray-200 overflow-hidden mb-8">
+            <div class="px-6 py-5 border-b border-gray-200 bg-gray-50">
+                <h3 class="text-base font-semibold leading-6 text-gray-900">Chi-Square Test of Independence</h3>
+                <p class="text-xs text-gray-500 mt-1">Omnibus test across all cohorts at once (not pairwise, unlike the 4/5ths ratio above) — tests whether selection outcome is independent of protected-class membership.</p>
+            </div>
+            <div class="px-6 py-5" id="chiSquareResult">
+                <p class="text-sm text-gray-500">Insufficient data to compute.</p>
+            </div>
+        </div>
+
         <div class="bg-white shadow rounded-lg border border-gray-200 overflow-hidden">
             <div class="px-6 py-5 border-b border-gray-200 bg-gray-50 md:flex md:items-center md:justify-between">
                 <div>
@@ -218,7 +228,7 @@
 
                 const { data: userRow, error: userError } = await supabaseClient
                     .from('users')
-                    .select('customer_id')
+                    .select('customer_id, is_platform_admin')
                     .eq('auth_id', session.user.id)
                     .single();
 
@@ -229,7 +239,12 @@
                     return;
                 }
 
-                const resolvedCustomerId = userRow.customer_id;
+                const resolvedCustomerId = getEffectiveCustomerId(userRow.customer_id, userRow.is_platform_admin);
+
+                if (userRow.is_platform_admin) {
+                    await populateClientSelector(userRow.customer_id, resolvedCustomerId);
+                }
+
                 const { data: customer } = await supabaseClient
                     .from('customers').select('company_name').eq('customer_id', resolvedCustomerId).single();
                 companyName = customer?.company_name || null;
@@ -241,6 +256,42 @@
                 console.error("Critical initialization trap:", err);
                 showErrorBanner(true);
             }
+        }
+
+        // ── Platform-admin "viewing as" (shared pattern across all dashboard
+        // pages) -- see main.html for the full explanation. Selection here
+        // uses the same sessionStorage key so it persists across navigation,
+        // not just fetches locally on this page.
+        const FAS_VIEWING_AS_KEY = 'fas_viewing_as_customer_id';
+
+        function getEffectiveCustomerId(ownId, isPlatformAdmin) {
+            if (!isPlatformAdmin) return ownId;
+            const stored = sessionStorage.getItem(FAS_VIEWING_AS_KEY);
+            return stored ? Number(stored) : ownId;
+        }
+
+        async function populateClientSelector(ownId, effectiveId) {
+            const { data: allCustomers } = await supabaseClient
+                .from('customers').select('customer_id, company_name').order('company_name');
+            if (!allCustomers || allCustomers.length === 0) return;
+
+            const wrap = document.createElement('div');
+            wrap.className = 'mt-4 md:mt-0 flex items-center gap-3';
+            wrap.innerHTML = `
+                <label for="clientSelector" class="text-sm font-semibold text-gray-700">Client:</label>
+                <select id="clientSelector" class="rounded-md border border-gray-300 py-1.5 pl-3 pr-10 text-gray-900 text-sm focus:border-indigo-500 focus:ring-indigo-500">
+                    ${allCustomers.map(c => `<option value="${c.customer_id}" ${c.customer_id === effectiveId ? 'selected' : ''}>${c.company_name}${c.customer_id === ownId ? ' (You)' : ''}</option>`).join('')}
+                </select>`;
+
+            const headerRow = document.querySelector('.md\\:flex.md\\:items-center.md\\:justify-between');
+            if (headerRow) headerRow.insertBefore(wrap, headerRow.firstChild.nextSibling ?? null);
+
+            document.getElementById('clientSelector').addEventListener('change', (e) => {
+                const newId = Number(e.target.value);
+                if (newId === ownId) sessionStorage.removeItem(FAS_VIEWING_AS_KEY);
+                else sessionStorage.setItem(FAS_VIEWING_AS_KEY, String(newId));
+                location.reload();
+            });
         }
 
         async function fetchTenantApplicationRecords(customerId) {
@@ -344,7 +395,40 @@
             }
 
             renderAdverseImpactMatrixTable(matrix, ratiosByCohort, pendingByCohort);
+            renderChiSquareResult(analysisOutput.chiSquare);
             renderIntakeTableLogs(targetRecords);
+        }
+
+        function renderChiSquareResult(result) {
+            const container = document.getElementById('chiSquareResult');
+            if (!container) return;
+
+            if (!result || result.chiSquare === null) {
+                container.innerHTML = `<p class="text-sm text-gray-500">${result?.reason || 'Insufficient data to compute.'}</p>`;
+                return;
+            }
+
+            if (result.significant === null) {
+                container.innerHTML = `
+                    <div class="flex items-center gap-6">
+                        <div><div class="text-2xl font-semibold text-gray-900">${result.chiSquare}</div><div class="text-xs text-gray-500">χ² (df=${result.degreesOfFreedom})</div></div>
+                        <div class="text-sm text-amber-700 bg-amber-50 border border-amber-200 rounded-md px-3 py-2">${result.reason}</div>
+                    </div>`;
+                return;
+            }
+
+            const badgeClass = result.significant
+                ? 'bg-red-100 text-red-800 border border-red-200'
+                : 'bg-green-100 text-green-800 border border-green-200';
+            const badgeLabel = result.significant
+                ? 'Statistically Significant Association (p < 0.05)'
+                : 'No Significant Association (p ≥ 0.05)';
+
+            container.innerHTML = `
+                <div class="flex items-center gap-6">
+                    <div><div class="text-2xl font-semibold text-gray-900">${result.chiSquare}</div><div class="text-xs text-gray-500">χ² (df=${result.degreesOfFreedom})</div></div>
+                    <span class="inline-flex items-center rounded-full px-3 py-1 text-xs font-medium ${badgeClass}">${badgeLabel}</span>
+                </div>`;
         }
 
         function renderAdverseImpactMatrixTable(matrix, ratiosByCohort, pendingByCohort) {

@@ -313,10 +313,23 @@
     'sb_publishable_9eXyp1KWa4g_uvM4TCliBg_XAwwSuwD'
   );
 
+  async function resolveDestination(authUserId) {
+    const { data: userRow } = await supabaseClient
+      .from('users').select('customer_id').eq('auth_id', authUserId).single();
+    if (!userRow) return '/dashboard/main.html';
+
+    const { data: customer } = await supabaseClient
+      .from('customers').select('intake_method').eq('customer_id', userRow.customer_id).single();
+
+    return customer?.intake_method === 'csv'
+      ? '/dashboard/csv-upload.html'
+      : '/dashboard/main.html';
+  }
+
   async function checkSession() {
     const { data: { session } } = await supabaseClient.auth.getSession();
     if (session) {
-      window.location.href = '/dashboard/main.html';
+      window.location.href = await resolveDestination(session.user.id);
     }
   }
 
@@ -360,8 +373,9 @@
       successAlert.textContent = 'Login successful. Redirecting to dashboard...';
       successAlert.style.display = 'block';
 
+      const destination = await resolveDestination(data.user.id);
       setTimeout(() => {
-        window.location.href = '/dashboard/main.html';
+        window.location.href = destination;
       }, 1000);
 
     } catch (err) {

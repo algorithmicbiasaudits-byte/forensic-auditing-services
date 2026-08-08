@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>F.A.S. Dashboard — Main</title>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="jurisdictions.js"></script>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
 
@@ -734,51 +735,10 @@
   <div class="jurisdiction-widget">
     <div class="jurisdiction-widget-header">
       <div class="title">Jurisdiction Compliance Status</div>
-      <div class="subtitle">7 FRAMEWORKS · LAST VERIFIED MAY 2026</div>
+      <div class="subtitle" id="jurisdictionWidgetSubtitle">— FRAMEWORKS</div>
     </div>
-    <div class="jurisdiction-cards">
-      <div class="jurisdiction-card">
-        <div class="j-icon">⚖️</div>
-        <div class="j-label">UGESP</div>
-        <div class="j-status active"><div class="j-dot active"></div>Active</div>
-        <div class="j-effective">29 C.F.R. § 1607</div>
-      </div>
-      <div class="jurisdiction-card">
-        <div class="j-icon">🗽</div>
-        <div class="j-label">NYC LL144</div>
-        <div class="j-status active"><div class="j-dot active"></div>Active</div>
-        <div class="j-effective">Since Jul 2023</div>
-      </div>
-      <div class="jurisdiction-card">
-        <div class="j-icon">🏔️</div>
-        <div class="j-label">CO SB 189</div>
-        <div class="j-status delayed"><div class="j-dot delayed"></div>Jan 1, 2027</div>
-        <div class="j-effective">SB 205 repealed</div>
-      </div>
-      <div class="jurisdiction-card">
-        <div class="j-icon">🌾</div>
-        <div class="j-label">IL HB 3773</div>
-        <div class="j-status active"><div class="j-dot active"></div>Active</div>
-        <div class="j-effective">Since Jan 2026</div>
-      </div>
-      <div class="jurisdiction-card">
-        <div class="j-icon">🌉</div>
-        <div class="j-label">CA AB-1018</div>
-        <div class="j-status building"><div class="j-dot building"></div>Building</div>
-        <div class="j-effective">Jan 1, 2027</div>
-      </div>
-      <div class="jurisdiction-card">
-        <div class="j-icon">🏛️</div>
-        <div class="j-label">OFCCP</div>
-        <div class="j-status active"><div class="j-dot active"></div>Active</div>
-        <div class="j-effective">Contractors only</div>
-      </div>
-      <div class="jurisdiction-card">
-        <div class="j-icon">🇪🇺</div>
-        <div class="j-label">EU AI Act</div>
-        <div class="j-status building"><div class="j-dot building"></div>Building</div>
-        <div class="j-effective">Aug 2, 2026</div>
-      </div>
+    <div class="jurisdiction-cards" id="jurisdictionCards">
+      <!-- rendered by renderJurisdictionWidget() from jurisdictions.js — single source of truth -->
     </div>
   </div>
 
@@ -843,6 +803,107 @@
     'sb_publishable_9eXyp1KWa4g_uvM4TCliBg_XAwwSuwD'
   );
 
+  // ── Platform-admin "viewing as" (shared pattern across all dashboard
+  // pages) — lets ALS Consulting's own account browse any client's data,
+  // including the isolated F.A.S. Demo Account, without touching real
+  // client accounts' own view of their data. Selection persists via
+  // sessionStorage so it follows navigation across pages within a tab.
+  const FAS_VIEWING_AS_KEY = 'fas_viewing_as_customer_id';
+
+  function getEffectiveCustomerId(ownId, isPlatformAdmin) {
+    if (!isPlatformAdmin) return ownId;
+    const stored = sessionStorage.getItem(FAS_VIEWING_AS_KEY);
+    return stored ? Number(stored) : ownId;
+  }
+
+  async function renderPlatformAdminBar(ownId, effectiveId, isPlatformAdmin) {
+    if (!isPlatformAdmin) return;
+    const { data: allCustomers } = await supabaseClient
+      .from('customers').select('customer_id, company_name').order('company_name');
+    if (!allCustomers || allCustomers.length === 0) return;
+
+    const viewingOther = effectiveId !== ownId;
+    const BAR_HEIGHT = 32;
+    const bar = document.createElement('div');
+    bar.style.cssText = `position:fixed;top:0;left:0;right:0;height:${BAR_HEIGHT}px;z-index:99999;box-sizing:border-box;
+      display:flex;align-items:center;gap:10px;padding:0 24px;font-size:12px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
+      background:${viewingOther ? '#fefce8' : '#f1f5f9'};border-bottom:2px solid ${viewingOther ? '#eab308' : '#cbd5e1'};color:${viewingOther ? '#854d0e' : '#475569'};`;
+    bar.innerHTML = `
+      <span style="font-weight:600;">${viewingOther ? '⚠ Viewing as another account:' : 'Viewing:'}</span>
+      <select id="viewingAsSelector" style="font-size:12px;padding:3px 6px;border:1px solid #cbd5e1;border-radius:5px;background:#fff;">
+        ${allCustomers.map(c => `<option value="${c.customer_id}" ${c.customer_id === effectiveId ? 'selected' : ''}>${c.company_name}${c.customer_id === ownId ? ' (You)' : ''}</option>`).join('')}
+      </select>`;
+    document.body.prepend(bar);
+
+    // Every dashboard page uses fixed-position top nav/sidebar -- push them
+    // (and anything else pinned relative to them) down so the bar doesn't
+    // render underneath.
+    ['.topnav', '.topbar', '.sidebar', '.live-banner'].forEach(sel => {
+      document.querySelectorAll(sel).forEach(el => {
+        if (el === bar) return;
+        if (getComputedStyle(el).position === 'fixed') {
+          el.style.top = (parseFloat(getComputedStyle(el).top) || 0) + BAR_HEIGHT + 'px';
+        }
+      });
+    });
+    const mainContent = document.querySelector('.main-content');
+    if (mainContent) {
+      const cs = getComputedStyle(mainContent);
+      mainContent.style.marginTop = (parseFloat(cs.marginTop) || 0) + BAR_HEIGHT + 'px';
+    }
+
+    document.getElementById('viewingAsSelector').addEventListener('change', (e) => {
+      const newId = Number(e.target.value);
+      if (newId === ownId) sessionStorage.removeItem(FAS_VIEWING_AS_KEY);
+      else sessionStorage.setItem(FAS_VIEWING_AS_KEY, String(newId));
+      location.reload();
+    });
+  }
+
+  // Renders the Compliance Dashboard's jurisdiction cards from
+  // jurisdictions.js's FAS_JURISDICTIONS -- single source of truth, replacing
+  // 7 hand-duplicated static cards that had drifted (stale CA AB-1018 label
+  // for a dead bill, stale EU AI Act date). Mirrors the pattern already used
+  // correctly in settings.html since 2026-07-21.
+  const FAS_STATUS_TO_CSS = {
+    active: 'active',
+    active_building: 'building',
+    delayed_rewritten: 'delayed',
+    pending: 'delayed',
+  };
+
+  function renderJurisdictionWidget() {
+    const container = document.getElementById('jurisdictionCards');
+    const subtitle = document.getElementById('jurisdictionWidgetSubtitle');
+    if (!container || typeof FAS_JURISDICTIONS === 'undefined') return;
+
+    subtitle.textContent = `${FAS_JURISDICTION_ORDER.length} FRAMEWORKS`;
+
+    container.innerHTML = FAS_JURISDICTION_ORDER.map(id => {
+      const j = FAS_JURISDICTIONS[id];
+      const cssStatus = FAS_STATUS_TO_CSS[j.status] || 'delayed';
+      const statusLabel = FAS_STATUS_LABELS[j.status]?.label || j.status;
+      const effectiveText = j.effectiveDate
+        ? (j.status === 'active'
+            ? 'Since ' + new Date(j.effectiveDate + 'T00:00:00').toLocaleDateString('en-US', { month: 'short', year: 'numeric' })
+            : new Date(j.effectiveDate + 'T00:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }))
+        : j.citation;
+
+      // NYC LL144 / IL HB 3773 style labels use the short bill/law form for
+      // the card title; California's real name is longer, so shorten it here
+      // to fit the card without repeating the full jurisdictions.js label.
+      const shortLabel = id === 'californiaAB1018' ? 'CA FEHA/CPPA' : j.label.replace('EEOC ', '').replace('NYC ', 'NYC ').replace('Local Law 144', 'LL144');
+
+      return `
+        <div class="jurisdiction-card">
+          <div class="j-icon">${j.icon}</div>
+          <div class="j-label">${shortLabel}</div>
+          <div class="j-status ${cssStatus}"><div class="j-dot ${cssStatus}"></div>${statusLabel}</div>
+          <div class="j-effective">${effectiveText}</div>
+        </div>`;
+    }).join('');
+  }
+
   let currentUser = null;
   let currentCustomer = null;
 
@@ -858,6 +919,7 @@
 
     await loadCustomerData();
     await loadDashboardData();
+    renderJurisdictionWidget();
 
     document.getElementById('last-updated').textContent =
       'Last updated: ' + new Date().toLocaleTimeString();
@@ -865,20 +927,32 @@
     setInterval(loadDashboardData, 30000);
   }
 
+  let currentCustomerId = null;
+
   async function loadCustomerData() {
-    const { data, error } = await supabaseClient
-      .from('customers')
-      .select('*')
-      .eq('contact_email', currentUser.email)
-      .single();
+    const { data: userRow } = await supabaseClient
+      .from('users').select('customer_id, role, is_platform_admin').eq('auth_id', currentUser.id).single();
+
+    if (!userRow) {
+      document.getElementById('org-name').textContent = 'F.A.S. Dashboard';
+      document.getElementById('user-role').textContent = '—';
+      return;
+    }
+
+    document.getElementById('user-role').textContent =
+      (userRow.role || 'reviewer').replace('_', ' ').toUpperCase();
+
+    currentCustomerId = getEffectiveCustomerId(userRow.customer_id, userRow.is_platform_admin);
+    await renderPlatformAdminBar(userRow.customer_id, currentCustomerId, userRow.is_platform_admin);
+
+    const { data } = await supabaseClient
+      .from('customers').select('*').eq('customer_id', currentCustomerId).single();
 
     if (data) {
       currentCustomer = data;
       document.getElementById('org-name').textContent = data.company_name;
-      document.getElementById('user-role').textContent = 'COMPLIANCE OFFICER';
     } else {
       document.getElementById('org-name').textContent = 'F.A.S. Dashboard';
-      document.getElementById('user-role').textContent = 'ADMIN';
     }
   }
 
@@ -897,27 +971,25 @@
     const { data: todayRejections } = await supabaseClient
       .from('rejections')
       .select('rejection_id', { count: 'exact' })
+      .eq('customer_id', currentCustomerId)
       .gte('created_at', today);
-
-    const { data: redFlags } = await supabaseClient
-      .from('audits')
-      .select('audit_id', { count: 'exact' })
-      .eq('risk_level', 'red');
 
     const { data: allRejections } = await supabaseClient
       .from('rejections')
-      .select('rejection_id');
+      .select('rejection_id, audits(risk_level)')
+      .eq('customer_id', currentCustomerId);
+
+    const redFlags = (allRejections || []).filter(r => r.audits?.[0]?.risk_level === 'red');
 
     const { data: allOverrides } = await supabaseClient
       .from('overrides')
-      .select('rejection_id');
+      .select('rejection_id, rejections!inner(customer_id)')
+      .eq('rejections.customer_id', currentCustomerId);
 
     const overrideIds = new Set((allOverrides || []).map(o => o.rejection_id));
     const pending = (allRejections || []).filter(r => !overrideIds.has(r.rejection_id)).length;
 
-    const { data: overrides } = await supabaseClient
-      .from('overrides')
-      .select('override_id', { count: 'exact' });
+    const overrides = allOverrides;
 
     document.getElementById('stat-today').textContent = todayRejections?.length ?? 0;
     document.getElementById('stat-red').textContent = redFlags?.length ?? 0;
@@ -937,6 +1009,7 @@
         audits (risk_level, audit_id),
         overrides (override_id, decision)
       `)
+      .eq('customer_id', currentCustomerId)
       .order('created_at', { ascending: false })
       .limit(10);
 
@@ -968,7 +1041,7 @@
       const statusClass = hasOverride ? 'reviewed' : 'pending';
 
       return `
-        <div class="feed-row ${riskLevel}-row" onclick="viewRejection('${r.rejection_id}')">
+        <div class="feed-row ${riskLevel}-row" onclick="viewRejection('${encodeURIComponent(r.candidate_id)}')">
           <div class="candidate-id">${r.candidate_id}</div>
           <div class="job-title">${r.job_title || '—'}</div>
           <div class="ats-reason">${r.rejection_reason_from_ats || '—'}</div>
@@ -987,7 +1060,8 @@
   async function loadActivity() {
     const { data: overrides } = await supabaseClient
       .from('overrides')
-      .select('*, rejections(job_title, candidate_id)')
+      .select('*, rejections!inner(job_title, candidate_id, customer_id)')
+      .eq('rejections.customer_id', currentCustomerId)
       .order('reviewed_timestamp', { ascending: false })
       .limit(8);
 
@@ -1017,6 +1091,7 @@
     const { data: users } = await supabaseClient
       .from('users')
       .select('*')
+      .eq('customer_id', currentCustomerId)
       .limit(6);
 
     const reviewerPool = document.getElementById('reviewer-pool');

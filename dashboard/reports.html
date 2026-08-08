@@ -464,14 +464,51 @@
   let userNameById = {};
   let companyName = null;
 
+  // ── Platform-admin "viewing as" (shared pattern across all dashboard
+  // pages) -- see main.html for the full explanation.
+  const FAS_VIEWING_AS_KEY = 'fas_viewing_as_customer_id';
+
+  function getEffectiveCustomerId(ownId, isPlatformAdmin) {
+    if (!isPlatformAdmin) return ownId;
+    const stored = sessionStorage.getItem(FAS_VIEWING_AS_KEY);
+    return stored ? Number(stored) : ownId;
+  }
+
   async function resolveCustomer(authUserId) {
     const { data: userRow } = await supabaseClient
-      .from('users').select('customer_id').eq('auth_id', authUserId).single();
+      .from('users').select('customer_id, is_platform_admin').eq('auth_id', authUserId).single();
     if (!userRow) return;
-    customerId = userRow.customer_id;
+    customerId = getEffectiveCustomerId(userRow.customer_id, userRow.is_platform_admin);
     const { data: customer } = await supabaseClient
       .from('customers').select('company_name').eq('customer_id', customerId).single();
     companyName = customer?.company_name || null;
+
+    if (userRow.is_platform_admin) await populateClientSelector(userRow.customer_id, customerId);
+  }
+
+  // Platform-admin only, same gate/purpose as audit-trail.html's version.
+  async function populateClientSelector(ownId, effectiveId) {
+    const { data: allCustomers } = await supabaseClient
+      .from('customers').select('customer_id, company_name').order('company_name');
+    if (!allCustomers || allCustomers.length === 0) return;
+
+    const wrap = document.createElement('div');
+    wrap.style.cssText = 'display:flex;align-items:center;gap:8px;margin-right:12px;';
+    wrap.innerHTML = `
+      <span style="font-size:12px;font-weight:600;color:var(--text-secondary);">Client</span>
+      <select class="filter-select" id="clientSelector">
+        ${allCustomers.map(c => `<option value="${c.customer_id}" ${c.customer_id === effectiveId ? 'selected' : ''}>${c.company_name}${c.customer_id === ownId ? ' (You)' : ''}</option>`).join('')}
+      </select>`;
+
+    const header = document.querySelector('.page-header');
+    if (header) header.insertBefore(wrap, header.lastElementChild);
+
+    document.getElementById('clientSelector').addEventListener('change', (e) => {
+      const newId = Number(e.target.value);
+      if (newId === ownId) sessionStorage.removeItem(FAS_VIEWING_AS_KEY);
+      else sessionStorage.setItem(FAS_VIEWING_AS_KEY, String(newId));
+      location.reload();
+    });
   }
 
   async function loadReportsData() {
@@ -1287,19 +1324,44 @@
   // determination for courts/regulators, not something an audit-trail
   // export can assert.
   async function exportCertificate() {
-    if (!allRecords.length) { alert('No audit records on file yet — nothing to certify.'); return; }
+    // Pulls from `applications` (the real Auditing-tier statistical data,
+    // via math/impactAnalysis.js) rather than `rejections` -- that table is
+    // HITL-only and empty for every Auditing-only client, which meant this
+    // certificate previously refused to generate for them at all. Also
+    // deliberately drops any HITL review-completion language: this
+    // certificate certifies the AUDIT ran, not that remediation happened --
+    // an Auditing-only client has no HITL review step to report on. Fixed
+    // 2026-08-08.
+    const { data: applications } = await supabaseClient
+      .from('applications').select('protected_class_cohort, outcome, occurred_at').eq('customer_id', customerId);
+
+    if (!applications || !applications.length) { alert('No audit records on file yet — nothing to certify.'); return; }
     showPDFProgress('Generating Certificate of Audit Completion...');
 
     const { jsPDF } = window.jspdf;
     const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'letter' });
     const pageWidth = doc.internal.pageSize.getWidth();
+    const pageHeight = doc.internal.pageSize.getHeight();
     const margin = 20;
 
-    const dates = allRecords.map(r => new Date(r.created_at)).filter(d => !isNaN(d));
+    // jsPDF does not auto-paginate -- content past the page edge is
+    // silently clipped, not pushed to a new page. Call before drawing any
+    // block taller than a couple lines. Bug found + fixed 2026-08-08: the
+    // Remediation Notice box was landing ~23mm past the physical page edge
+    // and rendering invisible with no warning.
+    function ensureSpace(neededHeight) {
+      if (y + neededHeight > pageHeight - margin) {
+        doc.addPage();
+        y = margin;
+      }
+    }
+
+    const resolved = applications.filter(a => a.outcome === 'hired' || a.outcome === 'rejected');
+    const rejectedCount = applications.filter(a => a.outcome === 'rejected').length;
+    const dates = applications.map(a => new Date(a.occurred_at)).filter(d => !isNaN(d));
     const periodStart = new Date(Math.min(...dates));
     const periodEnd = new Date(Math.max(...dates));
-    const total = allRecords.length;
-    const reviewed = allRecords.filter(r => r.overrides && r.overrides.length > 0).length;
+    const total = resolved.length;
     const dateFmt = (d) => d.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
 
     let y = 22;
@@ -1345,6 +1407,7 @@
     y += 20;
 
     // Real summary stats box
+    ensureSpace(30);
     doc.setFillColor(248, 250, 252);
     doc.setDrawColor(226, 232, 240);
     doc.rect(margin, y, pageWidth - margin * 2, 30, 'FD');
@@ -1353,12 +1416,12 @@
     doc.setFont('helvetica', 'normal');
     const col1 = margin + 8, col2 = margin + (pageWidth - margin * 2) / 2 + 8;
     doc.text('Hiring decisions audited', col1, y + 10);
-    doc.text('Completed human review', col2, y + 10);
+    doc.text('Rejections analyzed', col2, y + 10);
     doc.setFontSize(16);
     doc.setFont('helvetica', 'bold');
     doc.setTextColor(10, 22, 40);
     doc.text(String(total), col1, y + 22);
-    doc.text(`${reviewed} of ${total}`, col2, y + 22);
+    doc.text(String(rejectedCount), col2, y + 22);
     y += 42;
 
     // Disparate impact summary — real, from applications data (may be empty)
@@ -1370,12 +1433,12 @@
     doc.setFont('helvetica', 'normal');
     doc.setFontSize(9);
     doc.setTextColor(71, 85, 105);
+    let chiSquareResult = null;
     try {
-      const { buildDemographicMatrix, computeDisparateImpactRatio } = await import('../math/impactAnalysis.js');
-      const { data: applications } = await supabaseClient
-        .from('applications').select('protected_class_cohort, outcome').eq('customer_id', customerId);
-      const matrix = buildDemographicMatrix(applications || []);
+      const { buildDemographicMatrix, computeDisparateImpactRatio, computeChiSquare } = await import('../math/impactAnalysis.js');
+      const matrix = buildDemographicMatrix(applications);
       const { ratios } = computeDisparateImpactRatio(matrix);
+      chiSquareResult = computeChiSquare(matrix);
       if (ratios.length) {
         const failing = ratios.filter(r => r.belowFourFifths).length;
         doc.text(`${ratios.length} demographic cohorts analyzed; ${failing} below the 4/5ths threshold.`, margin, y);
@@ -1384,6 +1447,26 @@
       }
     } catch (e) {
       doc.text('Insufficient resolved (hired/rejected) applicant-outcome data to compute selection-rate ratios.', margin, y);
+    }
+    y += 12;
+
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(10);
+    doc.setTextColor(30, 41, 59);
+    doc.text('Chi-Square Test of Independence', margin, y);
+    y += 6;
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(9);
+    doc.setTextColor(71, 85, 105);
+    if (chiSquareResult && chiSquareResult.chiSquare !== null) {
+      const sigText = chiSquareResult.significant === null
+        ? (chiSquareResult.reason || 'validity threshold not met')
+        : chiSquareResult.significant
+          ? 'statistically significant association (p < 0.05)'
+          : 'no significant association (p >= 0.05)';
+      doc.text(`chi-square = ${chiSquareResult.chiSquare} (df=${chiSquareResult.degreesOfFreedom}) — ${sigText}.`, margin, y);
+    } else {
+      doc.text(chiSquareResult?.reason || 'Insufficient data to compute.', margin, y);
     }
     y += 14;
 
@@ -1396,15 +1479,17 @@
     doc.setFontSize(9);
     doc.setTextColor(71, 85, 105);
     const methodology = [
-      'Each rejection was screened by the F.A.S. audit engine across five detection lanes:',
-      'employment gap penalty, keyword mismatch, proxy discrimination signal, disparate',
-      'impact pattern, and legal trigger language. Records with active flags require human-in-',
-      'the-loop reviewer decision before certification.'
+      'Hiring outcomes were analyzed using the F.A.S. statistical audit engine: selection-rate',
+      'and disparate-impact analysis by protected-class cohort under the 4/5ths rule, an omnibus',
+      'chi-square test of independence across all cohorts, and two-proportion Z-score',
+      'significance testing where sample size permits (n >= 30 per cohort). Rejection reasons',
+      'were additionally screened for employment-gap and keyword-mismatch proxy patterns.'
     ];
     methodology.forEach(line => { doc.text(line, margin, y); y += 5; });
     y += 12;
 
     // Explicit scope disclaimer — precision matters here
+    ensureSpace(22);
     doc.setFillColor(254, 252, 232);
     doc.setDrawColor(253, 230, 138);
     doc.rect(margin, y, pageWidth - margin * 2, 22, 'FD');
@@ -1413,8 +1498,30 @@
     doc.text('This certificate confirms that an independent audit was performed. It does not constitute a', margin + 4, y + 8);
     doc.text('determination of legal compliance with any specific statute or regulation — compliance is a', margin + 4, y + 13);
     doc.text('legal determination made by courts or regulators, not by an audit-trail export.', margin + 4, y + 18);
-    y += 34;
+    y += 32;
 
+    // Remediation notice — same visual treatment as the disclaimer above.
+    // States plainly that this certificate reports findings, not that
+    // findings have been remediated; ties to F.A.S. HITL as the separate
+    // engagement that provides remediation/override capability.
+    const remediationBoxHeight = 42;
+    ensureSpace(remediationBoxHeight);
+    doc.setFillColor(254, 252, 232);
+    doc.setDrawColor(253, 230, 138);
+    doc.rect(margin, y, pageWidth - margin * 2, remediationBoxHeight, 'FD');
+    doc.setFontSize(8);
+    doc.setFont('helvetica', 'bold');
+    doc.setTextColor(120, 90, 10);
+    doc.text('Remediation Notice', margin + 4, y + 7);
+    doc.setFont('helvetica', 'normal');
+    doc.text('This certificate reports statistical audit findings. It does not certify that any identified', margin + 4, y + 13);
+    doc.text('disparate impact, chi-square significance, or other flagged finding has been remediated.', margin + 4, y + 18);
+    doc.text(`Remediation is the responsibility of ${companyName || 'this organization'} unless a separate F.A.S. HITL`, margin + 4, y + 23);
+    doc.text('engagement is in place, which provides ongoing human-reviewed override authority over', margin + 4, y + 28);
+    doc.text('flagged hiring decisions. Contact ALS Consulting for details.', margin + 4, y + 33);
+    y += remediationBoxHeight + 12;
+
+    ensureSpace(26);
     doc.setFontSize(9);
     doc.setTextColor(100, 116, 139);
     doc.setFont('helvetica', 'normal');

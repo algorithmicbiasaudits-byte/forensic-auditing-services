@@ -677,35 +677,33 @@
     <div class="filter-controls">
       <div class="filter-group">
         <span class="filter-label">Risk</span>
-        <select class="filter-select">
-          <option>All</option>
-          <option>HIGH</option>
-          <option>MEDIUM</option>
-          <option>LOW</option>
+        <select class="filter-select" id="riskFilter" onchange="applyFilters()">
+          <option value="">All</option>
+          <option value="high">HIGH</option>
+          <option value="medium">MEDIUM</option>
+          <option value="low">LOW</option>
         </select>
       </div>
       <div class="filter-group">
-        <span class="filter-label">Lane</span>
-        <select class="filter-select">
-          <option>All</option>
-          <option>Age Proxy</option>
-          <option>Gap Penalty</option>
-          <option>Disparate Impact</option>
-          <option>Credential</option>
-          <option>Keyword</option>
-          <option>Disability</option>
-          <option>Legal</option>
+        <span class="filter-label">Flag</span>
+        <select class="filter-select" id="laneFilter" onchange="applyFilters()">
+          <option value="">All</option>
+          <option value="employment_gap_flagged">Employment Gap</option>
+          <option value="keyword_mismatch_flagged">Keyword Mismatch</option>
+          <option value="proxy_discrimination_detected">Proxy Discrimination</option>
+          <option value="disparate_impact_detected">Disparate Impact</option>
+          <option value="legal_trigger_flagged">Legal Trigger</option>
         </select>
       </div>
       <div class="filter-group" style="flex:1;min-width:180px;">
-        <input type="text" class="filter-input" placeholder="Search candidate ID or role…" style="width:100%;">
+        <input type="text" class="filter-input" id="searchInput" placeholder="Search candidate ID or role…" style="width:100%;" oninput="applyFilters()">
       </div>
       <div class="filter-group">
         <span class="filter-label">Date</span>
         <div class="date-range">
-          <input type="date" class="filter-select" style="font-size:0.74rem;padding:5px 8px;">
+          <input type="date" class="filter-select" id="dateFrom" style="font-size:0.74rem;padding:5px 8px;" onchange="applyFilters()">
           <span class="date-sep">→</span>
-          <input type="date" class="filter-select" style="font-size:0.74rem;padding:5px 8px;">
+          <input type="date" class="filter-select" id="dateTo" style="font-size:0.74rem;padding:5px 8px;" onchange="applyFilters()">
         </div>
       </div>
       <div class="filter-actions">
@@ -720,13 +718,8 @@
 
   <!-- Pagination -->
   <div class="pagination-bar">
-    <span class="page-info">Showing 1–10 of 12 rejections</span>
-    <div class="page-btns">
-      <button class="page-btn" disabled>← Prev</button>
-      <button class="page-btn active">1</button>
-      <button class="page-btn">2</button>
-      <button class="page-btn">Next →</button>
-    </div>
+    <span class="page-info" id="pageInfo">Showing 0 of 0 rejections</span>
+    <div class="page-btns" id="pageBtns"></div>
   </div>
 
 </main>
@@ -737,6 +730,57 @@ const supabaseClient = createClient(
   'https://znjvjofsfvxccmidfpgy.supabase.co',
   'sb_publishable_9eXyp1KWa4g_uvM4TCliBg_XAwwSuwD'
 );
+
+// ── Platform-admin "viewing as" (shared pattern across all dashboard
+// pages) — see main.html for the full explanation.
+const FAS_VIEWING_AS_KEY = 'fas_viewing_as_customer_id';
+
+function getEffectiveCustomerId(ownId, isPlatformAdmin) {
+  if (!isPlatformAdmin) return ownId;
+  const stored = sessionStorage.getItem(FAS_VIEWING_AS_KEY);
+  return stored ? Number(stored) : ownId;
+}
+
+async function renderPlatformAdminBar(ownId, effectiveId, isPlatformAdmin) {
+  if (!isPlatformAdmin) return;
+  const { data: allCustomers } = await supabaseClient
+    .from('customers').select('customer_id, company_name').order('company_name');
+  if (!allCustomers || allCustomers.length === 0) return;
+
+  const viewingOther = effectiveId !== ownId;
+  const BAR_HEIGHT = 32;
+  const bar = document.createElement('div');
+  bar.style.cssText = `position:fixed;top:0;left:0;right:0;height:${BAR_HEIGHT}px;z-index:99999;box-sizing:border-box;
+    display:flex;align-items:center;gap:10px;padding:0 24px;font-size:12px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
+    background:${viewingOther ? '#fefce8' : '#f1f5f9'};border-bottom:2px solid ${viewingOther ? '#eab308' : '#cbd5e1'};color:${viewingOther ? '#854d0e' : '#475569'};`;
+  bar.innerHTML = `
+    <span style="font-weight:600;">${viewingOther ? '⚠ Viewing as another account:' : 'Viewing:'}</span>
+    <select id="viewingAsSelector" style="font-size:12px;padding:3px 6px;border:1px solid #cbd5e1;border-radius:5px;background:#fff;">
+      ${allCustomers.map(c => `<option value="${c.customer_id}" ${c.customer_id === effectiveId ? 'selected' : ''}>${c.company_name}${c.customer_id === ownId ? ' (You)' : ''}</option>`).join('')}
+    </select>`;
+  document.body.prepend(bar);
+
+  ['.topnav', '.topbar', '.sidebar', '.live-banner'].forEach(sel => {
+    document.querySelectorAll(sel).forEach(el => {
+      if (el === bar) return;
+      if (getComputedStyle(el).position === 'fixed') {
+        el.style.top = (parseFloat(getComputedStyle(el).top) || 0) + BAR_HEIGHT + 'px';
+      }
+    });
+  });
+  const mainContent = document.querySelector('.main-content');
+  if (mainContent) {
+    const cs = getComputedStyle(mainContent);
+    mainContent.style.marginTop = (parseFloat(cs.marginTop) || 0) + BAR_HEIGHT + 'px';
+  }
+
+  document.getElementById('viewingAsSelector').addEventListener('change', (e) => {
+    const newId = Number(e.target.value);
+    if (newId === ownId) sessionStorage.removeItem(FAS_VIEWING_AS_KEY);
+    else sessionStorage.setItem(FAS_VIEWING_AS_KEY, String(newId));
+    location.reload();
+  });
+}
 
 let allRejections = [];
 let customerId = null;
@@ -750,14 +794,12 @@ async function init() {
   document.getElementById('reviewerAvatar').textContent = displayName
     .split(/[\s@.]+/).filter(Boolean).slice(0, 2).map(s => s[0].toUpperCase()).join('');
 
-  const { data: customer } = await supabaseClient
-    .from('customers')
-    .select('customer_id, company_name')
-    .eq('contact_email', session.user.email)
-    .single();
+  const { data: userRow } = await supabaseClient
+    .from('users').select('customer_id, is_platform_admin').eq('auth_id', session.user.id).single();
 
-  if (customer) {
-    customerId = customer.customer_id;
+  if (userRow) {
+    customerId = getEffectiveCustomerId(userRow.customer_id, userRow.is_platform_admin);
+    await renderPlatformAdminBar(userRow.customer_id, customerId, userRow.is_platform_admin);
     await loadRejections();
   }
 }
@@ -776,9 +818,76 @@ async function loadRejections() {
 
   allRejections = rejections || [];
   renderStats(allRejections);
-  renderCards(allRejections);
   renderTabCounts(allRejections);
-  renderPaginationInfo(allRejections);
+  applyFilters();
+}
+
+// ── Filtering + pagination ──
+let currentTab = 'all';
+let currentPage = 1;
+const PER_PAGE = 10;
+
+function setTab(el, tab) {
+  document.querySelectorAll('.filter-tab').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+  currentTab = tab;
+  currentPage = 1;
+  applyFilters();
+}
+
+function clearFilters() {
+  document.getElementById('riskFilter').value = '';
+  document.getElementById('laneFilter').value = '';
+  document.getElementById('searchInput').value = '';
+  document.getElementById('dateFrom').value = '';
+  document.getElementById('dateTo').value = '';
+  currentPage = 1;
+  applyFilters();
+}
+
+function applyFilters() {
+  const risk = document.getElementById('riskFilter').value;
+  const lane = document.getElementById('laneFilter').value;
+  const search = document.getElementById('searchInput').value.trim().toLowerCase();
+  const dateFrom = document.getElementById('dateFrom').value;
+  const dateTo = document.getElementById('dateTo').value;
+
+  let filtered = allRejections.filter(r => {
+    const hasOverride = r.overrides && r.overrides.length > 0;
+    if (currentTab === 'pending' && hasOverride) return false;
+    if (currentTab === 'reviewed' && !hasOverride) return false;
+    if (currentTab === 'overridden' && !(hasOverride && r.overrides[0].decision === 'approved')) return false;
+
+    const audit = r.audits?.[0];
+    if (risk) {
+      const level = (audit?.risk_level === 'red' ? 'high' : audit?.risk_level === 'orange' ? 'medium' : audit?.risk_level) || 'low';
+      if (level !== risk) return false;
+    }
+    if (lane && !(audit && audit[lane])) return false;
+
+    if (search) {
+      const haystack = `${r.candidate_id || ''} ${r.job_title || ''}`.toLowerCase();
+      if (!haystack.includes(search)) return false;
+    }
+
+    if (dateFrom && new Date(r.created_at) < new Date(dateFrom)) return false;
+    if (dateTo && new Date(r.created_at) > new Date(dateTo + 'T23:59:59')) return false;
+
+    return true;
+  });
+
+  const totalPages = Math.max(1, Math.ceil(filtered.length / PER_PAGE));
+  if (currentPage > totalPages) currentPage = totalPages;
+  const start = (currentPage - 1) * PER_PAGE;
+  const pageItems = filtered.slice(start, start + PER_PAGE);
+
+  renderCards(pageItems);
+  renderPaginationInfo(filtered.length, currentPage, totalPages);
+}
+
+function goToPage(page) {
+  currentPage = page;
+  applyFilters();
 }
 
 function renderTabCounts(rejections) {
@@ -792,15 +901,27 @@ function renderTabCounts(rejections) {
   document.getElementById('tabCountOverridden').textContent = overridden;
 }
 
-// Real pagination/filtering isn't implemented on this page yet (filter tabs
-// only toggle their own active style, setTab() never re-renders the list) --
-// showing an honest total rather than fake page controls until that's built.
-function renderPaginationInfo(rejections) {
-  const bar = document.querySelector('.pagination-bar');
-  if (!bar) return;
-  document.querySelector('.page-info').textContent =
-    `Showing all ${rejections.length} rejection${rejections.length === 1 ? '' : 's'}`;
-  bar.querySelectorAll('.page-btn').forEach(btn => { btn.disabled = true; btn.style.display = 'none'; });
+function renderPaginationInfo(total, page, totalPages) {
+  const info = document.getElementById('pageInfo');
+  const btns = document.getElementById('pageBtns');
+  if (!info || !btns) return;
+
+  if (total === 0) {
+    info.textContent = 'Showing 0 of 0 rejections';
+    btns.innerHTML = '';
+    return;
+  }
+
+  const start = (page - 1) * PER_PAGE + 1;
+  const end = Math.min(page * PER_PAGE, total);
+  info.textContent = `Showing ${start}–${end} of ${total} rejection${total === 1 ? '' : 's'}`;
+
+  let html = `<button class="page-btn" ${page <= 1 ? 'disabled' : ''} onclick="goToPage(${page - 1})">← Prev</button>`;
+  for (let p = 1; p <= totalPages; p++) {
+    html += `<button class="page-btn${p === page ? ' active' : ''}" onclick="goToPage(${p})">${p}</button>`;
+  }
+  html += `<button class="page-btn" ${page >= totalPages ? 'disabled' : ''} onclick="goToPage(${page + 1})">Next →</button>`;
+  btns.innerHTML = html;
 }
 
 function renderStats(rejections) {
@@ -842,7 +963,14 @@ function renderCards(rejections) {
                       riskLevel === 'medium' || riskLevel === 'orange' ? 'MEDIUM' : 'LOW';
     const isOverdue = (Date.now() - new Date(r.created_at)) / 3600000 > 3;
     const hasOverride = r.overrides && r.overrides.length > 0;
-    const lanes = audit?.lanes_triggered || [];
+    const FLAG_LABELS = {
+      employment_gap_flagged: 'Employment Gap',
+      keyword_mismatch_flagged: 'Keyword Mismatch',
+      proxy_discrimination_detected: 'Proxy Discrimination',
+      disparate_impact_detected: 'Disparate Impact',
+      legal_trigger_flagged: 'Legal Trigger',
+    };
+    const lanes = audit ? Object.keys(FLAG_LABELS).filter(k => audit[k]) : [];
 
     return `
       <div class="rejection-card risk-${riskLevel === 'red' ? 'high' : riskLevel === 'orange' ? 'medium' : riskLevel}${isOverdue && !hasOverride ? ' overdue' : ''}">
@@ -851,7 +979,7 @@ function renderCards(rejections) {
             <span class="case-id">#${r.rejection_id}</span>
             <span class="badge badge-${riskLabel.toLowerCase()}">${riskLabel}</span>
             ${isOverdue && !hasOverride ? '<span class="badge badge-overdue">⏱ OVERDUE</span>' : ''}
-            ${lanes.map(l => `<span class="badge badge-lane">${l}</span>`).join('')}
+            ${lanes.map(l => `<span class="badge badge-lane">${FLAG_LABELS[l]}</span>`).join('')}
           </div>
           <div class="card-row-2">
             <span class="card-role">${r.job_title || 'Unknown Position'}</span>
@@ -869,7 +997,7 @@ function renderCards(rejections) {
             <div class="card-actions">
               ${hasOverride
                 ? `<span class="badge badge-status-reviewed">${r.overrides[0].decision}</span>`
-                : `<button class="btn btn-primary btn-sm" onclick="window.location='/dashboard/rejection-detail.html?id=${r.rejection_id}'">Review Now →</button>`
+                : `<button class="btn btn-primary btn-sm" onclick="window.location='/dashboard/rejection-detail.html?id=${encodeURIComponent(r.candidate_id)}'">Review Now →</button>`
               }
             </div>
           </div>
@@ -886,17 +1014,6 @@ function formatTime(iso) {
   if (diff < 3600) return Math.floor(diff / 60) + 'm ago';
   if (diff < 86400) return Math.floor(diff / 3600) + 'h ago';
   return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-}
-
-function setTab(el, tab) {
-  document.querySelectorAll('.filter-tab').forEach(t => t.classList.remove('active'));
-  el.classList.add('active');
-}
-
-function clearFilters() {
-  document.querySelectorAll('.filter-select').forEach(s => { if (s.tagName === 'SELECT') s.selectedIndex = 0; });
-  document.querySelectorAll('input[type="text"]').forEach(i => i.value = '');
-  document.querySelectorAll('input[type="date"]').forEach(i => i.value = '');
 }
 
 document.addEventListener('DOMContentLoaded', init);

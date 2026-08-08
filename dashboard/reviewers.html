@@ -283,6 +283,57 @@
     'sb_publishable_9eXyp1KWa4g_uvM4TCliBg_XAwwSuwD'
   );
 
+  // ── Platform-admin "viewing as" (shared pattern across all dashboard
+  // pages) — see main.html for the full explanation.
+  const FAS_VIEWING_AS_KEY = 'fas_viewing_as_customer_id';
+
+  function getEffectiveCustomerId(ownId, isPlatformAdmin) {
+    if (!isPlatformAdmin) return ownId;
+    const stored = sessionStorage.getItem(FAS_VIEWING_AS_KEY);
+    return stored ? Number(stored) : ownId;
+  }
+
+  async function renderPlatformAdminBar(ownId, effectiveId, isPlatformAdmin) {
+    if (!isPlatformAdmin) return;
+    const { data: allCustomers } = await supabaseClient
+      .from('customers').select('customer_id, company_name').order('company_name');
+    if (!allCustomers || allCustomers.length === 0) return;
+
+    const viewingOther = effectiveId !== ownId;
+    const BAR_HEIGHT = 32;
+    const bar = document.createElement('div');
+    bar.style.cssText = `position:fixed;top:0;left:0;right:0;height:${BAR_HEIGHT}px;z-index:99999;box-sizing:border-box;
+      display:flex;align-items:center;gap:10px;padding:0 24px;font-size:12px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
+      background:${viewingOther ? '#fefce8' : '#f1f5f9'};border-bottom:2px solid ${viewingOther ? '#eab308' : '#cbd5e1'};color:${viewingOther ? '#854d0e' : '#475569'};`;
+    bar.innerHTML = `
+      <span style="font-weight:600;">${viewingOther ? '⚠ Viewing as another account:' : 'Viewing:'}</span>
+      <select id="viewingAsSelector" style="font-size:12px;padding:3px 6px;border:1px solid #cbd5e1;border-radius:5px;background:#fff;">
+        ${allCustomers.map(c => `<option value="${c.customer_id}" ${c.customer_id === effectiveId ? 'selected' : ''}>${c.company_name}${c.customer_id === ownId ? ' (You)' : ''}</option>`).join('')}
+      </select>`;
+    document.body.prepend(bar);
+
+    ['.topnav', '.topbar', '.sidebar', '.live-banner'].forEach(sel => {
+      document.querySelectorAll(sel).forEach(el => {
+        if (el === bar) return;
+        if (getComputedStyle(el).position === 'fixed') {
+          el.style.top = (parseFloat(getComputedStyle(el).top) || 0) + BAR_HEIGHT + 'px';
+        }
+      });
+    });
+    const mainContent = document.querySelector('.main-content');
+    if (mainContent) {
+      const cs = getComputedStyle(mainContent);
+      mainContent.style.marginTop = (parseFloat(cs.marginTop) || 0) + BAR_HEIGHT + 'px';
+    }
+
+    document.getElementById('viewingAsSelector').addEventListener('change', (e) => {
+      const newId = Number(e.target.value);
+      if (newId === ownId) sessionStorage.removeItem(FAS_VIEWING_AS_KEY);
+      else sessionStorage.setItem(FAS_VIEWING_AS_KEY, String(newId));
+      location.reload();
+    });
+  }
+
   let allReviewers = [];
   let filteredReviewers = [];
   let activeTab = 'all';
@@ -296,7 +347,7 @@
     const { data: { session } } = await supabaseClient.auth.getSession();
     if (!session) { window.location.href = 'login.html'; return; }
     injectUserInfo(session.user);
-    await resolveCustomer(session.user.email);
+    await resolveCustomer(session.user.id);
     await checkEntitlement();
     await loadReviewers();
     await loadAuditLog();
@@ -314,13 +365,14 @@
     document.getElementById('userRole').textContent = user.user_metadata?.role || 'Reviewer';
   }
 
-  async function resolveCustomer(email) {
-    const { data: customer } = await supabaseClient
-      .from('customers')
-      .select('customer_id, company_name')
-      .eq('contact_email', email)
-      .single();
-    if (customer) customerId = customer.customer_id;
+  async function resolveCustomer(authUserId) {
+    const { data: userRow } = await supabaseClient
+      .from('users').select('customer_id, role, is_platform_admin').eq('auth_id', authUserId).single();
+    if (userRow) {
+      customerId = getEffectiveCustomerId(userRow.customer_id, userRow.is_platform_admin);
+      await renderPlatformAdminBar(userRow.customer_id, customerId, userRow.is_platform_admin);
+      if (userRow.role) document.getElementById('userRole').textContent = userRow.role.replace('_', ' ').toUpperCase();
+    }
   }
 
   async function loadReviewers() {
@@ -485,21 +537,24 @@
 
     if (!name || !email) { alert('Name and email are required.'); return; }
 
-    const reviewerData = {
-      name, email, role, status,
-      customer_id: customerId,
-      updated_at: new Date().toISOString()
-    };
-
     if (editingId) {
+      const reviewerData = { name, email, role, status, customer_id: customerId, updated_at: new Date().toISOString() };
       const { error } = await supabaseClient.from('users').update(reviewerData).eq('user_id', editingId);
       if (error) { alert('Error updating reviewer: ' + error.message); return; }
       await logAuditAction('UPDATE_REVIEWER', editingId, `Updated reviewer ${name} (${email}) — role: ${role}, status: ${status}`);
     } else {
-      reviewerData.created_at = new Date().toISOString();
-      const { error } = await supabaseClient.from('users').insert([reviewerData]);
-      if (error) { alert('Error adding reviewer: ' + error.message); return; }
-      await logAuditAction('CREATE_REVIEWER', null, `Added reviewer ${name} (${email}) — role: ${role}`);
+      const { data: { session } } = await supabaseClient.auth.getSession();
+      const res = await fetch('https://znjvjofsfvxccmidfpgy.supabase.co/functions/v1/invite-reviewer', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${session.access_token}`,
+        },
+        body: JSON.stringify({ name, email, role }),
+      });
+      const result = await res.json();
+      if (!res.ok) { alert('Error inviting reviewer: ' + (result.error || 'unknown error')); return; }
+      await logAuditAction('CREATE_REVIEWER', null, `Invited reviewer ${name} (${email}) — role: ${role}`);
     }
 
     closeModal();
