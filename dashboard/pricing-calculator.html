@@ -1,0 +1,573 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>F.A.S. Dashboard — Pricing Calculator</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #f8fafc;
+      color: #1e293b;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ── TOP NAV ── */
+    .topnav {
+      background: #ffffff;
+      padding: 0 32px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      height: 56px;
+      border-bottom: 1px solid #e2e8f0;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 100;
+    }
+
+    .topnav-left { display: flex; align-items: center; gap: 24px; }
+    .nav-logo { font-size: 16px; font-weight: 700; color: #0a1628; letter-spacing: 2px; }
+    .nav-logo span { color: #b8872e; }
+    .nav-divider { width: 1px; height: 20px; background: #e2e8f0; }
+    .nav-org { font-size: 12px; color: #64748b; font-family: monospace; letter-spacing: 1px; }
+    .topnav-right { display: flex; align-items: center; gap: 20px; }
+    .nav-user { font-size: 12px; color: #64748b; }
+    .nav-user span { color: #1e293b; font-weight: 500; }
+    .nav-role {
+      font-family: monospace; font-size: 10px; letter-spacing: 1px; padding: 4px 10px;
+      border-radius: 2px; background: rgba(184,135,46,0.1); color: #b8872e;
+      border: 1px solid rgba(184,135,46,0.25);
+    }
+    .nav-logout { font-size: 12px; color: #94a3b8; cursor: pointer; text-decoration: none; }
+    .nav-logout:hover { color: #1e293b; }
+
+    /* ── SIDEBAR ── */
+    .sidebar {
+      position: fixed; top: 56px; left: 0; bottom: 0; width: 220px;
+      background: white; border-right: 1px solid #e8e8e8; padding: 24px 0;
+      overflow-y: auto; z-index: 90;
+    }
+    .sidebar-section-label {
+      font-family: monospace; font-size: 9px; letter-spacing: 2px; color: #bbb;
+      text-transform: uppercase; padding: 8px 20px 6px; margin-top: 12px;
+    }
+    .sidebar-section-label:first-child { margin-top: 0; }
+    .sidebar-link {
+      display: flex; align-items: center; gap: 10px; padding: 10px 20px;
+      font-size: 13px; color: #555; text-decoration: none; cursor: pointer;
+      transition: all 0.15s; margin: 0 8px 2px; border-radius: 4px;
+    }
+    .sidebar-link:hover { background: #f5f8ff; color: #0a1628; }
+    .sidebar-link.active { background: rgba(184,135,46,0.08); color: #b8872e; font-weight: 600; border-left: 3px solid #b8872e; }
+    .sidebar-link .icon { font-size: 15px; width: 20px; text-align: center; }
+    .sidebar-badge {
+      margin-left: auto; background: #e53e3e; color: white; font-size: 10px; font-weight: 700;
+      padding: 2px 7px; border-radius: 10px; min-width: 20px; text-align: center;
+    }
+
+    /* ── MAIN CONTENT ── */
+    .main-content { margin-left: 220px; margin-top: 56px; padding: 32px; flex: 1; }
+
+    .page-header { margin-bottom: 28px; }
+    .page-title { font-size: 22px; font-weight: 700; color: #1e293b; margin-bottom: 4px; }
+    .page-subtitle { font-size: 13px; color: #888; }
+
+    .calc-layout { display: grid; grid-template-columns: 1fr 420px; gap: 24px; align-items: start; }
+
+    .card { background: white; border: 1px solid #e8e8e8; border-radius: 6px; padding: 24px 26px; }
+    .card + .card { margin-top: 20px; }
+
+    .card-title {
+      font-family: monospace; font-size: 10px; letter-spacing: 1.5px; color: #b8872e;
+      text-transform: uppercase; margin-bottom: 16px; border-bottom: 1px solid #f1f5f9; padding-bottom: 8px;
+    }
+
+    label.field-label {
+      display: block; font-size: 12px; font-weight: 600; color: #475569; margin-bottom: 6px;
+    }
+    .field { margin-bottom: 18px; }
+    .field:last-child { margin-bottom: 0; }
+    input[type="number"], select {
+      width: 100%; padding: 9px 12px; font-size: 13px; border: 1px solid #cbd5e1;
+      border-radius: 4px; color: #1e293b; background: white;
+    }
+    input[type="number"]:focus, select:focus { outline: none; border-color: #b8872e; }
+    .hint { font-size: 11px; color: #94a3b8; margin-top: 5px; }
+
+    .tier-badge {
+      display: inline-block; font-size: 11px; font-weight: 700; letter-spacing: 0.5px;
+      padding: 3px 10px; border-radius: 100px; margin-top: 6px;
+    }
+    .tier-badge.t1 { background: rgba(22,163,74,0.1); color: #16a34a; }
+    .tier-badge.t2 { background: rgba(184,135,46,0.12); color: #b8872e; }
+    .tier-badge.t3 { background: rgba(220,38,38,0.08); color: #dc2626; }
+
+    .lanes-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px 16px; }
+    .lane-check {
+      display: flex; align-items: center; gap: 8px; font-size: 13px; color: #334155;
+      padding: 6px 0; cursor: pointer;
+    }
+    .lane-check input { width: 16px; height: 16px; cursor: pointer; }
+
+    .toggle-row {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 10px 0; border-bottom: 1px solid #f1f5f9;
+    }
+    .toggle-row:last-child { border-bottom: none; }
+    .toggle-row .label { font-size: 13px; color: #334155; font-weight: 500; }
+    .toggle-row .sub { font-size: 11px; color: #94a3b8; margin-top: 2px; }
+    .switch { position: relative; width: 40px; height: 22px; flex-shrink: 0; }
+    .switch input { opacity: 0; width: 0; height: 0; }
+    .slider {
+      position: absolute; cursor: pointer; inset: 0; background: #cbd5e1;
+      border-radius: 22px; transition: 0.2s;
+    }
+    .slider::before {
+      content: ""; position: absolute; height: 16px; width: 16px; left: 3px; bottom: 3px;
+      background: white; border-radius: 50%; transition: 0.2s;
+    }
+    input:checked + .slider { background: #b8872e; }
+    input:checked + .slider::before { transform: translateX(18px); }
+
+    .inline-number {
+      width: 70px; padding: 6px 8px; font-size: 12px; border: 1px solid #cbd5e1;
+      border-radius: 4px; margin-left: 10px;
+    }
+
+    /* ── OUTPUT ── */
+    .quote-card {
+      background: #0a1628; color: white; border-radius: 6px; padding: 26px; position: sticky; top: 80px;
+    }
+    .quote-title { font-family: monospace; font-size: 10px; letter-spacing: 1.5px; color: #b8872e; text-transform: uppercase; margin-bottom: 4px; }
+    .quote-subtitle { font-size: 12px; color: rgba(255,255,255,0.5); margin-bottom: 20px; }
+
+    .line-item {
+      display: flex; justify-content: space-between; align-items: baseline;
+      padding: 10px 0; border-bottom: 1px solid rgba(255,255,255,0.08); font-size: 13px;
+    }
+    .line-item .desc { color: rgba(255,255,255,0.75); }
+    .line-item .desc .sub { display: block; font-size: 10px; color: rgba(255,255,255,0.4); margin-top: 2px; }
+    .line-item .amt { font-weight: 600; color: white; white-space: nowrap; }
+
+    .quote-total {
+      display: flex; justify-content: space-between; align-items: baseline;
+      margin-top: 18px; padding-top: 18px; border-top: 2px solid rgba(184,135,46,0.4);
+    }
+    .quote-total .label { font-size: 13px; color: rgba(255,255,255,0.7); font-weight: 600; }
+    .quote-total .amt { font-size: 26px; font-weight: 700; color: #d9a94a; }
+
+    .override-row {
+      margin-top: 14px; padding-top: 14px; border-top: 1px solid rgba(255,255,255,0.08);
+    }
+    .override-label {
+      display: flex; align-items: center; gap: 8px; font-size: 12px; color: rgba(255,255,255,0.65);
+      cursor: pointer;
+    }
+    .override-label input { width: 14px; height: 14px; cursor: pointer; }
+    #override-input-row { margin-top: 10px; }
+    #override-value {
+      width: 100%; padding: 8px 10px; font-size: 15px; font-weight: 600; color: #1e293b;
+      border: 2px solid #d9a94a; border-radius: 4px; background: white;
+    }
+    .override-hint {
+      font-size: 10px; color: rgba(255,255,255,0.4); margin-top: 6px;
+    }
+    .override-hint span { color: rgba(255,255,255,0.7); font-weight: 600; }
+
+    .renewal-box {
+      margin-top: 16px; padding: 14px 16px; background: rgba(255,255,255,0.05);
+      border-radius: 4px; font-size: 12px; color: rgba(255,255,255,0.7);
+    }
+    .renewal-box .row { display: flex; justify-content: space-between; padding: 3px 0; }
+    .renewal-box .row .amt { color: white; font-weight: 600; }
+
+    .quote-note {
+      margin-top: 18px; font-size: 11px; color: rgba(255,255,255,0.4); line-height: 1.5;
+    }
+
+    .empty-lanes { font-size: 12px; color: rgba(255,255,255,0.4); text-align: center; padding: 20px 0; }
+
+    .access-denied { max-width: 480px; margin: 120px auto; text-align: center; padding: 40px; }
+    .access-denied h2 { color: #1e293b; margin-bottom: 12px; }
+    .access-denied p { color: #888; font-size: 14px; }
+
+    @media (max-width: 1000px) {
+      .sidebar { display: none; }
+      .main-content { margin-left: 0; }
+      .calc-layout { grid-template-columns: 1fr; }
+      .quote-card { position: static; }
+    }
+  </style>
+</head>
+<body>
+
+<nav class="topnav">
+  <div class="topnav-left">
+    <div class="nav-logo">F<span>.</span>A<span>.</span>S<span>.</span></div>
+    <div class="nav-divider"></div>
+    <div class="nav-org">ALS Consulting — Platform Admin</div>
+  </div>
+  <div class="topnav-right">
+    <div class="nav-user">Signed in as <span id="user-email">—</span></div>
+    <div class="nav-role">ADMIN</div>
+    <a class="nav-logout" onclick="handleLogout()">Sign Out</a>
+  </div>
+</nav>
+
+<aside class="sidebar">
+  <div class="sidebar-section-label">MAIN</div>
+  <a href="main.html" class="sidebar-link"><span class="icon">📊</span> Dashboard</a>
+  <a href="rejections.html" class="sidebar-link"><span class="icon">🚨</span> Rejections</a>
+  <a href="reports.html" class="sidebar-link"><span class="icon">📋</span> Reports</a>
+
+  <div class="sidebar-section-label">COMPLIANCE</div>
+  <a href="audit-trail.html" class="sidebar-link"><span class="icon">🔒</span> Audit Trail</a>
+  <a href="reviewers.html" class="sidebar-link"><span class="icon">👥</span> Reviewers</a>
+
+  <div class="sidebar-section-label">ADMIN</div>
+  <a href="intake-review.html" class="sidebar-link"><span class="icon">📥</span> Intake Requests <span class="sidebar-badge" id="new-count-badge" style="display:none;"></span></a>
+  <a href="pricing-calculator.html" class="sidebar-link active"><span class="icon">🧮</span> Pricing Calculator</a>
+
+  <div class="sidebar-section-label">SYSTEM</div>
+  <a href="settings.html" class="sidebar-link"><span class="icon">⚙️</span> Settings</a>
+  <a href="it-setup-docs.html" class="sidebar-link"><span class="icon">📄</span> IT Setup Docs</a>
+</aside>
+
+<div class="main-content" id="main-content" style="display:none;">
+  <div class="page-header">
+    <div class="page-title">Pricing Calculator</div>
+    <div class="page-subtitle">Live discovery-call quoting tool — per-lane model locked 2026-08-09. Nothing here is saved or sent.</div>
+  </div>
+
+  <div class="calc-layout">
+    <div>
+      <div class="card">
+        <div class="card-title">Client Tier</div>
+        <div class="field">
+          <label class="field-label">Employee count</label>
+          <input type="number" id="employee-count" min="0" placeholder="e.g. 450" oninput="onEmployeeCountInput()">
+          <div class="hint">Auto-suggests a tier. Override below for high-risk institutional entities regardless of headcount.</div>
+        </div>
+        <div class="field">
+          <label class="field-label">Tier</label>
+          <select id="tier-select" onchange="recalc()">
+            <option value="1">Tier 1 — Mid-Market (100–250 employees)</option>
+            <option value="2">Tier 2 — Premium Enterprise (251–1,000 employees)</option>
+            <option value="3">Tier 3 — Strategic/Large Enterprise (1,001+)</option>
+          </select>
+          <span class="tier-badge" id="tier-auto-badge" style="display:none;"></span>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Jurisdiction Lanes</div>
+        <div class="lanes-grid" id="lanes-grid">
+          <label class="lane-check"><input type="checkbox" value="NYC LL144" onchange="recalc()"> NYC LL144</label>
+          <label class="lane-check"><input type="checkbox" value="Illinois HB3773" onchange="recalc()"> Illinois HB3773</label>
+          <label class="lane-check"><input type="checkbox" value="California FEHA/CPPA" onchange="recalc()"> California FEHA/CPPA</label>
+          <label class="lane-check"><input type="checkbox" value="Texas TRAIGA" onchange="recalc()"> Texas TRAIGA</label>
+          <label class="lane-check"><input type="checkbox" value="EU AI Act" onchange="recalc()"> EU AI Act</label>
+          <label class="lane-check"><input type="checkbox" value="EEOC/OFCCP" onchange="recalc()"> EEOC/OFCCP</label>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Engagement</div>
+        <div class="toggle-row">
+          <div>
+            <div class="label">FAS HITL (Integration + Monitoring)</div>
+            <div class="sub">Off = audit-only. On = adds Integration Fee + per-lane Monitoring Fee.</div>
+          </div>
+          <label class="switch"><input type="checkbox" id="hitl-toggle" onchange="onHitlToggle()"><span class="slider"></span></label>
+        </div>
+        <div class="toggle-row" id="seats-row" style="display:none;">
+          <div>
+            <div class="label">Additional remediation seats</div>
+            <div class="sub">2 seats included with the Integration Fee</div>
+          </div>
+          <input type="number" class="inline-number" id="extra-seats" min="0" value="0" oninput="recalc()">
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Add-Ons</div>
+        <div class="toggle-row">
+          <div>
+            <div class="label">Multi-ATS</div>
+            <div class="sub">$9,000 one-time + $1,500/mo per lane, per extra ATS instance</div>
+          </div>
+          <label class="switch"><input type="checkbox" id="multiats-toggle" onchange="onMultiAtsToggle()"><span class="slider"></span></label>
+        </div>
+        <div class="toggle-row" id="multiats-count-row" style="display:none;">
+          <div class="label">Extra ATS instances</div>
+          <input type="number" class="inline-number" id="multiats-count" min="1" value="1" oninput="recalc()">
+        </div>
+        <div class="toggle-row">
+          <div>
+            <div class="label">Additional Locations</div>
+            <div class="sub">$9,000 one-time + $1,500/mo per lane, per additional location</div>
+          </div>
+          <label class="switch"><input type="checkbox" id="locations-toggle" onchange="onLocationsToggle()"><span class="slider"></span></label>
+        </div>
+        <div class="toggle-row" id="locations-count-row" style="display:none;">
+          <div class="label">Extra locations</div>
+          <input type="number" class="inline-number" id="locations-count" min="1" value="1" oninput="recalc()">
+        </div>
+        <div class="toggle-row">
+          <div>
+            <div class="label">Multi-Year commitment</div>
+            <div class="sub">Only if signing multi-year on this call — shows Year 2/3 renewal preview</div>
+          </div>
+          <label class="switch"><input type="checkbox" id="multiyear-toggle" onchange="recalc()"><span class="slider"></span></label>
+        </div>
+      </div>
+    </div>
+
+    <div class="quote-card">
+      <div class="quote-title">Live Quote</div>
+      <div class="quote-subtitle" id="quote-tier-label">Select a tier and at least one lane</div>
+
+      <div id="quote-lines"></div>
+
+      <div class="line-item" id="adjustment-line" style="display:none;">
+        <div class="desc">Manual Adjustment</div>
+        <div class="amt" id="adjustment-amt">$0</div>
+      </div>
+
+      <div class="quote-total">
+        <div class="label">Year 1 Total</div>
+        <div class="amt" id="quote-total">$0</div>
+      </div>
+
+      <div class="override-row">
+        <label class="override-label">
+          <input type="checkbox" id="override-toggle" onchange="onOverrideToggle()"> Manual adjustment
+        </label>
+        <div id="override-input-row" style="display:none;">
+          <input type="number" id="override-value" step="500" value="0" oninput="recalc()">
+          <div class="override-hint">
+            Enter a +/- amount (e.g. <code>-9000</code> to knock off $9,000). Formula total, always shown: <span id="formula-total-ref">$0</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="renewal-box" id="renewal-box" style="display:none;">
+        <div class="row"><span>Year 2 (10% credit)</span><span class="amt" id="renewal-y2">$0</span></div>
+        <div class="row"><span>Year 3+ (5% credit)</span><span class="amt" id="renewal-y3">$0</span></div>
+      </div>
+
+      <div class="quote-note">
+        No bundle or gap-assessment discounts by design (eliminated 2026-08-09). Rates from <code>Pricing-Cost-Drivers.md</code> — if this tool and that note ever disagree, the vault note wins.
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="access-denied" id="access-denied" style="display:none;">
+  <h2>Access Restricted</h2>
+  <p>This page is only available to platform administrators.</p>
+</div>
+
+<script>
+  const { createClient } = supabase;
+  const supabaseClient = createClient(
+    'https://znjvjofsfvxccmidfpgy.supabase.co',
+    'sb_publishable_9eXyp1KWa4g_uvM4TCliBg_XAwwSuwD'
+  );
+
+  const RATES = {
+    1: { label: 'Tier 1 — Mid-Market', badge: 't1', audit: 4000, integration: 5000, monitoring: 1000, seat: 75 },
+    2: { label: 'Tier 2 — Premium Enterprise', badge: 't2', audit: 5000, integration: 9000, monitoring: 1500, seat: 100 },
+    3: { label: 'Tier 3 — Strategic/Large Enterprise', badge: 't3', audit: 7500, integration: 15000, monitoring: 2500, seat: 125 },
+  };
+  const MULTIATS_ONE_TIME = 9000;
+  const MULTIATS_MONTHLY_PER_LANE = 1500;
+  const LOCATION_ONE_TIME = 9000;
+  const LOCATION_MONTHLY_PER_LANE = 1500;
+
+  async function init() {
+    const { data: { session } } = await supabaseClient.auth.getSession();
+    if (!session) { window.location.href = 'login.html'; return; }
+
+    document.getElementById('user-email').textContent = session.user.email;
+
+    const { data: userRow } = await supabaseClient
+      .from('users').select('is_platform_admin').eq('auth_id', session.user.id).single();
+
+    // No password-age check here, matching intake-review.html's pattern --
+    // only platform-admin accounts ever reach past the gate below, and
+    // platform admins are exempt from password rotation everywhere else
+    // on this site by design.
+    if (!userRow || !userRow.is_platform_admin) {
+      document.getElementById('access-denied').style.display = 'block';
+      return;
+    }
+
+    document.getElementById('main-content').style.display = 'block';
+    recalc();
+  }
+
+  async function handleLogout() {
+    await supabaseClient.auth.signOut();
+    window.location.href = 'login.html';
+  }
+
+  function onEmployeeCountInput() {
+    const count = parseInt(document.getElementById('employee-count').value, 10);
+    const badge = document.getElementById('tier-auto-badge');
+    const select = document.getElementById('tier-select');
+    if (!count || count <= 0) { badge.style.display = 'none'; recalc(); return; }
+
+    let tier;
+    if (count <= 250) tier = 1;
+    else if (count <= 1000) tier = 2;
+    else tier = 3;
+
+    select.value = String(tier);
+    badge.textContent = 'Auto-suggested: ' + RATES[tier].label;
+    badge.className = 'tier-badge ' + RATES[tier].badge;
+    badge.style.display = 'inline-block';
+    recalc();
+  }
+
+  function onHitlToggle() {
+    document.getElementById('seats-row').style.display =
+      document.getElementById('hitl-toggle').checked ? 'flex' : 'none';
+    recalc();
+  }
+
+  function onMultiAtsToggle() {
+    document.getElementById('multiats-count-row').style.display =
+      document.getElementById('multiats-toggle').checked ? 'flex' : 'none';
+    recalc();
+  }
+
+  function onLocationsToggle() {
+    document.getElementById('locations-count-row').style.display =
+      document.getElementById('locations-toggle').checked ? 'flex' : 'none';
+    recalc();
+  }
+
+  function onOverrideToggle() {
+    const on = document.getElementById('override-toggle').checked;
+    document.getElementById('override-input-row').style.display = on ? 'block' : 'none';
+    recalc();
+  }
+
+  function fmt(n) {
+    return '$' + Math.round(n).toLocaleString('en-US');
+  }
+
+  function recalc() {
+    const tier = parseInt(document.getElementById('tier-select').value, 10);
+    const rates = RATES[tier];
+    const lanes = Array.from(document.querySelectorAll('#lanes-grid input:checked')).map(el => el.value);
+    const laneCount = lanes.length;
+    const hitlOn = document.getElementById('hitl-toggle').checked;
+    const extraSeats = hitlOn ? Math.max(0, parseInt(document.getElementById('extra-seats').value, 10) || 0) : 0;
+    const multiAtsOn = document.getElementById('multiats-toggle').checked;
+    const multiAtsCount = multiAtsOn ? Math.max(1, parseInt(document.getElementById('multiats-count').value, 10) || 1) : 0;
+    const locationsOn = document.getElementById('locations-toggle').checked;
+    const locationsCount = locationsOn ? Math.max(1, parseInt(document.getElementById('locations-count').value, 10) || 1) : 0;
+    const multiYearOn = document.getElementById('multiyear-toggle').checked;
+
+    document.getElementById('quote-tier-label').textContent =
+      rates.label + (laneCount ? ` · ${laneCount} lane${laneCount === 1 ? '' : 's'}` : ' · no lanes selected');
+
+    const lines = [];
+    let total = 0;
+
+    if (laneCount === 0) {
+      document.getElementById('quote-lines').innerHTML = '<div class="empty-lanes">Select at least one jurisdiction lane to generate a quote.</div>';
+      document.getElementById('quote-total').textContent = '$0';
+      document.getElementById('formula-total-ref').textContent = '$0';
+      document.getElementById('adjustment-line').style.display = 'none';
+      document.getElementById('renewal-box').style.display = 'none';
+      return;
+    }
+
+    const auditTotal = laneCount * rates.audit;
+    lines.push({ desc: 'Audit Ingestion Fee', sub: `${laneCount} lane${laneCount === 1 ? '' : ''} × ${fmt(rates.audit)}`, amt: auditTotal });
+    total += auditTotal;
+
+    if (hitlOn) {
+      lines.push({ desc: 'HITL Core Integration Fee', sub: 'One-time, 2 seats included', amt: rates.integration });
+      total += rates.integration;
+
+      const monitoringTotal = laneCount * rates.monitoring * 12;
+      lines.push({ desc: 'Drift Monitoring Fee', sub: `${laneCount} lane${laneCount === 1 ? '' : ''} × ${fmt(rates.monitoring)}/mo, billed annual`, amt: monitoringTotal });
+      total += monitoringTotal;
+
+      if (extraSeats > 0) {
+        const seatsTotal = extraSeats * rates.seat;
+        lines.push({ desc: 'Additional remediation seats', sub: `${extraSeats} × ${fmt(rates.seat)}/seat`, amt: seatsTotal });
+        total += seatsTotal;
+      }
+    }
+
+    if (multiAtsOn && multiAtsCount > 0) {
+      const oneTime = multiAtsCount * MULTIATS_ONE_TIME;
+      lines.push({ desc: 'Multi-ATS Add-On (setup)', sub: `${multiAtsCount} instance${multiAtsCount === 1 ? '' : 's'} × ${fmt(MULTIATS_ONE_TIME)}`, amt: oneTime });
+      total += oneTime;
+
+      if (hitlOn) {
+        const monthlyExt = multiAtsCount * laneCount * MULTIATS_MONTHLY_PER_LANE * 12;
+        lines.push({ desc: 'Multi-ATS monitoring extension', sub: `${multiAtsCount} × ${laneCount} lane(s) × ${fmt(MULTIATS_MONTHLY_PER_LANE)}/mo`, amt: monthlyExt });
+        total += monthlyExt;
+      }
+    }
+
+    if (locationsOn && locationsCount > 0) {
+      const oneTime = locationsCount * LOCATION_ONE_TIME;
+      lines.push({ desc: 'Additional Location Add-On (setup)', sub: `${locationsCount} location${locationsCount === 1 ? '' : 's'} × ${fmt(LOCATION_ONE_TIME)}`, amt: oneTime });
+      total += oneTime;
+
+      if (hitlOn) {
+        const monthlyExt = locationsCount * laneCount * LOCATION_MONTHLY_PER_LANE * 12;
+        lines.push({ desc: 'Additional Location monitoring extension', sub: `${locationsCount} × ${laneCount} lane(s) × ${fmt(LOCATION_MONTHLY_PER_LANE)}/mo`, amt: monthlyExt });
+        total += monthlyExt;
+      }
+    }
+
+    document.getElementById('quote-lines').innerHTML = lines.map(l => `
+      <div class="line-item">
+        <div class="desc">${l.desc}<span class="sub">${l.sub}</span></div>
+        <div class="amt">${fmt(l.amt)}</div>
+      </div>
+    `).join('');
+
+    document.getElementById('formula-total-ref').textContent = fmt(total);
+
+    const overrideOn = document.getElementById('override-toggle').checked;
+    let displayTotal = total;
+    let adjustment = 0;
+    if (overrideOn) {
+      adjustment = parseFloat(document.getElementById('override-value').value) || 0;
+      displayTotal = Math.max(0, total + adjustment);
+    }
+
+    document.getElementById('quote-total').textContent = fmt(displayTotal);
+    document.getElementById('adjustment-line').style.display = (overrideOn && adjustment !== 0) ? 'flex' : 'none';
+    document.getElementById('adjustment-amt').textContent = (adjustment >= 0 ? '+$' : '−$') + Math.round(Math.abs(adjustment)).toLocaleString('en-US');
+
+    if (multiYearOn) {
+      document.getElementById('renewal-box').style.display = 'block';
+      document.getElementById('renewal-y2').textContent = fmt(displayTotal * 0.9);
+      document.getElementById('renewal-y3').textContent = fmt(displayTotal * 0.95);
+    } else {
+      document.getElementById('renewal-box').style.display = 'none';
+    }
+  }
+
+  init();
+</script>
+
+</body>
+</html>

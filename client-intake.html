@@ -205,6 +205,11 @@
           <option value="1000_plus">1,000+</option>
         </select>
       </div>
+
+      <div class="form-group">
+        <label for="referred_by">Were you referred by an existing ALS Consulting / F.A.S. client? <span class="hint">If so, who? Leave blank if not applicable.</span></label>
+        <input type="text" id="referred_by" placeholder="Referring company or contact name">
+      </div>
     </div>
 
     <!-- 2. System Architecture & Tech Stack -->
@@ -565,6 +570,7 @@
       contact_email: document.getElementById('contact_email').value.trim(),
       contact_phone: document.getElementById('contact_phone').value.trim() || null,
       company_size_band: document.getElementById('company_size_band').value || null,
+      referred_by: document.getElementById('referred_by').value.trim() || null,
 
       ats_platform: document.getElementById('ats_platform').value.trim() || null,
       hosting_environment: document.getElementById('hosting_environment').value || null,

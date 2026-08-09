@@ -662,6 +662,7 @@
 
   <div class="sidebar-section-label" id="admin-section-label" style="display:none;">ADMIN</div>
   <a href="intake-review.html" class="sidebar-link" id="intake-review-link" style="display:none;"><span class="icon">📥</span> Intake Requests</a>
+  <a href="pricing-calculator.html" class="sidebar-link" id="pricing-calculator-link" style="display:none;"><span class="icon">🧮</span> Pricing Calculator</a>
 
   <div class="sidebar-section-label">SYSTEM</div>
   <a href="settings.html" class="sidebar-link"><span class="icon">⚙️</span> Settings</a>
@@ -960,6 +961,7 @@
     if (userRow.is_platform_admin) {
       document.getElementById('admin-section-label').style.display = 'block';
       document.getElementById('intake-review-link').style.display = 'flex';
+      document.getElementById('pricing-calculator-link').style.display = 'flex';
     }
 
     currentCustomerId = getEffectiveCustomerId(userRow.customer_id, userRow.is_platform_admin);

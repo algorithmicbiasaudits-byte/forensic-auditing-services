@@ -139,6 +139,7 @@
     .status-tag.declined { background: rgba(220,38,38,0.08); color: #dc2626; }
 
     .litigation-flag { color: #dc2626; font-size: 12px; font-weight: 600; }
+    .referral-flag { color: #b8872e; font-size: 12px; font-weight: 600; }
 
     .empty-state { padding: 60px 20px; text-align: center; color: #888; font-size: 13px; }
 
@@ -172,6 +173,11 @@
     .litigation-callout {
       background: rgba(220,38,38,0.06); border: 1px solid rgba(220,38,38,0.2); border-radius: 4px;
       padding: 12px 16px; font-size: 13px; color: #991b1b; margin-bottom: 22px;
+    }
+
+    .referral-callout {
+      background: rgba(184,135,46,0.08); border: 1px solid rgba(184,135,46,0.3); border-radius: 4px;
+      padding: 12px 16px; font-size: 13px; color: #7a5b1e; margin-bottom: 22px;
     }
 
     .detail-actions { display: flex; gap: 10px; margin-top: 28px; padding-top: 20px; border-top: 1px solid #f1f5f9; }
@@ -381,6 +387,7 @@
         </td>
         <td>${s.engagement_type === 'hitl' ? 'FAS HITL' : s.engagement_type === 'auditing' ? 'FAS Auditing' : '—'}
           ${s.litigation_history ? '<div class="litigation-flag">⚠ Litigation history</div>' : ''}
+          ${s.referred_by ? `<div class="referral-flag">★ Referred by ${escapeHtml(s.referred_by)}</div>` : ''}
         </td>
         <td>${formatDate(s.submitted_at)}</td>
         <td><span class="status-tag ${s.status}">${s.status}</span></td>
@@ -427,6 +434,15 @@
           <strong>⚠ Litigation history disclosed.</strong> Status: ${escapeHtml(s.litigation_status) || 'not specified'}.
           Outside counsel engaged: ${s.outside_counsel_engaged === true ? 'Yes' : s.outside_counsel_engaged === false ? 'No' : 'Not specified'}.
           Consider legal-precision review on report language before delivery.
+        </div>
+      ` : ''}
+
+      ${s.referred_by ? `
+        <div class="referral-callout">
+          <strong>★ Referred by ${escapeHtml(s.referred_by)}.</strong> If this converts to a real client, apply the
+          Network Referral Mitigation Program credit to <strong>${escapeHtml(s.referred_by)}'s</strong> account —
+          $1,000 on introduction, plus $5,000 more once this contract closes (see <code>Pricing-Cost-Drivers.md</code>).
+          Not automatic — needs to be applied manually to the referrer's next invoice.
         </div>
       ` : ''}
 
