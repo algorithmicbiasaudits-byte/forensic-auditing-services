@@ -629,7 +629,7 @@
   <div class="page-header">
     <div>
       <div class="page-title">Rejection Queue</div>
-      <div class="page-subtitle">ATS rejection intercepts pending compliance review · 3 overdue</div>
+      <div class="page-subtitle">ATS rejections pending compliance review · 3 overdue</div>
     </div>
     <div style="display:flex;gap:8px;">
       <button class="btn btn-ghost btn-sm" onclick="alert('Export coming soon.')">↓ Export CSV</button>
@@ -992,7 +992,7 @@ function renderCards(rejections) {
           </div>
           <div class="card-row-4">
             <div class="card-row-4-left">
-              <span class="card-time">Intercepted ${formatTime(r.created_at)}</span>
+              <span class="card-time">Flagged ${formatTime(r.created_at)}</span>
             </div>
             <div class="card-actions">
               ${hasOverride
