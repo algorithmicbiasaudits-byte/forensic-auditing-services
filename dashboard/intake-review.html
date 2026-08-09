@@ -298,19 +298,16 @@
     document.getElementById('user-email').textContent = session.user.email;
 
     const { data: userRow } = await supabaseClient
-      .from('users').select('is_platform_admin, password_updated_at').eq('auth_id', session.user.id).single();
+      .from('users').select('is_platform_admin').eq('auth_id', session.user.id).single();
 
+    // No password-age check here (unlike every other dashboard page) --
+    // only platform-admin accounts ever reach past the check below, and
+    // platform admins are exempt from password rotation everywhere else
+    // on this site by design. Re-adding an age check here would apply
+    // to the one account it's explicitly not supposed to apply to.
     if (!userRow || !userRow.is_platform_admin) {
       document.getElementById('access-denied').style.display = 'block';
       return;
-    }
-
-    if (userRow.password_updated_at) {
-      const ageDays = (Date.now() - new Date(userRow.password_updated_at).getTime()) / (1000 * 60 * 60 * 24);
-      if (ageDays >= 45) {
-        window.location.href = '/dashboard/change-password.html?required=1';
-        return;
-      }
     }
 
     document.getElementById('main-content').style.display = 'block';
