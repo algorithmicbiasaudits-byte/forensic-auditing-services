@@ -795,7 +795,15 @@ async function init() {
     .split(/[\s@.]+/).filter(Boolean).slice(0, 2).map(s => s[0].toUpperCase()).join('');
 
   const { data: userRow } = await supabaseClient
-    .from('users').select('customer_id, is_platform_admin').eq('auth_id', session.user.id).single();
+    .from('users').select('customer_id, is_platform_admin, password_updated_at').eq('auth_id', session.user.id).single();
+
+  if (userRow && !userRow.is_platform_admin && userRow.password_updated_at) {
+    const ageDays = (Date.now() - new Date(userRow.password_updated_at).getTime()) / (1000 * 60 * 60 * 24);
+    if (ageDays >= 45) {
+      window.location.href = '/dashboard/change-password.html?required=1';
+      return;
+    }
+  }
 
   if (userRow) {
     customerId = getEffectiveCustomerId(userRow.customer_id, userRow.is_platform_admin);

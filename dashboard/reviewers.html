@@ -347,7 +347,8 @@
     const { data: { session } } = await supabaseClient.auth.getSession();
     if (!session) { window.location.href = 'login.html'; return; }
     injectUserInfo(session.user);
-    await resolveCustomer(session.user.id);
+    const ok = await resolveCustomer(session.user.id);
+    if (!ok) return;
     await checkEntitlement();
     await loadReviewers();
     await loadAuditLog();
@@ -367,12 +368,22 @@
 
   async function resolveCustomer(authUserId) {
     const { data: userRow } = await supabaseClient
-      .from('users').select('customer_id, role, is_platform_admin').eq('auth_id', authUserId).single();
+      .from('users').select('customer_id, role, is_platform_admin, password_updated_at').eq('auth_id', authUserId).single();
+
+    if (userRow && !userRow.is_platform_admin && userRow.password_updated_at) {
+      const ageDays = (Date.now() - new Date(userRow.password_updated_at).getTime()) / (1000 * 60 * 60 * 24);
+      if (ageDays >= 45) {
+        window.location.href = '/dashboard/change-password.html?required=1';
+        return false;
+      }
+    }
+
     if (userRow) {
       customerId = getEffectiveCustomerId(userRow.customer_id, userRow.is_platform_admin);
       await renderPlatformAdminBar(userRow.customer_id, customerId, userRow.is_platform_admin);
       if (userRow.role) document.getElementById('userRole').textContent = userRow.role.replace('_', ' ').toUpperCase();
     }
+    return true;
   }
 
   async function loadReviewers() {

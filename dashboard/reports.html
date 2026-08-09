@@ -452,7 +452,8 @@
     const { data: { session } } = await supabaseClient.auth.getSession();
     if (!session) { window.location.href = 'login.html'; return; }
     injectUserInfo(session.user);
-    await resolveCustomer(session.user.id);
+    const ok = await resolveCustomer(session.user.id);
+    if (!ok) return;
     await loadReportsData();
   }
 
@@ -476,14 +477,24 @@
 
   async function resolveCustomer(authUserId) {
     const { data: userRow } = await supabaseClient
-      .from('users').select('customer_id, is_platform_admin').eq('auth_id', authUserId).single();
-    if (!userRow) return;
+      .from('users').select('customer_id, is_platform_admin, password_updated_at').eq('auth_id', authUserId).single();
+    if (!userRow) return true;
+
+    if (!userRow.is_platform_admin && userRow.password_updated_at) {
+      const ageDays = (Date.now() - new Date(userRow.password_updated_at).getTime()) / (1000 * 60 * 60 * 24);
+      if (ageDays >= 45) {
+        window.location.href = '/dashboard/change-password.html?required=1';
+        return false;
+      }
+    }
+
     customerId = getEffectiveCustomerId(userRow.customer_id, userRow.is_platform_admin);
     const { data: customer } = await supabaseClient
       .from('customers').select('company_name').eq('customer_id', customerId).single();
     companyName = customer?.company_name || null;
 
     if (userRow.is_platform_admin) await populateClientSelector(userRow.customer_id, customerId);
+    return true;
   }
 
   // Platform-admin only, same gate/purpose as audit-trail.html's version.
