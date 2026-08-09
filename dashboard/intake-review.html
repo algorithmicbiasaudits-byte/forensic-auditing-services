@@ -36,6 +36,16 @@
     .nav-logo { font-size: 16px; font-weight: 700; color: #0a1628; letter-spacing: 2px; }
     .nav-logo span { color: #b8872e; }
     .nav-divider { width: 1px; height: 20px; background: #e2e8f0; }
+
+    .hamburger-btn {
+      display: none; background: none; border: none; cursor: pointer;
+      padding: 6px; font-size: 20px; color: #1e293b; line-height: 1;
+    }
+
+    .mobile-backdrop {
+      display: none; position: fixed; inset: 56px 0 0 0; background: rgba(15,23,42,0.4); z-index: 89;
+    }
+    .mobile-backdrop.show { display: block; }
     .nav-org { font-size: 12px; color: #64748b; font-family: monospace; letter-spacing: 1px; }
     .topnav-right { display: flex; align-items: center; gap: 20px; }
     .nav-user { font-size: 12px; color: #64748b; }
@@ -192,7 +202,12 @@
     .access-denied p { color: #888; font-size: 14px; }
 
     @media (max-width: 900px) {
-      .sidebar { display: none; }
+      .hamburger-btn { display: block; }
+      .sidebar {
+        transform: translateX(-100%); transition: transform 0.2s ease; z-index: 91;
+        box-shadow: 2px 0 12px rgba(0,0,0,0.15);
+      }
+      .sidebar.mobile-open { transform: translateX(0); }
       .main-content { margin-left: 0; }
       .stats-grid { grid-template-columns: repeat(2, 1fr); }
       .detail-grid { grid-template-columns: 1fr; }
@@ -203,6 +218,7 @@
 
 <nav class="topnav">
   <div class="topnav-left">
+    <button class="hamburger-btn" onclick="toggleMobileSidebar()" aria-label="Toggle navigation">☰</button>
     <div class="nav-logo">F<span>.</span>A<span>.</span>S<span>.</span></div>
     <div class="nav-divider"></div>
     <div class="nav-org">ALS Consulting — Platform Admin</div>
@@ -213,8 +229,9 @@
     <a class="nav-logout" onclick="handleLogout()">Sign Out</a>
   </div>
 </nav>
+<div class="mobile-backdrop" id="mobile-backdrop" onclick="closeMobileSidebar()"></div>
 
-<aside class="sidebar">
+<aside class="sidebar" id="sidebar">
   <div class="sidebar-section-label">MAIN</div>
   <a href="main.html" class="sidebar-link"><span class="icon">📊</span> Dashboard</a>
   <a href="rejections.html" class="sidebar-link"><span class="icon">🚨</span> Rejections</a>
@@ -323,6 +340,16 @@
   async function handleLogout() {
     await supabaseClient.auth.signOut();
     window.location.href = 'login.html';
+  }
+
+  function toggleMobileSidebar() {
+    document.getElementById('sidebar').classList.toggle('mobile-open');
+    document.getElementById('mobile-backdrop').classList.toggle('show');
+  }
+
+  function closeMobileSidebar() {
+    document.getElementById('sidebar').classList.remove('mobile-open');
+    document.getElementById('mobile-backdrop').classList.remove('show');
   }
 
   async function loadSubmissions() {

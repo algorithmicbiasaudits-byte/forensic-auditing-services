@@ -59,6 +59,9 @@
     }
 
     .nav-divider { width: 1px; height: 18px; background: var(--border); }
+    .hamburger-btn { display: none; background: none; border: none; cursor: pointer; padding: 6px; font-size: 20px; color: var(--text-primary, #1e293b); line-height: 1; }
+    .mobile-backdrop { display: none; position: fixed; inset: 56px 0 0 0; background: rgba(15,23,42,0.4); z-index: 89; }
+    .mobile-backdrop.show { display: block; }
 
     .header-title {
       font-size: 0.78rem;
@@ -569,7 +572,9 @@
     }
 
     @media (max-width: 900px) {
-      .sidebar { display: none; }
+      .hamburger-btn { display: block; }
+      .sidebar { transform: translateX(-100%); transition: transform 0.2s ease; z-index: 91; box-shadow: 2px 0 12px rgba(0,0,0,0.15); }
+      .sidebar.mobile-open { transform: translateX(0); }
       .main-content { margin-left: 0; }
       .stats-row { grid-template-columns: repeat(2, 1fr); }
       .record-header { flex-direction: column; }
@@ -589,6 +594,7 @@
 <!-- ── TOP NAV ── -->
 <nav class="header">
   <div class="header-left">
+    <button class="hamburger-btn" onclick="toggleMobileSidebar()" aria-label="Toggle navigation">☰</button>
     <a href="main.html" class="header-logo">F.A.S.</a>
     <div class="nav-divider"></div>
     <span class="header-title">Audit Record Detail</span>
@@ -599,9 +605,10 @@
     <a href="login.html" class="nav-logout">Sign out</a>
   </div>
 </nav>
+<div class="mobile-backdrop" id="mobile-backdrop" onclick="closeMobileSidebar()"></div>
 
 <!-- ── SIDEBAR ── -->
-<aside class="sidebar">
+<aside class="sidebar" id="sidebar">
   <div class="sidebar-label">Dashboard</div>
   <a href="main.html" class="sidebar-link"><span class="icon">⬛</span> Overview</a>
   <a href="escalation-queue.html" class="sidebar-link"><span class="icon">🚨</span> Escalation Queue</a>
@@ -653,6 +660,16 @@
   // newlines (seed-data artifact) — unescape for readable display.
   function unescapeNarrative(s) {
     return s.replace(/\\n/g, '\n');
+  }
+
+  function toggleMobileSidebar() {
+    document.getElementById('sidebar').classList.toggle('mobile-open');
+    document.getElementById('mobile-backdrop').classList.toggle('show');
+  }
+
+  function closeMobileSidebar() {
+    document.getElementById('sidebar').classList.remove('mobile-open');
+    document.getElementById('mobile-backdrop').classList.remove('show');
   }
 
   async function init() {

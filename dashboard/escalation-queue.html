@@ -58,6 +58,9 @@
     }
 
     .nav-divider { width: 1px; height: 18px; background: var(--border); }
+    .hamburger-btn { display: none; background: none; border: none; cursor: pointer; padding: 6px; font-size: 20px; color: var(--text-primary, #1e293b); line-height: 1; }
+    .mobile-backdrop { display: none; position: fixed; inset: 56px 0 0 0; background: rgba(15,23,42,0.4); z-index: 89; }
+    .mobile-backdrop.show { display: block; }
 
     .header-title {
       font-size: 0.78rem;
@@ -439,7 +442,9 @@
 
     /* ── RESPONSIVE ── */
     @media (max-width: 900px) {
-      .sidebar { display: none; }
+      .hamburger-btn { display: block; }
+      .sidebar { transform: translateX(-100%); transition: transform 0.2s ease; z-index: 91; box-shadow: 2px 0 12px rgba(0,0,0,0.15); }
+      .sidebar.mobile-open { transform: translateX(0); }
       .main-content { margin-left: 0; }
       .stats-row { grid-template-columns: repeat(2, 1fr); }
       .case-body { grid-template-columns: 1fr; }
@@ -458,6 +463,7 @@
 <!-- ── TOP NAV ── -->
 <nav class="topnav">
   <div class="topnav-left">
+    <button class="hamburger-btn" onclick="toggleMobileSidebar()" aria-label="Toggle navigation">☰</button>
     <a href="/dashboard/main.html" class="header-logo">F.A.S.</a>
     <div class="nav-divider"></div>
     <span class="header-title">Escalation Queue</span>
@@ -468,9 +474,10 @@
     <a href="login.html" class="nav-logout">Sign out</a>
   </div>
 </nav>
+<div class="mobile-backdrop" id="mobile-backdrop" onclick="closeMobileSidebar()"></div>
 
 <!-- ── SIDEBAR ── -->
-<aside class="sidebar">
+<aside class="sidebar" id="sidebar">
   <div class="sidebar-section-label">MAIN</div>
   <a href="main.html" class="sidebar-link"><span class="icon">📊</span> Dashboard</a>
   <a href="rejections.html" class="sidebar-link active"><span class="icon">🚨</span> Rejections</a>
@@ -617,6 +624,16 @@
   }
 
   let allCases = [];
+
+  function toggleMobileSidebar() {
+    document.getElementById('sidebar').classList.toggle('mobile-open');
+    document.getElementById('mobile-backdrop').classList.toggle('show');
+  }
+
+  function closeMobileSidebar() {
+    document.getElementById('sidebar').classList.remove('mobile-open');
+    document.getElementById('mobile-backdrop').classList.remove('show');
+  }
 
   async function init() {
     const { data: { session } } = await supabaseClient.auth.getSession();

@@ -32,6 +32,9 @@
     .topnav-left { display: flex; align-items: center; gap: 12px; }
     .logo { font-size: 18px; font-weight: 700; color: var(--navy); letter-spacing: -0.5px; }
     .topnav-divider { color: var(--text-dim); font-weight: 300; }
+    .hamburger-btn { display: none; background: none; border: none; cursor: pointer; padding: 6px; font-size: 20px; color: var(--text-primary); line-height: 1; }
+    .mobile-backdrop { display: none; position: fixed; inset: 56px 0 0 0; background: rgba(15,23,42,0.4); z-index: 89; }
+    .mobile-backdrop.show { display: block; }
     .topnav-title { font-size: 14px; font-weight: 500; color: var(--text-secondary); }
     .topnav-right { display: flex; align-items: center; gap: 12px; }
     .user-name { font-size: 13px; color: var(--text-secondary); }
@@ -405,7 +408,9 @@
     /* ── RESPONSIVE ── */
     @media (max-width: 768px) {
       body { overflow: auto; }
-      .sidebar { display: none; }
+      .hamburger-btn { display: block; }
+      .sidebar { transform: translateX(-100%); transition: transform 0.2s ease; z-index: 91; box-shadow: 2px 0 12px rgba(0,0,0,0.15); position: fixed !important; }
+      .sidebar.mobile-open { transform: translateX(0); }
       .main-content { position: static; top: auto; left: 0; right: auto; bottom: auto; overflow: visible; }
       .live-banner { left: 0; position: relative; top: auto; }
       .split-pane { flex-direction: column; overflow: visible; }
@@ -425,6 +430,7 @@
 <!-- ── TOPNAV ── -->
 <nav class="topnav">
   <div class="topnav-left">
+    <button class="hamburger-btn" onclick="toggleMobileSidebar()" aria-label="Toggle navigation">☰</button>
     <span class="logo">FAS</span>
     <span class="topnav-divider">|</span>
     <span class="topnav-title">Rejection Review</span>
@@ -434,9 +440,10 @@
     <span class="role-badge-nav" id="userRole">—</span>
   </div>
 </nav>
+<div class="mobile-backdrop" id="mobile-backdrop" onclick="closeMobileSidebar()"></div>
 
 <!-- ── SIDEBAR ── -->
-<aside class="sidebar">
+<aside class="sidebar" id="sidebar">
   <div class="sidebar-section-label">MAIN</div>
   <a href="main.html" class="sidebar-link"><span class="icon">📊</span> Dashboard</a>
   <a href="rejections.html" class="sidebar-link active"><span class="icon">🚨</span> Rejections</a>
@@ -821,6 +828,16 @@
   // ════════════════════════════════════════
   // INIT
   // ════════════════════════════════════════
+  function toggleMobileSidebar() {
+    document.getElementById('sidebar').classList.toggle('mobile-open');
+    document.getElementById('mobile-backdrop').classList.toggle('show');
+  }
+
+  function closeMobileSidebar() {
+    document.getElementById('sidebar').classList.remove('mobile-open');
+    document.getElementById('mobile-backdrop').classList.remove('show');
+  }
+
   async function init() {
     const { data: { session } } = await supabaseClient.auth.getSession();
     if (!session) { window.location.href = 'login.html'; return; }
