@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>F.A.S. Dashboard — Accept Invitation</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #f8fafc;
+      color: #1e293b;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    header {
+      background: #ffffff;
+      padding: 16px 40px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid #e2e8f0;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+    }
+
+    .logo { font-size: 18px; font-weight: 700; color: #0a1628; letter-spacing: 1px; }
+    .logo-sub { font-size: 10px; color: #b8872e; letter-spacing: 2px; margin-top: 3px; font-family: monospace; }
+
+    .header-badge {
+      font-family: monospace;
+      font-size: 10px;
+      letter-spacing: 2px;
+      color: #94a3b8;
+      border: 1px solid #e2e8f0;
+      padding: 5px 12px;
+      border-radius: 2px;
+    }
+
+    main {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 60px 20px;
+    }
+
+    .login-container { width: 100%; max-width: 440px; }
+
+    .login-logo { text-align: center; margin-bottom: 32px; }
+    .login-logo .fas-text { font-size: 48px; font-weight: 700; color: #0a1628; letter-spacing: 4px; line-height: 1; }
+    .login-logo .fas-text span { color: #b8872e; }
+    .login-logo .fas-sub { font-family: monospace; font-size: 10px; letter-spacing: 3px; color: #888; margin-top: 8px; }
+
+    .login-card {
+      background: white;
+      border-radius: 4px;
+      padding: 40px;
+      box-shadow: 0 2px 20px rgba(0,0,0,0.06);
+      border-top: 3px solid #0a1628;
+    }
+
+    .login-card h2 { font-size: 20px; font-weight: 600; color: #1e293b; margin-bottom: 6px; }
+    .login-card p { font-size: 13px; color: #888; margin-bottom: 28px; line-height: 1.6; }
+
+    .form-group { margin-bottom: 20px; }
+    .form-group label {
+      display: block;
+      font-size: 11px;
+      font-weight: 600;
+      color: #64748b;
+      letter-spacing: 1px;
+      margin-bottom: 8px;
+      font-family: monospace;
+      text-transform: uppercase;
+    }
+
+    .form-group input {
+      width: 100%;
+      padding: 12px 14px;
+      border: 1px solid #e0e0e0;
+      border-radius: 3px;
+      font-size: 14px;
+      color: #2d2d2d;
+      outline: none;
+      transition: border 0.2s;
+      background: #fafafa;
+    }
+
+    .form-group input:focus { border-color: #b8872e; background: white; }
+
+    .submit-btn {
+      width: 100%;
+      background: #0a1628;
+      color: white;
+      font-size: 14px;
+      font-weight: 600;
+      padding: 14px;
+      border: none;
+      border-radius: 3px;
+      cursor: pointer;
+      transition: background 0.2s;
+      letter-spacing: 0.5px;
+      margin-top: 8px;
+    }
+
+    .submit-btn:hover { background: #162440; }
+    .submit-btn:disabled { background: #aaa; cursor: not-allowed; }
+
+    .alert {
+      padding: 12px 16px;
+      border-radius: 3px;
+      font-size: 13px;
+      margin-bottom: 20px;
+      display: none;
+      line-height: 1.5;
+    }
+
+    .alert.error { background: rgba(229,62,62,0.08); border: 1px solid rgba(229,62,62,0.2); color: #c53030; }
+    .alert.success { background: rgba(56,161,105,0.08); border: 1px solid rgba(56,161,105,0.2); color: #276749; }
+
+    .security-note {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      font-size: 12px;
+      color: #888;
+      line-height: 1.6;
+      margin-top: 24px;
+    }
+
+    .security-note .icon { font-size: 14px; flex-shrink: 0; margin-top: 1px; }
+
+    footer { background: #f8fafc; padding: 16px 40px; text-align: center; border-top: 1px solid #e2e8f0; }
+    footer p { font-size: 11px; color: #94a3b8; }
+    footer a { color: #b8872e; text-decoration: none; }
+
+    @media (max-width: 480px) {
+      header { padding: 14px 20px; }
+      .login-card { padding: 28px 20px; }
+      .login-logo .fas-text { font-size: 36px; }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div>
+    <div class="logo">F.A.S.</div>
+    <div class="logo-sub">FORENSIC AUDITING SERVICES</div>
+  </div>
+  <div class="header-badge">COMPLIANCE DASHBOARD</div>
+</header>
+
+<main>
+  <div class="login-container">
+
+    <div class="login-logo">
+      <div class="fas-text">F<span>.</span>A<span>.</span>S<span>.</span></div>
+      <div class="fas-sub">ACCEPT YOUR INVITATION</div>
+    </div>
+
+    <div class="login-card" id="invite-card">
+      <h2 id="card-title">Set Your Password</h2>
+      <p id="card-sub">You've been invited to the F.A.S. Compliance Dashboard. Choose a password to activate your account.</p>
+
+      <div class="alert error" id="error-alert"></div>
+      <div class="alert success" id="success-alert"></div>
+
+      <div id="form-fields">
+        <div class="form-group">
+          <label>New Password</label>
+          <input type="password" id="password" placeholder="••••••••••••" autocomplete="new-password">
+        </div>
+
+        <div class="form-group">
+          <label>Confirm Password</label>
+          <input type="password" id="password-confirm" placeholder="••••••••••••" autocomplete="new-password">
+        </div>
+
+        <button class="submit-btn" id="submit-btn" onclick="handleSetPassword()">
+          Activate Account →
+        </button>
+      </div>
+
+      <div class="security-note">
+        <span class="icon">🔒</span>
+        <span>All sessions are logged and timestamped. This system is monitored for compliance purposes.</span>
+      </div>
+    </div>
+
+  </div>
+</main>
+
+<footer>
+  <p>F.A.S. Compliance Dashboard · A product of <a href="https://alsconsulting.services">ALS Consulting Services</a> · © 2026 All rights reserved</p>
+</footer>
+
+<script>
+  const { createClient } = supabase;
+  const supabaseClient = createClient(
+    'https://znjvjofsfvxccmidfpgy.supabase.co',
+    'sb_publishable_9eXyp1KWa4g_uvM4TCliBg_XAwwSuwD'
+  );
+
+  const errorAlert = document.getElementById('error-alert');
+  const successAlert = document.getElementById('success-alert');
+  const formFields = document.getElementById('form-fields');
+  const cardTitle = document.getElementById('card-title');
+  const cardSub = document.getElementById('card-sub');
+
+  function showError(message) {
+    errorAlert.textContent = message;
+    errorAlert.style.display = 'block';
+    successAlert.style.display = 'none';
+  }
+
+  function showFatalError(title, message) {
+    cardTitle.textContent = title;
+    cardSub.textContent = '';
+    formFields.style.display = 'none';
+    showError(message);
+  }
+
+  async function resolveDestination(authUserId) {
+    const { data: userRow } = await supabaseClient
+      .from('users').select('customer_id').eq('auth_id', authUserId).single();
+    if (!userRow) return '/dashboard/main.html';
+
+    const { data: customer } = await supabaseClient
+      .from('customers').select('intake_method').eq('customer_id', userRow.customer_id).single();
+
+    return customer?.intake_method === 'csv'
+      ? '/dashboard/csv-upload.html'
+      : '/dashboard/main.html';
+  }
+
+  // Supabase redirects invite/recovery links here with the session tokens
+  // in the URL hash fragment (#access_token=...&refresh_token=...&type=invite),
+  // not as query params -- this is the implicit flow, confirmed via auth logs
+  // showing "login_method":"implicit" for real invite acceptances.
+  async function initFromInviteLink() {
+    const hashParams = new URLSearchParams(window.location.hash.replace(/^#/, ''));
+    const accessToken = hashParams.get('access_token');
+    const refreshToken = hashParams.get('refresh_token');
+    const type = hashParams.get('type');
+    const hashError = hashParams.get('error_description') || hashParams.get('error');
+
+    if (hashError) {
+      showFatalError(
+        'This Invitation Has Expired',
+        decodeURIComponent(hashError.replace(/\+/g, ' ')) + ' Ask whoever invited you to send a new invitation from the Reviewers page.'
+      );
+      return;
+    }
+
+    if (!accessToken || !refreshToken || (type !== 'invite' && type !== 'recovery')) {
+      // Not a valid invite/recovery link at all -- either visited directly,
+      // or already consumed once (Supabase invite links are single-use).
+      showFatalError(
+        'Invalid or Expired Link',
+        'This invitation link is invalid or has already been used. Ask whoever invited you to send a new invitation, or contact your administrator.'
+      );
+      return;
+    }
+
+    const { data, error } = await supabaseClient.auth.setSession({
+      access_token: accessToken,
+      refresh_token: refreshToken,
+    });
+
+    if (error || !data.session) {
+      showFatalError(
+        'Invalid or Expired Link',
+        'This invitation link could not be verified. It may have expired -- ask whoever invited you to send a new one.'
+      );
+      return;
+    }
+
+    // Session established -- strip the tokens from the visible URL so they
+    // don't linger in browser history / get shared accidentally.
+    window.history.replaceState(null, '', window.location.pathname);
+  }
+
+  async function handleSetPassword() {
+    const password = document.getElementById('password').value;
+    const passwordConfirm = document.getElementById('password-confirm').value;
+    const btn = document.getElementById('submit-btn');
+
+    errorAlert.style.display = 'none';
+    successAlert.style.display = 'none';
+
+    if (!password || !passwordConfirm) {
+      showError('Please fill in both password fields.');
+      return;
+    }
+    if (password.length < 8) {
+      showError('Password must be at least 8 characters.');
+      return;
+    }
+    if (password !== passwordConfirm) {
+      showError('Passwords do not match.');
+      return;
+    }
+
+    btn.textContent = 'Activating...';
+    btn.disabled = true;
+
+    const { data: sessionData } = await supabaseClient.auth.getSession();
+    if (!sessionData.session) {
+      showFatalError(
+        'Invalid or Expired Link',
+        'Your invitation link session has expired. Ask whoever invited you to send a new invitation.'
+      );
+      return;
+    }
+
+    const { error } = await supabaseClient.auth.updateUser({ password });
+
+    if (error) {
+      showError(error.message);
+      btn.textContent = 'Activate Account →';
+      btn.disabled = false;
+      return;
+    }
+
+    successAlert.textContent = 'Account activated. Redirecting to your dashboard...';
+    successAlert.style.display = 'block';
+    formFields.style.display = 'none';
+
+    const destination = await resolveDestination(sessionData.session.user.id);
+    setTimeout(() => {
+      window.location.href = destination;
+    }, 1200);
+  }
+
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Enter') handleSetPassword();
+  });
+
+  initFromInviteLink();
+</script>
+
+</body>
+</html>
