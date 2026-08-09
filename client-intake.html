@@ -1,0 +1,626 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Client Intake Form — F.A.S. | Forensic Auditing Services</title>
+  <meta name="description" content="Pre-audit intake form for F.A.S. clients — company, technical, regulatory, and legal information needed before your ATS audit.">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --navy: #1a3a6b;
+      --navy-mid: #1e4480;
+      --navy-dark: #152f5a;
+      --gold: #b8872e;
+      --gold-light: #d4a44a;
+      --gold-muted: rgba(184,135,46,0.12);
+      --white: #ffffff;
+      --off-white: #f8f7f4;
+      --gray-100: #f2f1ee;
+      --gray-300: #d0cec8;
+      --gray-600: #555;
+      --gray-800: #2d2d2d;
+      --red: #c0392b;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: var(--off-white);
+      color: var(--gray-800);
+      line-height: 1.6;
+    }
+
+    header {
+      background: var(--navy);
+      padding: 20px 48px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 2px solid var(--gold);
+    }
+
+    .logo-wrap a { font-size: 13px; font-weight: 500; color: rgba(255,255,255,0.6); text-decoration: none; letter-spacing: 1px; text-transform: uppercase; }
+    .logo-wrap a:hover { color: var(--gold); }
+    .brand-subtitle { font-size: 11px; color: var(--gold); margin-top: 4px; }
+
+    .page-wrap { max-width: 800px; margin: 0 auto; padding: 56px 24px 100px; }
+
+    .page-header { text-align: center; margin-bottom: 40px; }
+    .page-header .eyebrow { font-size: 11px; font-weight: 600; color: var(--gold); letter-spacing: 2px; text-transform: uppercase; margin-bottom: 12px; }
+    .page-header h1 { font-family: 'Playfair Display', serif; font-size: 32px; color: var(--navy); font-weight: 700; margin-bottom: 12px; }
+    .page-header p { font-size: 15px; color: var(--gray-600); max-width: 560px; margin: 0 auto; }
+
+    form { background: var(--white); border: 1px solid #e0ddd6; border-top: 4px solid var(--gold); padding: 8px 44px 44px; }
+
+    .section { padding-top: 36px; border-top: 1px solid #eee; margin-top: 8px; }
+    .section:first-child { border-top: none; }
+
+    .section-num { display: inline-block; font-family: monospace; font-size: 11px; color: var(--gold); letter-spacing: 2px; margin-bottom: 6px; }
+    .section h2 { font-family: 'Playfair Display', serif; font-size: 20px; color: var(--navy); font-weight: 700; margin-bottom: 8px; }
+    .section-intro { font-size: 13px; color: var(--gray-600); margin-bottom: 20px; line-height: 1.7; }
+
+    .disclosure {
+      background: var(--gold-muted);
+      border: 1px solid rgba(184,135,46,0.3);
+      border-radius: 3px;
+      padding: 14px 18px;
+      font-size: 13px;
+      color: var(--gray-800);
+      line-height: 1.7;
+      margin-bottom: 20px;
+    }
+
+    .form-group { margin-bottom: 20px; }
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px; }
+
+    label { display: block; font-size: 12px; font-weight: 600; color: var(--navy); letter-spacing: 0.3px; margin-bottom: 8px; }
+    label .req { color: var(--gold); margin-left: 2px; }
+    label .hint { display: block; font-size: 11px; font-weight: 400; color: var(--gray-600); margin-top: 3px; }
+
+    input[type="text"], input[type="email"], input[type="tel"], input[type="number"], select, textarea {
+      width: 100%;
+      padding: 11px 14px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 14px;
+      color: var(--gray-800);
+      background: var(--off-white);
+      border: 1px solid var(--gray-300);
+      border-radius: 2px;
+      outline: none;
+    }
+
+    input:focus, select:focus, textarea:focus { border-color: var(--gold); background: var(--white); }
+    textarea { resize: vertical; min-height: 80px; }
+
+    .checkbox-group, .radio-group { display: flex; flex-direction: column; gap: 10px; }
+    .checkbox-group.inline, .radio-group.inline { flex-direction: row; flex-wrap: wrap; gap: 16px; }
+
+    .checkbox-item, .radio-item { display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 400; color: var(--gray-800); }
+    .checkbox-item input, .radio-item input { width: auto; }
+
+    .conditional { display: none; margin-top: 14px; padding: 14px 16px; background: var(--gray-100); border-radius: 3px; }
+    .conditional.show { display: block; }
+
+    .submit-btn {
+      width: 100%;
+      background: var(--gold);
+      color: var(--navy);
+      font-size: 15px;
+      font-weight: 600;
+      padding: 16px;
+      border: none;
+      border-radius: 2px;
+      cursor: pointer;
+      letter-spacing: 0.5px;
+      margin-top: 32px;
+    }
+
+    .submit-btn:hover { background: var(--gold-light); }
+    .submit-btn:disabled { background: #aaa; cursor: not-allowed; }
+
+    .form-disclaimer { margin-top: 14px; font-size: 11px; color: var(--gray-600); text-align: center; line-height: 1.6; }
+
+    .alert { padding: 12px 16px; border-radius: 3px; font-size: 13px; margin-bottom: 20px; display: none; line-height: 1.5; }
+    .alert.error { background: rgba(192,57,43,0.08); border: 1px solid rgba(192,57,43,0.2); color: var(--red); }
+
+    #success-panel { display: none; text-align: center; padding: 60px 44px; }
+    #success-panel h2 { font-family: 'Playfair Display', serif; font-size: 26px; color: var(--navy); margin-bottom: 16px; }
+    #success-panel p { font-size: 14px; color: var(--gray-600); max-width: 480px; margin: 0 auto 12px; line-height: 1.8; }
+
+    footer { background: var(--navy-dark); padding: 32px 48px; text-align: center; }
+    footer p { color: rgba(255,255,255,0.4); font-size: 12px; margin: 4px 0; }
+    footer a { color: var(--gold); text-decoration: none; }
+
+    @media (max-width: 700px) {
+      header { padding: 16px 20px; flex-direction: column; gap: 10px; }
+      form { padding: 8px 22px 32px; }
+      .form-row { grid-template-columns: 1fr; gap: 0; }
+      .form-row .form-group { margin-bottom: 20px; }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="logo-wrap">
+    <a href="https://alsconsulting.services" target="_blank">← ALS Consulting</a>
+    <div class="brand-subtitle">F.A.S. — Forensic Auditing Services</div>
+  </div>
+</header>
+
+<div class="page-wrap">
+
+  <div class="page-header">
+    <div class="eyebrow">Client Intake Form</div>
+    <h1>AI/ATS Audit Client Intake</h1>
+    <p>Before your audit begins, we need a clear picture of your systems, data, and regulatory footprint. This form takes about 10 minutes and ensures your engagement is scoped correctly from day one.</p>
+  </div>
+
+  <form id="intake-form">
+    <div class="alert error" id="error-alert"></div>
+
+    <!-- 1. Company & Contact -->
+    <div class="section">
+      <div class="section-num">SECTION 1</div>
+      <h2>Company &amp; Contact Information</h2>
+
+      <div class="form-group">
+        <label for="company_name">Company Name <span class="req">*</span></label>
+        <input type="text" id="company_name" required>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label for="primary_contact_name">Primary Contact Person <span class="req">*</span></label>
+          <input type="text" id="primary_contact_name" required>
+        </div>
+        <div class="form-group">
+          <label for="job_title">Job Title</label>
+          <input type="text" id="job_title">
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label for="contact_email">Email Address <span class="req">*</span></label>
+          <input type="email" id="contact_email" required>
+        </div>
+        <div class="form-group">
+          <label for="contact_phone">Phone Number</label>
+          <input type="tel" id="contact_phone">
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="company_size_band">Company Size (Employees)</label>
+        <select id="company_size_band">
+          <option value="">Select...</option>
+          <option value="under_250">Under 250</option>
+          <option value="250_999">250–999</option>
+          <option value="1000_plus">1,000+</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- 2. System Architecture & Tech Stack -->
+    <div class="section">
+      <div class="section-num">SECTION 2</div>
+      <h2>System Architecture &amp; Tech Stack</h2>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label for="ats_platform">ATS Platform Name</label>
+          <input type="text" id="ats_platform" placeholder="e.g. Workday, Greenhouse, Lever, Custom">
+        </div>
+        <div class="form-group">
+          <label for="hosting_environment">Hosting Environment</label>
+          <select id="hosting_environment">
+            <option value="">Select...</option>
+            <option value="cloud">Cloud</option>
+            <option value="on_premise">On-premise</option>
+            <option value="hybrid">Hybrid</option>
+            <option value="unsure">Not sure</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>AI Features Used <span class="hint">Select all that apply</span></label>
+        <div class="checkbox-group inline">
+          <label class="checkbox-item"><input type="checkbox" name="ai_features_used" value="resume_screening"> Resume screening</label>
+          <label class="checkbox-item"><input type="checkbox" name="ai_features_used" value="chatbot"> Chatbot</label>
+          <label class="checkbox-item"><input type="checkbox" name="ai_features_used" value="video_analysis"> Video analysis</label>
+          <label class="checkbox-item"><input type="checkbox" name="ai_features_used" value="ranking"> Candidate ranking</label>
+          <label class="checkbox-item"><input type="checkbox" name="ai_features_used" value="other"> Other</label>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="third_party_addons">Third-Party AI Add-ons or Vendors</label>
+        <textarea id="third_party_addons" placeholder="List any external AI vendors integrated with your ATS"></textarea>
+      </div>
+
+      <div class="disclosure">
+        <strong>Integration note:</strong> F.A.S. integrates via a dedicated API webhook key. Your organization needs a dedicated IT resource — internal staff or a contracted third-party IT vendor — to configure this integration. We provide technical documentation and support but do not perform ATS configuration on your behalf.
+      </div>
+
+      <div class="form-group">
+        <label>Do you have an IT resource available to configure the webhook integration? <span class="req">*</span></label>
+        <div class="radio-group inline">
+          <label class="radio-item"><input type="radio" name="it_resource_availability" value="internal" required> Yes, internal staff</label>
+          <label class="radio-item"><input type="radio" name="it_resource_availability" value="outsourced" required> Yes, outsourced/contracted vendor</label>
+          <label class="radio-item"><input type="radio" name="it_resource_availability" value="not_yet_identified" required> Not yet identified</label>
+        </div>
+      </div>
+    </div>
+
+    <!-- 3. Data & Regulatory Scope -->
+    <div class="section">
+      <div class="section-num">SECTION 3</div>
+      <h2>Data &amp; Regulatory Scope</h2>
+
+      <div class="form-group">
+        <label>Geographic Jurisdictions <span class="hint">Where do you recruit or hire? Select all that apply</span></label>
+        <div class="checkbox-group inline">
+          <label class="checkbox-item"><input type="checkbox" name="jurisdictions" value="nyc"> NYC / NY</label>
+          <label class="checkbox-item"><input type="checkbox" name="jurisdictions" value="california"> California</label>
+          <label class="checkbox-item"><input type="checkbox" name="jurisdictions" value="illinois"> Illinois</label>
+          <label class="checkbox-item"><input type="checkbox" name="jurisdictions" value="colorado"> Colorado</label>
+          <label class="checkbox-item"><input type="checkbox" name="jurisdictions" value="texas"> Texas</label>
+          <label class="checkbox-item"><input type="checkbox" name="jurisdictions" value="eu"> EU</label>
+          <label class="checkbox-item"><input type="checkbox" name="jurisdictions" value="other"> Other</label>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>Are you a federal contractor or subcontractor?</label>
+        <div class="radio-group inline">
+          <label class="radio-item"><input type="radio" name="federal_contractor" value="yes"> Yes</label>
+          <label class="radio-item"><input type="radio" name="federal_contractor" value="no"> No</label>
+        </div>
+        <div class="conditional" id="federal-contractor-detail">
+          <label for="contract_value_band">Approximate Contract Value</label>
+          <select id="contract_value_band">
+            <option value="">Select...</option>
+            <option value="under_50k">Under $50,000</option>
+            <option value="50k_150k">$50,000 – $150,000</option>
+            <option value="over_150k">Over $150,000</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label for="monthly_applicant_volume">Average Monthly Applicant Volume</label>
+          <select id="monthly_applicant_volume">
+            <option value="">Select...</option>
+            <option value="under_100">Under 100</option>
+            <option value="100_500">100–500</option>
+            <option value="500_2000">500–2,000</option>
+            <option value="over_2000">Over 2,000</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="historical_data_retention_years">Historical Data Retention (Years)</label>
+          <input type="number" id="historical_data_retention_years" min="0" max="50">
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>Protected Attributes Collected Today <span class="hint">Select all that apply</span></label>
+        <div class="checkbox-group inline">
+          <label class="checkbox-item"><input type="checkbox" name="protected_attributes_collected" value="gender"> Gender</label>
+          <label class="checkbox-item"><input type="checkbox" name="protected_attributes_collected" value="race_ethnicity"> Race/Ethnicity</label>
+          <label class="checkbox-item"><input type="checkbox" name="protected_attributes_collected" value="age"> Age</label>
+          <label class="checkbox-item"><input type="checkbox" name="protected_attributes_collected" value="disability"> Disability</label>
+          <label class="checkbox-item"><input type="checkbox" name="protected_attributes_collected" value="veteran_status"> Veteran Status</label>
+          <label class="checkbox-item"><input type="checkbox" name="protected_attributes_collected" value="none"> None currently</label>
+        </div>
+      </div>
+    </div>
+
+    <!-- 4. Audit Objectives & Compliance Needs -->
+    <div class="section">
+      <div class="section-num">SECTION 4</div>
+      <h2>Audit Objectives &amp; Compliance Needs</h2>
+
+      <div class="form-group">
+        <label for="primary_audit_goal">Primary Audit Goal</label>
+        <select id="primary_audit_goal">
+          <option value="">Select...</option>
+          <option value="legal_compliance">Legal compliance</option>
+          <option value="bias_mitigation">Bias mitigation</option>
+          <option value="system_efficiency">System efficiency</option>
+          <option value="other">Other</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label for="specific_regulations">Specific Regulations to Address</label>
+        <textarea id="specific_regulations" placeholder="e.g. NYC Local Law 144, EU AI Act, or leave blank if unsure"></textarea>
+      </div>
+
+      <div class="form-group">
+        <label for="previous_audits">Has this system been audited before?</label>
+        <textarea id="previous_audits" placeholder="If yes, describe briefly — you can share results separately. This is for context only and does not affect pricing."></textarea>
+      </div>
+
+      <div class="form-group">
+        <label>Has a discrimination complaint, charge, or lawsuit been filed related to hiring or AI-assisted hiring decisions? <span class="req">*</span></label>
+        <div class="radio-group inline">
+          <label class="radio-item"><input type="radio" name="litigation_history" value="yes" required> Yes</label>
+          <label class="radio-item"><input type="radio" name="litigation_history" value="no" required> No</label>
+        </div>
+        <div class="conditional" id="litigation-detail">
+          <div class="form-group" style="margin-bottom:14px;">
+            <label for="litigation_status">Status</label>
+            <select id="litigation_status">
+              <option value="">Select...</option>
+              <option value="pending">Pending</option>
+              <option value="resolved">Resolved</option>
+            </select>
+          </div>
+          <div class="form-group" style="margin-bottom:0;">
+            <label>Is outside counsel already engaged?</label>
+            <div class="radio-group inline">
+              <label class="radio-item"><input type="radio" name="outside_counsel_engaged" value="yes"> Yes</label>
+              <label class="radio-item"><input type="radio" name="outside_counsel_engaged" value="no"> No</label>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 5. Documentation & Access Checklist -->
+    <div class="section">
+      <div class="section-num">SECTION 5</div>
+      <h2>Documentation &amp; Access Checklist</h2>
+      <p class="section-intro">Please confirm whether you can provide the following.</p>
+
+      <div class="form-group">
+        <label>Technical Documentation <span class="hint">Vendor API documentation and algorithmic models</span></label>
+        <div class="radio-group inline">
+          <label class="radio-item"><input type="radio" name="doc_technical_documentation" value="yes"> Yes</label>
+          <label class="radio-item"><input type="radio" name="doc_technical_documentation" value="no"> No</label>
+          <label class="radio-item"><input type="radio" name="doc_technical_documentation" value="in_progress"> In Progress</label>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>Data Dictionaries <span class="hint">Explanations of data fields used by the AI</span></label>
+        <div class="radio-group inline">
+          <label class="radio-item"><input type="radio" name="doc_data_dictionaries" value="yes"> Yes</label>
+          <label class="radio-item"><input type="radio" name="doc_data_dictionaries" value="no"> No</label>
+          <label class="radio-item"><input type="radio" name="doc_data_dictionaries" value="in_progress"> In Progress</label>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>Privacy Policy <span class="hint">Current candidate data usage policy</span></label>
+        <div class="radio-group inline">
+          <label class="radio-item"><input type="radio" name="doc_privacy_policy" value="yes"> Yes</label>
+          <label class="radio-item"><input type="radio" name="doc_privacy_policy" value="no"> No</label>
+          <label class="radio-item"><input type="radio" name="doc_privacy_policy" value="in_progress"> In Progress</label>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>System Access <span class="hint">Sandbox/staging environment credentials for testing</span></label>
+        <div class="radio-group inline">
+          <label class="radio-item"><input type="radio" name="doc_sandbox_access" value="yes"> Yes</label>
+          <label class="radio-item"><input type="radio" name="doc_sandbox_access" value="no"> No</label>
+          <label class="radio-item"><input type="radio" name="doc_sandbox_access" value="in_progress"> In Progress</label>
+        </div>
+      </div>
+    </div>
+
+    <!-- 6. Legal -->
+    <div class="section">
+      <div class="section-num">SECTION 6</div>
+      <h2>Legal</h2>
+
+      <div class="form-group">
+        <label>Do you require a signed Data Processing Agreement (DPA)?</label>
+        <div class="radio-group inline">
+          <label class="radio-item"><input type="radio" name="dpa_required" value="yes"> Yes</label>
+          <label class="radio-item"><input type="radio" name="dpa_required" value="no"> No</label>
+          <label class="radio-item"><input type="radio" name="dpa_required" value="unsure"> Not sure</label>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="data_residency_requirements">Data Residency Requirements</label>
+        <input type="text" id="data_residency_requirements" placeholder="e.g. EU candidate data must stay in the EU — leave blank if none">
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label for="legal_contact_name">Legal/Compliance Contact <span class="hint">If different from primary contact</span></label>
+          <input type="text" id="legal_contact_name">
+        </div>
+        <div class="form-group">
+          <label for="legal_contact_email">Legal/Compliance Contact Email</label>
+          <input type="email" id="legal_contact_email">
+        </div>
+      </div>
+    </div>
+
+    <!-- 7. Engagement Type -->
+    <div class="section">
+      <div class="section-num">SECTION 7</div>
+      <h2>Engagement Type</h2>
+
+      <div class="form-group">
+        <label>Which are you interested in? <span class="req">*</span></label>
+        <div class="radio-group">
+          <label class="radio-item"><input type="radio" name="engagement_type" value="auditing" required> FAS Auditing — one-time forensic bias audit</label>
+          <label class="radio-item"><input type="radio" name="engagement_type" value="hitl" required> FAS HITL — continuous human-in-the-loop review</label>
+        </div>
+        <div class="conditional" id="hitl-detail">
+          <p style="font-size:12px;color:var(--gray-600);margin-bottom:14px;">FAS HITL includes 2 remediation reviewer seats. Please provide their names and emails — we'll provision their dashboard access during onboarding.</p>
+          <div class="form-row" style="margin-bottom:14px;">
+            <div class="form-group" style="margin-bottom:0;">
+              <label for="hitl_reviewer_1_name">Reviewer 1 Name</label>
+              <input type="text" id="hitl_reviewer_1_name">
+            </div>
+            <div class="form-group" style="margin-bottom:0;">
+              <label for="hitl_reviewer_1_email">Reviewer 1 Email</label>
+              <input type="email" id="hitl_reviewer_1_email">
+            </div>
+          </div>
+          <div class="form-row" style="margin-bottom:14px;">
+            <div class="form-group" style="margin-bottom:0;">
+              <label for="hitl_reviewer_2_name">Reviewer 2 Name</label>
+              <input type="text" id="hitl_reviewer_2_name">
+            </div>
+            <div class="form-group" style="margin-bottom:0;">
+              <label for="hitl_reviewer_2_email">Reviewer 2 Email</label>
+              <input type="email" id="hitl_reviewer_2_email">
+            </div>
+          </div>
+          <div class="form-group" style="margin-bottom:0;">
+            <label for="review_sla_expectations">Review SLA Expectations</label>
+            <input type="text" id="review_sla_expectations" placeholder="e.g. flagged cases reviewed within 48 hours — leave blank if unsure">
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <button type="submit" class="submit-btn" id="submit-btn">Submit Intake Form →</button>
+    <p class="form-disclaimer">By submitting this form you agree to be contacted by ALS Consulting regarding your F.A.S. engagement. <a href="terms.html" style="color:var(--gold);">Terms apply.</a></p>
+  </form>
+
+  <div id="success-panel">
+    <h2>Thank you — your intake form has been received.</h2>
+    <p>Our team will review your submission and follow up before your scheduled call. If you have any questions in the meantime, reach out at <a href="mailto:algorithmicbiasaudits@gmail.com" style="color:var(--gold);">algorithmicbiasaudits@gmail.com</a>.</p>
+  </div>
+
+</div>
+
+<footer>
+  <p>F.A.S. — Forensic Auditing Services · A service of ALS Consulting</p>
+  <p>© 2026 ALS Consulting Services. All rights reserved.</p>
+</footer>
+
+<script>
+  const { createClient } = supabase;
+  const supabaseClient = createClient(
+    'https://znjvjofsfvxccmidfpgy.supabase.co',
+    'sb_publishable_9eXyp1KWa4g_uvM4TCliBg_XAwwSuwD'
+  );
+
+  // Conditional section toggles
+  document.querySelectorAll('input[name="federal_contractor"]').forEach(el => {
+    el.addEventListener('change', () => {
+      document.getElementById('federal-contractor-detail').classList.toggle('show', el.value === 'yes' && el.checked);
+    });
+  });
+
+  document.querySelectorAll('input[name="litigation_history"]').forEach(el => {
+    el.addEventListener('change', () => {
+      document.getElementById('litigation-detail').classList.toggle('show', el.value === 'yes' && el.checked);
+    });
+  });
+
+  document.querySelectorAll('input[name="engagement_type"]').forEach(el => {
+    el.addEventListener('change', () => {
+      document.getElementById('hitl-detail').classList.toggle('show', el.value === 'hitl' && el.checked);
+    });
+  });
+
+  function getCheckedValues(name) {
+    return Array.from(document.querySelectorAll(`input[name="${name}"]:checked`)).map(el => el.value);
+  }
+
+  function getRadioValue(name) {
+    const checked = document.querySelector(`input[name="${name}"]:checked`);
+    return checked ? checked.value : null;
+  }
+
+  function toBool(value) {
+    if (value === 'yes') return true;
+    if (value === 'no') return false;
+    return null;
+  }
+
+  document.getElementById('intake-form').addEventListener('submit', async function(e) {
+    e.preventDefault();
+
+    const errorAlert = document.getElementById('error-alert');
+    errorAlert.style.display = 'none';
+
+    const btn = document.getElementById('submit-btn');
+    btn.textContent = 'Submitting...';
+    btn.disabled = true;
+
+    const payload = {
+      company_name: document.getElementById('company_name').value.trim(),
+      primary_contact_name: document.getElementById('primary_contact_name').value.trim(),
+      job_title: document.getElementById('job_title').value.trim() || null,
+      contact_email: document.getElementById('contact_email').value.trim(),
+      contact_phone: document.getElementById('contact_phone').value.trim() || null,
+      company_size_band: document.getElementById('company_size_band').value || null,
+
+      ats_platform: document.getElementById('ats_platform').value.trim() || null,
+      hosting_environment: document.getElementById('hosting_environment').value || null,
+      ai_features_used: getCheckedValues('ai_features_used'),
+      third_party_addons: document.getElementById('third_party_addons').value.trim() || null,
+      it_resource_availability: getRadioValue('it_resource_availability'),
+
+      jurisdictions: getCheckedValues('jurisdictions'),
+      federal_contractor: toBool(getRadioValue('federal_contractor')),
+      contract_value_band: document.getElementById('contract_value_band').value || null,
+      monthly_applicant_volume: document.getElementById('monthly_applicant_volume').value || null,
+      historical_data_retention_years: document.getElementById('historical_data_retention_years').value
+        ? parseInt(document.getElementById('historical_data_retention_years').value, 10) : null,
+      protected_attributes_collected: getCheckedValues('protected_attributes_collected'),
+
+      primary_audit_goal: document.getElementById('primary_audit_goal').value || null,
+      specific_regulations: document.getElementById('specific_regulations').value.trim() || null,
+      previous_audits: document.getElementById('previous_audits').value.trim() || null,
+      litigation_history: toBool(getRadioValue('litigation_history')),
+      litigation_status: document.getElementById('litigation_status').value || null,
+      outside_counsel_engaged: toBool(getRadioValue('outside_counsel_engaged')),
+
+      doc_technical_documentation: getRadioValue('doc_technical_documentation'),
+      doc_data_dictionaries: getRadioValue('doc_data_dictionaries'),
+      doc_privacy_policy: getRadioValue('doc_privacy_policy'),
+      doc_sandbox_access: getRadioValue('doc_sandbox_access'),
+
+      dpa_required: toBool(getRadioValue('dpa_required')),
+      data_residency_requirements: document.getElementById('data_residency_requirements').value.trim() || null,
+      legal_contact_name: document.getElementById('legal_contact_name').value.trim() || null,
+      legal_contact_email: document.getElementById('legal_contact_email').value.trim() || null,
+
+      engagement_type: getRadioValue('engagement_type'),
+      hitl_reviewer_1_name: document.getElementById('hitl_reviewer_1_name').value.trim() || null,
+      hitl_reviewer_1_email: document.getElementById('hitl_reviewer_1_email').value.trim() || null,
+      hitl_reviewer_2_name: document.getElementById('hitl_reviewer_2_name').value.trim() || null,
+      hitl_reviewer_2_email: document.getElementById('hitl_reviewer_2_email').value.trim() || null,
+      review_sla_expectations: document.getElementById('review_sla_expectations').value.trim() || null,
+    };
+
+    const { error } = await supabaseClient.from('intake_submissions').insert(payload);
+
+    if (error) {
+      errorAlert.textContent = 'Something went wrong submitting your form: ' + error.message + '. Please try again or contact us directly.';
+      errorAlert.style.display = 'block';
+      btn.textContent = 'Submit Intake Form →';
+      btn.disabled = false;
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      return;
+    }
+
+    document.getElementById('intake-form').style.display = 'none';
+    document.getElementById('success-panel').style.display = 'block';
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  });
+</script>
+
+</body>
+</html>
