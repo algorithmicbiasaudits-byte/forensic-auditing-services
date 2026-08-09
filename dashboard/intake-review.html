@@ -1,0 +1,558 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>F.A.S. Dashboard — Intake Requests</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #f8fafc;
+      color: #1e293b;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ── TOP NAV ── */
+    .topnav {
+      background: #ffffff;
+      padding: 0 32px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      height: 56px;
+      border-bottom: 1px solid #e2e8f0;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 100;
+    }
+
+    .topnav-left { display: flex; align-items: center; gap: 24px; }
+    .nav-logo { font-size: 16px; font-weight: 700; color: #0a1628; letter-spacing: 2px; }
+    .nav-logo span { color: #b8872e; }
+    .nav-divider { width: 1px; height: 20px; background: #e2e8f0; }
+    .nav-org { font-size: 12px; color: #64748b; font-family: monospace; letter-spacing: 1px; }
+    .topnav-right { display: flex; align-items: center; gap: 20px; }
+    .nav-user { font-size: 12px; color: #64748b; }
+    .nav-user span { color: #1e293b; font-weight: 500; }
+    .nav-role {
+      font-family: monospace; font-size: 10px; letter-spacing: 1px; padding: 4px 10px;
+      border-radius: 2px; background: rgba(184,135,46,0.1); color: #b8872e;
+      border: 1px solid rgba(184,135,46,0.25);
+    }
+    .nav-logout { font-size: 12px; color: #94a3b8; cursor: pointer; text-decoration: none; }
+    .nav-logout:hover { color: #1e293b; }
+
+    /* ── SIDEBAR ── */
+    .sidebar {
+      position: fixed; top: 56px; left: 0; bottom: 0; width: 220px;
+      background: white; border-right: 1px solid #e8e8e8; padding: 24px 0;
+      overflow-y: auto; z-index: 90;
+    }
+    .sidebar-section-label {
+      font-family: monospace; font-size: 9px; letter-spacing: 2px; color: #bbb;
+      text-transform: uppercase; padding: 8px 20px 6px; margin-top: 12px;
+    }
+    .sidebar-section-label:first-child { margin-top: 0; }
+    .sidebar-link {
+      display: flex; align-items: center; gap: 10px; padding: 10px 20px;
+      font-size: 13px; color: #555; text-decoration: none; cursor: pointer;
+      transition: all 0.15s; margin: 0 8px 2px; border-radius: 4px;
+    }
+    .sidebar-link:hover { background: #f5f8ff; color: #0a1628; }
+    .sidebar-link.active { background: rgba(184,135,46,0.08); color: #b8872e; font-weight: 600; border-left: 3px solid #b8872e; }
+    .sidebar-link .icon { font-size: 15px; width: 20px; text-align: center; }
+    .sidebar-badge {
+      margin-left: auto; background: #e53e3e; color: white; font-size: 10px; font-weight: 700;
+      padding: 2px 7px; border-radius: 10px; min-width: 20px; text-align: center;
+    }
+
+    /* ── MAIN CONTENT ── */
+    .main-content { margin-left: 220px; margin-top: 56px; padding: 32px; flex: 1; }
+
+    .page-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 28px; }
+    .page-title { font-size: 22px; font-weight: 700; color: #1e293b; margin-bottom: 4px; }
+    .page-subtitle { font-size: 13px; color: #888; }
+
+    .btn-outline {
+      background: white; color: #64748b; font-size: 13px; font-weight: 500; padding: 9px 18px;
+      border: 1px solid #e2e8f0; border-radius: 3px; cursor: pointer; transition: all 0.2s;
+    }
+    .btn-outline:hover { background: #f1f5f9; border-color: #cbd5e1; color: #1e293b; }
+
+    .btn-primary {
+      background: #0a1628; color: white; font-size: 13px; font-weight: 500; padding: 9px 18px;
+      border: none; border-radius: 3px; cursor: pointer; transition: background 0.2s;
+    }
+    .btn-primary:hover { background: #162440; }
+    .btn-primary:disabled { background: #aaa; cursor: not-allowed; }
+
+    .btn-danger {
+      background: white; color: #dc2626; font-size: 13px; font-weight: 500; padding: 9px 18px;
+      border: 1px solid rgba(220,38,38,0.3); border-radius: 3px; cursor: pointer;
+    }
+    .btn-danger:hover { background: rgba(220,38,38,0.06); }
+
+    /* ── STATS ── */
+    .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 24px; }
+    .stat-card {
+      background: white; border-radius: 4px; padding: 18px 22px; border: 1px solid #e8e8e8;
+      position: relative; overflow: hidden; cursor: pointer; transition: box-shadow 0.2s;
+    }
+    .stat-card:hover { box-shadow: 0 4px 12px rgba(0,0,0,0.06); }
+    .stat-card::before { content: ''; position: absolute; top: 0; left: 0; width: 3px; height: 100%; background: #cbd5e1; }
+    .stat-card.active-filter { border-color: #b8872e; }
+    .stat-card.active-filter::before { background: #b8872e; }
+    .stat-card.gold::before { background: #b8872e; }
+    .stat-card.green::before { background: #16a34a; }
+    .stat-card.red::before { background: #dc2626; }
+    .stat-label { font-family: monospace; font-size: 10px; letter-spacing: 1.5px; color: #888; text-transform: uppercase; margin-bottom: 8px; }
+    .stat-num { font-size: 30px; font-weight: 700; color: #1e293b; line-height: 1; }
+
+    /* ── TABLE ── */
+    .table-card { background: white; border: 1px solid #e8e8e8; border-radius: 4px; overflow: hidden; }
+    table { width: 100%; border-collapse: collapse; }
+    thead th {
+      text-align: left; font-family: monospace; font-size: 10px; letter-spacing: 1px;
+      color: #888; text-transform: uppercase; padding: 12px 20px; border-bottom: 1px solid #e8e8e8;
+      background: #fafbfc;
+    }
+    tbody td { padding: 14px 20px; font-size: 13px; border-bottom: 1px solid #f1f5f9; }
+    tbody tr:last-child td { border-bottom: none; }
+    tbody tr { cursor: pointer; transition: background 0.15s; }
+    tbody tr:hover { background: #f8fafc; }
+    .company-name { font-weight: 600; color: #1e293b; }
+    .contact-sub { font-size: 11px; color: #888; margin-top: 2px; }
+
+    .status-tag {
+      display: inline-block; font-size: 10px; font-weight: 700; letter-spacing: 0.5px;
+      padding: 3px 10px; border-radius: 100px; text-transform: uppercase;
+    }
+    .status-tag.new { background: rgba(184,135,46,0.12); color: #b8872e; }
+    .status-tag.reviewed { background: rgba(30,64,175,0.1); color: #1e40af; }
+    .status-tag.converted { background: rgba(22,163,74,0.1); color: #16a34a; }
+    .status-tag.declined { background: rgba(220,38,38,0.08); color: #dc2626; }
+
+    .litigation-flag { color: #dc2626; font-size: 12px; font-weight: 600; }
+
+    .empty-state { padding: 60px 20px; text-align: center; color: #888; font-size: 13px; }
+
+    /* ── DETAIL PANEL ── */
+    .overlay {
+      display: none; position: fixed; inset: 0; background: rgba(15,23,42,0.5); z-index: 200;
+      align-items: center; justify-content: center; padding: 24px;
+    }
+    .overlay.show { display: flex; }
+    .detail-panel {
+      background: white; border-radius: 6px; max-width: 760px; width: 100%;
+      max-height: 88vh; overflow-y: auto; padding: 32px 36px;
+    }
+    .detail-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 24px; }
+    .detail-header h2 { font-size: 20px; color: #1e293b; }
+    .detail-close { cursor: pointer; color: #94a3b8; font-size: 20px; background: none; border: none; }
+    .detail-close:hover { color: #1e293b; }
+
+    .detail-section { margin-bottom: 22px; }
+    .detail-section-title {
+      font-family: monospace; font-size: 10px; letter-spacing: 1.5px; color: #b8872e;
+      text-transform: uppercase; margin-bottom: 10px; border-bottom: 1px solid #f1f5f9; padding-bottom: 6px;
+    }
+    .detail-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px 20px; }
+    .detail-field { font-size: 13px; }
+    .detail-field label { display: block; font-size: 10px; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 2px; }
+    .detail-field .val { color: #1e293b; }
+    .detail-field .val.empty { color: #cbd5e1; font-style: italic; }
+    .detail-field.full { grid-column: 1 / -1; }
+
+    .litigation-callout {
+      background: rgba(220,38,38,0.06); border: 1px solid rgba(220,38,38,0.2); border-radius: 4px;
+      padding: 12px 16px; font-size: 13px; color: #991b1b; margin-bottom: 22px;
+    }
+
+    .detail-actions { display: flex; gap: 10px; margin-top: 28px; padding-top: 20px; border-top: 1px solid #f1f5f9; }
+
+    .convert-note {
+      background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 4px; padding: 12px 16px;
+      font-size: 12px; color: #64748b; margin-top: 12px; line-height: 1.6;
+    }
+
+    .access-denied { max-width: 480px; margin: 120px auto; text-align: center; padding: 40px; }
+    .access-denied h2 { color: #1e293b; margin-bottom: 12px; }
+    .access-denied p { color: #888; font-size: 14px; }
+
+    @media (max-width: 900px) {
+      .sidebar { display: none; }
+      .main-content { margin-left: 0; }
+      .stats-grid { grid-template-columns: repeat(2, 1fr); }
+      .detail-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<nav class="topnav">
+  <div class="topnav-left">
+    <div class="nav-logo">F<span>.</span>A<span>.</span>S<span>.</span></div>
+    <div class="nav-divider"></div>
+    <div class="nav-org">ALS Consulting — Platform Admin</div>
+  </div>
+  <div class="topnav-right">
+    <div class="nav-user">Signed in as <span id="user-email">—</span></div>
+    <div class="nav-role">ADMIN</div>
+    <a class="nav-logout" onclick="handleLogout()">Sign Out</a>
+  </div>
+</nav>
+
+<aside class="sidebar">
+  <div class="sidebar-section-label">MAIN</div>
+  <a href="main.html" class="sidebar-link"><span class="icon">📊</span> Dashboard</a>
+  <a href="rejections.html" class="sidebar-link"><span class="icon">🚨</span> Rejections</a>
+  <a href="reports.html" class="sidebar-link"><span class="icon">📋</span> Reports</a>
+
+  <div class="sidebar-section-label">COMPLIANCE</div>
+  <a href="audit-trail.html" class="sidebar-link"><span class="icon">🔒</span> Audit Trail</a>
+  <a href="reviewers.html" class="sidebar-link"><span class="icon">👥</span> Reviewers</a>
+
+  <div class="sidebar-section-label">ADMIN</div>
+  <a href="intake-review.html" class="sidebar-link active"><span class="icon">📥</span> Intake Requests <span class="sidebar-badge" id="new-count-badge" style="display:none;"></span></a>
+
+  <div class="sidebar-section-label">SYSTEM</div>
+  <a href="settings.html" class="sidebar-link"><span class="icon">⚙️</span> Settings</a>
+  <a href="it-setup-docs.html" class="sidebar-link"><span class="icon">📄</span> IT Setup Docs</a>
+</aside>
+
+<div class="main-content" id="main-content" style="display:none;">
+  <div class="page-header">
+    <div>
+      <div class="page-title">Intake Requests</div>
+      <div class="page-subtitle">Pre-audit intake form submissions from prospective clients</div>
+    </div>
+    <button class="btn-outline" onclick="loadSubmissions()">↻ Refresh</button>
+  </div>
+
+  <div class="stats-grid">
+    <div class="stat-card gold active-filter" id="stat-new" onclick="setFilter('new')">
+      <div class="stat-label">New</div>
+      <div class="stat-num" id="count-new">0</div>
+    </div>
+    <div class="stat-card" id="stat-reviewed" onclick="setFilter('reviewed')">
+      <div class="stat-label">Reviewed</div>
+      <div class="stat-num" id="count-reviewed">0</div>
+    </div>
+    <div class="stat-card green" id="stat-converted" onclick="setFilter('converted')">
+      <div class="stat-label">Converted</div>
+      <div class="stat-num" id="count-converted">0</div>
+    </div>
+    <div class="stat-card" id="stat-all" onclick="setFilter('all')">
+      <div class="stat-label">All Submissions</div>
+      <div class="stat-num" id="count-all">0</div>
+    </div>
+  </div>
+
+  <div class="table-card">
+    <table>
+      <thead>
+        <tr>
+          <th>Company / Contact</th>
+          <th>Engagement</th>
+          <th>Submitted</th>
+          <th>Status</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody id="submissions-tbody"></tbody>
+    </table>
+    <div class="empty-state" id="empty-state" style="display:none;">No submissions in this view.</div>
+  </div>
+</div>
+
+<div class="access-denied" id="access-denied" style="display:none;">
+  <h2>Access Restricted</h2>
+  <p>This page is only available to platform administrators.</p>
+</div>
+
+<!-- DETAIL OVERLAY -->
+<div class="overlay" id="detail-overlay">
+  <div class="detail-panel" id="detail-panel"></div>
+</div>
+
+<script>
+  const { createClient } = supabase;
+  const supabaseClient = createClient(
+    'https://znjvjofsfvxccmidfpgy.supabase.co',
+    'sb_publishable_9eXyp1KWa4g_uvM4TCliBg_XAwwSuwD'
+  );
+
+  let allSubmissions = [];
+  let currentFilter = 'new';
+
+  async function init() {
+    const { data: { session } } = await supabaseClient.auth.getSession();
+    if (!session) { window.location.href = 'login.html'; return; }
+
+    document.getElementById('user-email').textContent = session.user.email;
+
+    const { data: userRow } = await supabaseClient
+      .from('users').select('is_platform_admin, password_updated_at').eq('auth_id', session.user.id).single();
+
+    if (!userRow || !userRow.is_platform_admin) {
+      document.getElementById('access-denied').style.display = 'block';
+      return;
+    }
+
+    if (userRow.password_updated_at) {
+      const ageDays = (Date.now() - new Date(userRow.password_updated_at).getTime()) / (1000 * 60 * 60 * 24);
+      if (ageDays >= 45) {
+        window.location.href = '/dashboard/change-password.html?required=1';
+        return;
+      }
+    }
+
+    document.getElementById('main-content').style.display = 'block';
+    await loadSubmissions();
+  }
+
+  async function handleLogout() {
+    await supabaseClient.auth.signOut();
+    window.location.href = 'login.html';
+  }
+
+  async function loadSubmissions() {
+    const { data, error } = await supabaseClient
+      .from('intake_submissions')
+      .select('*')
+      .order('submitted_at', { ascending: false });
+
+    if (error) {
+      console.error('Failed to load submissions:', error.message);
+      return;
+    }
+
+    allSubmissions = data || [];
+    renderStats();
+    renderTable();
+  }
+
+  function renderStats() {
+    const counts = { new: 0, reviewed: 0, converted: 0, declined: 0 };
+    allSubmissions.forEach(s => { if (counts[s.status] !== undefined) counts[s.status]++; });
+
+    document.getElementById('count-new').textContent = counts.new;
+    document.getElementById('count-reviewed').textContent = counts.reviewed;
+    document.getElementById('count-converted').textContent = counts.converted;
+    document.getElementById('count-all').textContent = allSubmissions.length;
+
+    const badge = document.getElementById('new-count-badge');
+    if (counts.new > 0) {
+      badge.textContent = counts.new;
+      badge.style.display = 'inline-block';
+    } else {
+      badge.style.display = 'none';
+    }
+  }
+
+  function setFilter(filter) {
+    currentFilter = filter;
+    document.querySelectorAll('.stat-card').forEach(el => el.classList.remove('active-filter'));
+    document.getElementById('stat-' + filter).classList.add('active-filter');
+    renderTable();
+  }
+
+  function renderTable() {
+    const tbody = document.getElementById('submissions-tbody');
+    const filtered = currentFilter === 'all'
+      ? allSubmissions
+      : allSubmissions.filter(s => s.status === currentFilter);
+
+    if (filtered.length === 0) {
+      tbody.innerHTML = '';
+      document.getElementById('empty-state').style.display = 'block';
+      return;
+    }
+    document.getElementById('empty-state').style.display = 'none';
+
+    tbody.innerHTML = filtered.map(s => `
+      <tr onclick="openDetail('${s.id}')">
+        <td>
+          <div class="company-name">${escapeHtml(s.company_name)}</div>
+          <div class="contact-sub">${escapeHtml(s.primary_contact_name)} · ${escapeHtml(s.contact_email)}</div>
+        </td>
+        <td>${s.engagement_type === 'hitl' ? 'FAS HITL' : s.engagement_type === 'auditing' ? 'FAS Auditing' : '—'}
+          ${s.litigation_history ? '<div class="litigation-flag">⚠ Litigation history</div>' : ''}
+        </td>
+        <td>${formatDate(s.submitted_at)}</td>
+        <td><span class="status-tag ${s.status}">${s.status}</span></td>
+        <td style="text-align:right;color:#b8872e;font-size:12px;">View →</td>
+      </tr>
+    `).join('');
+  }
+
+  function formatDate(iso) {
+    if (!iso) return '—';
+    return new Date(iso).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+  }
+
+  function escapeHtml(str) {
+    if (str === null || str === undefined) return '';
+    const div = document.createElement('div');
+    div.textContent = str;
+    return div.innerHTML;
+  }
+
+  function fieldVal(val) {
+    if (val === null || val === undefined || val === '') return '<span class="val empty">Not provided</span>';
+    if (Array.isArray(val)) return val.length ? `<span class="val">${val.map(escapeHtml).join(', ')}</span>` : '<span class="val empty">None selected</span>';
+    if (typeof val === 'boolean') return `<span class="val">${val ? 'Yes' : 'No'}</span>`;
+    return `<span class="val">${escapeHtml(val)}</span>`;
+  }
+
+  function openDetail(id) {
+    const s = allSubmissions.find(x => x.id === id);
+    if (!s) return;
+
+    const panel = document.getElementById('detail-panel');
+    panel.innerHTML = `
+      <div class="detail-header">
+        <div>
+          <h2>${escapeHtml(s.company_name)}</h2>
+          <div class="contact-sub" style="margin-top:4px;">Submitted ${formatDate(s.submitted_at)} · <span class="status-tag ${s.status}">${s.status}</span></div>
+        </div>
+        <button class="detail-close" onclick="closeDetail()">✕</button>
+      </div>
+
+      ${s.litigation_history ? `
+        <div class="litigation-callout">
+          <strong>⚠ Litigation history disclosed.</strong> Status: ${escapeHtml(s.litigation_status) || 'not specified'}.
+          Outside counsel engaged: ${s.outside_counsel_engaged === true ? 'Yes' : s.outside_counsel_engaged === false ? 'No' : 'Not specified'}.
+          Consider legal-precision review on report language before delivery.
+        </div>
+      ` : ''}
+
+      <div class="detail-section">
+        <div class="detail-section-title">Company &amp; Contact</div>
+        <div class="detail-grid">
+          <div class="detail-field"><label>Primary Contact</label>${fieldVal(s.primary_contact_name)}</div>
+          <div class="detail-field"><label>Job Title</label>${fieldVal(s.job_title)}</div>
+          <div class="detail-field"><label>Email</label>${fieldVal(s.contact_email)}</div>
+          <div class="detail-field"><label>Phone</label>${fieldVal(s.contact_phone)}</div>
+          <div class="detail-field"><label>Company Size</label>${fieldVal(s.company_size_band)}</div>
+        </div>
+      </div>
+
+      <div class="detail-section">
+        <div class="detail-section-title">System Architecture &amp; Tech Stack</div>
+        <div class="detail-grid">
+          <div class="detail-field"><label>ATS Platform</label>${fieldVal(s.ats_platform)}</div>
+          <div class="detail-field"><label>Hosting Environment</label>${fieldVal(s.hosting_environment)}</div>
+          <div class="detail-field full"><label>AI Features Used</label>${fieldVal(s.ai_features_used)}</div>
+          <div class="detail-field full"><label>Third-Party Add-ons</label>${fieldVal(s.third_party_addons)}</div>
+          <div class="detail-field"><label>IT Resource Availability</label>${fieldVal(s.it_resource_availability)}</div>
+        </div>
+      </div>
+
+      <div class="detail-section">
+        <div class="detail-section-title">Data &amp; Regulatory Scope</div>
+        <div class="detail-grid">
+          <div class="detail-field full"><label>Jurisdictions</label>${fieldVal(s.jurisdictions)}</div>
+          <div class="detail-field"><label>Federal Contractor</label>${fieldVal(s.federal_contractor)}</div>
+          <div class="detail-field"><label>Contract Value Band</label>${fieldVal(s.contract_value_band)}</div>
+          <div class="detail-field"><label>Monthly Applicant Volume</label>${fieldVal(s.monthly_applicant_volume)}</div>
+          <div class="detail-field"><label>Historical Data Retention (yrs)</label>${fieldVal(s.historical_data_retention_years)}</div>
+          <div class="detail-field full"><label>Protected Attributes Collected</label>${fieldVal(s.protected_attributes_collected)}</div>
+        </div>
+      </div>
+
+      <div class="detail-section">
+        <div class="detail-section-title">Audit Objectives &amp; Compliance Needs</div>
+        <div class="detail-grid">
+          <div class="detail-field"><label>Primary Audit Goal</label>${fieldVal(s.primary_audit_goal)}</div>
+          <div class="detail-field full"><label>Specific Regulations</label>${fieldVal(s.specific_regulations)}</div>
+          <div class="detail-field full"><label>Previous Audits</label>${fieldVal(s.previous_audits)}</div>
+        </div>
+      </div>
+
+      <div class="detail-section">
+        <div class="detail-section-title">Documentation &amp; Access Checklist</div>
+        <div class="detail-grid">
+          <div class="detail-field"><label>Technical Documentation</label>${fieldVal(s.doc_technical_documentation)}</div>
+          <div class="detail-field"><label>Data Dictionaries</label>${fieldVal(s.doc_data_dictionaries)}</div>
+          <div class="detail-field"><label>Privacy Policy</label>${fieldVal(s.doc_privacy_policy)}</div>
+          <div class="detail-field"><label>Sandbox Access</label>${fieldVal(s.doc_sandbox_access)}</div>
+        </div>
+      </div>
+
+      <div class="detail-section">
+        <div class="detail-section-title">Legal</div>
+        <div class="detail-grid">
+          <div class="detail-field"><label>DPA Required</label>${fieldVal(s.dpa_required)}</div>
+          <div class="detail-field"><label>Data Residency Requirements</label>${fieldVal(s.data_residency_requirements)}</div>
+          <div class="detail-field"><label>Legal Contact</label>${fieldVal(s.legal_contact_name)}</div>
+          <div class="detail-field"><label>Legal Contact Email</label>${fieldVal(s.legal_contact_email)}</div>
+        </div>
+      </div>
+
+      <div class="detail-section">
+        <div class="detail-section-title">Engagement Type</div>
+        <div class="detail-grid">
+          <div class="detail-field"><label>Interested In</label>${fieldVal(s.engagement_type === 'hitl' ? 'FAS HITL' : s.engagement_type === 'auditing' ? 'FAS Auditing' : null)}</div>
+          <div class="detail-field"><label>Review SLA Expectations</label>${fieldVal(s.review_sla_expectations)}</div>
+          <div class="detail-field"><label>Reviewer 1</label>${fieldVal(s.hitl_reviewer_1_name ? s.hitl_reviewer_1_name + ' (' + s.hitl_reviewer_1_email + ')' : null)}</div>
+          <div class="detail-field"><label>Reviewer 2</label>${fieldVal(s.hitl_reviewer_2_name ? s.hitl_reviewer_2_name + ' (' + s.hitl_reviewer_2_email + ')' : null)}</div>
+        </div>
+      </div>
+
+      <div class="detail-actions">
+        ${s.status === 'new' ? `<button class="btn-primary" onclick="markStatus('${s.id}', 'reviewed')">Mark Reviewed</button>` : ''}
+        ${s.status !== 'declined' && s.status !== 'converted' ? `<button class="btn-danger" onclick="markStatus('${s.id}', 'declined')">Decline</button>` : ''}
+        <button class="btn-outline" onclick="closeDetail()">Close</button>
+      </div>
+
+      ${s.status !== 'converted' ? `
+        <div class="convert-note">
+          <strong>Converting to a real client account is a manual step, by design</strong> — matching how every other account on this platform is created (no self-serve signup). Use this submission's details to set up the real <code>customers</code> row and API key yourself, then update this record's status directly if needed. Automatic conversion isn't built here on purpose, to avoid auto-provisioning real API credentials from an unreviewed web form.
+        </div>
+      ` : ''}
+    `;
+
+    document.getElementById('detail-overlay').classList.add('show');
+  }
+
+  function closeDetail() {
+    document.getElementById('detail-overlay').classList.remove('show');
+  }
+
+  async function markStatus(id, status) {
+    const { data: { session } } = await supabaseClient.auth.getSession();
+
+    const updates = { status };
+    if (status === 'reviewed') {
+      updates.reviewed_at = new Date().toISOString();
+      const { data: userRow } = await supabaseClient
+        .from('users').select('user_id').eq('auth_id', session.user.id).single();
+      if (userRow) updates.reviewed_by_user_id = userRow.user_id;
+    }
+
+    const { error } = await supabaseClient.from('intake_submissions').update(updates).eq('id', id);
+    if (error) {
+      alert('Failed to update status: ' + error.message);
+      return;
+    }
+
+    closeDetail();
+    await loadSubmissions();
+  }
+
+  document.getElementById('detail-overlay').addEventListener('click', (e) => {
+    if (e.target.id === 'detail-overlay') closeDetail();
+  });
+
+  init();
+</script>
+
+</body>
+</html>
