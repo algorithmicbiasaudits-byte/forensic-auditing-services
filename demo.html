@@ -194,7 +194,7 @@
         <div class="lane-icon red">!</div>
         <div class="lane-content">
           <div class="lane-title" style="color:#fc8181;">Legal Framework Triggers</div>
-          <div class="lane-detail">NYC LL144: Automated employment decision tool used without bias audit disclosure. Colorado SB 189 (signed May 14, 2026, effective January 1, 2027): Gap-based rejection without pre-use notice violates SB 189 consumer disclosure requirements — SB 205 was fully repealed and never took effect. EU AI Act: High-risk AI system decision without human oversight (effective August 2, 2026). OFCCP: Federal contractors must document adverse impact analysis and maintain records of all selection decisions under the Internet Applicant Rule.</div>
+          <div class="lane-detail">NYC LL144: Automated employment decision tool used without bias audit disclosure. Colorado SB 189 (signed May 14, 2026, effective January 1, 2027): Gap-based rejection without pre-use notice violates SB 189 consumer disclosure requirements — SB 205 was fully repealed and never took effect. EU AI Act: High-risk AI system decision without human oversight (Annex III employment deadline: December 2, 2027). OFCCP: Federal contractors must document adverse impact analysis and maintain records of all selection decisions under the Internet Applicant Rule.</div>
         </div>
       </div>
       <div class="analysis-lane" id="lane-5">
@@ -215,7 +215,7 @@
         <div class="lane-icon green">✓</div>
         <div class="lane-content">
           <div class="lane-title" style="color:#68d391;">Comparative Assessment — Insufficient Data</div>
-          <div class="lane-detail">No comparative candidate data provided by ATS. Cannot confirm selected candidate was demonstrably more qualified on job-related criteria. Human review required before rejection is finalized.</div>
+          <div class="lane-detail">No comparative candidate data provided by ATS. Cannot confirm selected candidate was demonstrably more qualified on job-related criteria. Human review and documented justification required before this case can be closed.</div>
         </div>
       </div>
     </div>
@@ -419,7 +419,7 @@ Compliance Officer notification sent.
           <div style="font-size: 9px; color: rgba(255,255,255,0.3); letter-spacing: 2px; margin-top: 4px;">SEC</div>
         </div>
       </div>
-      <div style="font-size: 12px; color: rgba(255,255,255,0.4);">August 2, 2026 · High-risk AI systems require human oversight or face fines up to €35M</div>
+      <div style="font-size: 12px; color: rgba(255,255,255,0.4);">December 2, 2027 · High-risk AI systems require human oversight or face fines up to €15M</div>
     </div>
 
   </div>
@@ -475,7 +475,7 @@ Compliance Officer notification sent.
   function updateRegulatoryCountdowns() {
     const now = new Date().getTime();
     const coDeadline = new Date('2027-01-01T07:00:00Z').getTime(); // midnight MST = UTC-7
-    const euDeadline = new Date('2026-08-01T22:00:00Z').getTime(); // midnight CEST = UTC+2
+    const euDeadline = new Date('2027-12-01T23:00:00Z').getTime(); // midnight CET = UTC+1 (Annex III high-risk employment AI deadline)
     function getUnits(diff) {
       if (diff <= 0) return { days: '00', hours: '00', minutes: '00', seconds: '00' };
       return {
