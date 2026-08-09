@@ -928,15 +928,27 @@
   }
 
   let currentCustomerId = null;
+  const PASSWORD_MAX_AGE_DAYS = 45;
 
   async function loadCustomerData() {
     const { data: userRow } = await supabaseClient
-      .from('users').select('customer_id, role, is_platform_admin').eq('auth_id', currentUser.id).single();
+      .from('users').select('customer_id, role, is_platform_admin, password_updated_at').eq('auth_id', currentUser.id).single();
 
     if (!userRow) {
       document.getElementById('org-name').textContent = 'F.A.S. Dashboard';
       document.getElementById('user-role').textContent = '—';
       return;
+    }
+
+    // Catches a session that was already open before the 45-day mark hit --
+    // login.html only checks at sign-in time, so a long-lived open tab needs
+    // its own check here too.
+    if (!userRow.is_platform_admin && userRow.password_updated_at) {
+      const ageDays = (Date.now() - new Date(userRow.password_updated_at).getTime()) / (1000 * 60 * 60 * 24);
+      if (ageDays >= PASSWORD_MAX_AGE_DAYS) {
+        window.location.href = '/dashboard/change-password.html?required=1';
+        return;
+      }
     }
 
     document.getElementById('user-role').textContent =

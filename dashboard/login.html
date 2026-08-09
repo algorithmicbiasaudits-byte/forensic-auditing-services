@@ -188,6 +188,16 @@
       color: #276749;
     }
 
+    /* Forgot password link */
+    .forgot-link {
+      text-align: center;
+      font-size: 12px;
+      margin-top: 16px;
+    }
+
+    .forgot-link a { color: #b8872e; text-decoration: none; }
+    .forgot-link a:hover { text-decoration: underline; }
+
     /* Divider */
     .divider {
       border: none;
@@ -291,12 +301,35 @@
         Sign In →
       </button>
 
+      <p class="forgot-link"><a href="#" onclick="showForgotPassword(); return false;">Forgot your password?</a></p>
+
       <hr class="divider">
 
       <div class="security-note">
         <span class="icon">🔒</span>
         <span>All sessions are logged and timestamped. Unauthorized access attempts are recorded. This system is monitored for compliance purposes.</span>
       </div>
+    </div>
+
+    <div class="login-card" id="forgot-card" style="display:none;">
+      <h2>Reset Your Password</h2>
+      <p>Enter the email address associated with your account. We'll send you a link to set a new password.</p>
+
+      <div class="alert error" id="forgot-error-alert"></div>
+      <div class="alert success" id="forgot-success-alert"></div>
+
+      <div id="forgot-form-fields">
+        <div class="form-group">
+          <label>Email Address</label>
+          <input type="email" id="forgot-email" placeholder="your@organization.com" autocomplete="email">
+        </div>
+
+        <button class="submit-btn" id="forgot-btn" onclick="handleForgotPassword()">
+          Send Reset Link →
+        </button>
+      </div>
+
+      <p class="forgot-link"><a href="#" onclick="showLogin(); return false;">← Back to Sign In</a></p>
     </div>
 
   </div>
@@ -313,10 +346,22 @@
     'sb_publishable_9eXyp1KWa4g_uvM4TCliBg_XAwwSuwD'
   );
 
+  const PASSWORD_MAX_AGE_DAYS = 45;
+
   async function resolveDestination(authUserId) {
     const { data: userRow } = await supabaseClient
-      .from('users').select('customer_id').eq('auth_id', authUserId).single();
+      .from('users').select('customer_id, is_platform_admin, password_updated_at').eq('auth_id', authUserId).single();
     if (!userRow) return '/dashboard/main.html';
+
+    // Platform-admin (Aisha's own account) is exempt from rotation -- every
+    // other role, including per-customer 'admin', still has to rotate.
+    if (!userRow.is_platform_admin && userRow.password_updated_at) {
+      const ageMs = Date.now() - new Date(userRow.password_updated_at).getTime();
+      const ageDays = ageMs / (1000 * 60 * 60 * 24);
+      if (ageDays >= PASSWORD_MAX_AGE_DAYS) {
+        return '/dashboard/change-password.html?required=1';
+      }
+    }
 
     const { data: customer } = await supabaseClient
       .from('customers').select('intake_method').eq('customer_id', userRow.customer_id).single();
@@ -387,8 +432,63 @@
   }
 
   document.addEventListener('keydown', function(e) {
-    if (e.key === 'Enter') handleLogin();
+    const forgotVisible = document.getElementById('forgot-card').style.display !== 'none';
+    if (e.key === 'Enter') {
+      if (forgotVisible) handleForgotPassword();
+      else handleLogin();
+    }
   });
+
+  function showForgotPassword() {
+    document.getElementById('error-alert').style.display = 'none';
+    document.getElementById('success-alert').style.display = 'none';
+    document.querySelector('.login-card:not(#forgot-card)').style.display = 'none';
+    document.getElementById('forgot-card').style.display = 'block';
+    document.getElementById('forgot-email').focus();
+  }
+
+  function showLogin() {
+    document.getElementById('forgot-error-alert').style.display = 'none';
+    document.getElementById('forgot-success-alert').style.display = 'none';
+    document.getElementById('forgot-card').style.display = 'none';
+    document.querySelector('.login-card:not(#forgot-card)').style.display = 'block';
+  }
+
+  async function handleForgotPassword() {
+    const email = document.getElementById('forgot-email').value.trim();
+    const btn = document.getElementById('forgot-btn');
+    const errorAlert = document.getElementById('forgot-error-alert');
+    const successAlert = document.getElementById('forgot-success-alert');
+
+    errorAlert.style.display = 'none';
+    successAlert.style.display = 'none';
+
+    if (!email) {
+      errorAlert.textContent = 'Please enter your email address.';
+      errorAlert.style.display = 'block';
+      return;
+    }
+
+    btn.textContent = 'Sending...';
+    btn.disabled = true;
+
+    // Reuses accept-invite.html -- it already handles type=recovery tokens
+    // the same way it handles type=invite, both via Supabase's implicit-flow
+    // hash-fragment redirect.
+    const { error } = await supabaseClient.auth.resetPasswordForEmail(email, {
+      redirectTo: 'https://forensicauditingservices.com/dashboard/accept-invite.html',
+    });
+
+    // Supabase does not reveal whether the email exists, to avoid account
+    // enumeration -- always show the same success message regardless.
+    successAlert.textContent = 'If an account exists for that email, a password reset link has been sent. Check your inbox.';
+    successAlert.style.display = 'block';
+    document.getElementById('forgot-form-fields').style.display = 'none';
+
+    if (error) {
+      console.error('resetPasswordForEmail error:', error.message);
+    }
+  }
 </script>
 
 </body>
