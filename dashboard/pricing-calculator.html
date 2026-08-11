@@ -274,7 +274,7 @@
         </div>
         <div class="field">
           <label class="field-label">Tier</label>
-          <select id="tier-select" onchange="recalc()">
+          <select id="tier-select" onchange="updateTier3SeatRateVisibility(); recalc();">
             <option value="1">Tier 1 — Mid-Market (100–250 employees)</option>
             <option value="2">Tier 2 — Premium Enterprise (251–1,000 employees)</option>
             <option value="3">Tier 3 — Strategic/Large Enterprise (1,001+)</option>
@@ -310,6 +310,16 @@
             <div class="sub">2 seats included with the Integration Fee</div>
           </div>
           <input type="number" class="inline-number" id="extra-seats" min="0" value="0" oninput="recalc()">
+        </div>
+        <div class="toggle-row" id="tier3-seat-rate-row" style="display:none;">
+          <div>
+            <div class="label">Tier 3 seat rate</div>
+            <div class="sub">Pricing-Cost-Drivers.md gives Tier 3 as a $125–150/seat range, not a fixed rate</div>
+          </div>
+          <select id="tier3-seat-rate" onchange="recalc()">
+            <option value="125">$125/seat</option>
+            <option value="150">$150/seat</option>
+          </select>
         </div>
       </div>
 
@@ -428,6 +438,7 @@
     }
 
     document.getElementById('main-content').style.display = 'block';
+    updateTier3SeatRateVisibility();
     recalc();
   }
 
@@ -461,13 +472,22 @@
     badge.textContent = 'Auto-suggested: ' + RATES[tier].label;
     badge.className = 'tier-badge ' + RATES[tier].badge;
     badge.style.display = 'inline-block';
+    updateTier3SeatRateVisibility();
     recalc();
   }
 
   function onHitlToggle() {
     document.getElementById('seats-row').style.display =
       document.getElementById('hitl-toggle').checked ? 'flex' : 'none';
+    updateTier3SeatRateVisibility();
     recalc();
+  }
+
+  function updateTier3SeatRateVisibility() {
+    const hitlOn = document.getElementById('hitl-toggle').checked;
+    const tier = parseInt(document.getElementById('tier-select').value, 10);
+    document.getElementById('tier3-seat-rate-row').style.display =
+      (hitlOn && tier === 3) ? 'flex' : 'none';
   }
 
   function onMultiAtsToggle() {
@@ -533,8 +553,11 @@
       total += monitoringTotal;
 
       if (extraSeats > 0) {
-        const seatsTotal = extraSeats * rates.seat;
-        lines.push({ desc: 'Additional remediation seats', sub: `${extraSeats} × ${fmt(rates.seat)}/seat`, amt: seatsTotal });
+        const seatRate = tier === 3
+          ? parseInt(document.getElementById('tier3-seat-rate').value, 10)
+          : rates.seat;
+        const seatsTotal = extraSeats * seatRate;
+        lines.push({ desc: 'Additional remediation seats', sub: `${extraSeats} × ${fmt(seatRate)}/seat`, amt: seatsTotal });
         total += seatsTotal;
       }
     }
