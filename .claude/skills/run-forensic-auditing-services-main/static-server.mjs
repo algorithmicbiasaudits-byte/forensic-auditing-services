@@ -18,6 +18,14 @@ const server = http.createServer((req, res) => {
   const urlPath = decodeURIComponent(req.url.split('?')[0]);
   let filePath = path.join(SITE_ROOT, urlPath);
   if (urlPath.endsWith('/')) filePath = path.join(filePath, 'index.html');
+  // Reject any request that resolves outside SITE_ROOT (e.g. /../../etc/passwd)
+  // -- this is a local-only test helper, but don't let it serve arbitrary
+  // filesystem paths just because it's not internet-facing.
+  const resolved = path.resolve(filePath);
+  if (resolved !== SITE_ROOT && !resolved.startsWith(SITE_ROOT + path.sep)) {
+    res.writeHead(403); res.end('Forbidden');
+    return;
+  }
   fs.readFile(filePath, (err, data) => {
     if (err) { res.writeHead(404); res.end('Not found: ' + urlPath); return; }
     const ext = path.extname(filePath).toLowerCase();

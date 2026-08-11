@@ -165,6 +165,7 @@ const supabaseClient = createClient(
   'sb_publishable_9eXyp1KWa4g_uvM4TCliBg_XAwwSuwD'
 );
 
+const MAX_ROWS = 5000;
 const REQUIRED_COLUMNS = ['candidate_id', 'job_id', 'job_title', 'outcome', 'occurred_at'];
 const ALL_COLUMNS = [...REQUIRED_COLUMNS, 'rejection_reason_from_ats', 'years_experience', 'education_level', 'skills', 'protected_class_cohort', 'demographic_source'];
 
@@ -229,6 +230,13 @@ function handleFile(file) {
   reader.onload = (e) => {
     try {
       parsedRows = parseCsv(e.target.result);
+      if (parsedRows.length > MAX_ROWS) {
+        showError(`This file has ${parsedRows.length} rows — the limit is ${MAX_ROWS} per upload. Split it into smaller files and upload separately.`);
+        parsedRows = null;
+        document.getElementById('fileNameDisplay').textContent = '';
+        document.getElementById('uploadBtn').disabled = true;
+        return;
+      }
       document.getElementById('fileNameDisplay').textContent = `${file.name} — ${parsedRows.length} row${parsedRows.length === 1 ? '' : 's'} found`;
       document.getElementById('uploadBtn').disabled = parsedRows.length === 0;
     } catch (err) {
