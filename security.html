@@ -173,7 +173,7 @@
     </div>
     <h1>F.A.S. Security Overview</h1>
     <p class="subtitle">Forensic Auditing Services — Security & Compliance</p>
-    <p style="color: #999; margin-top: 1rem; font-size: 0.9rem;">ALS Consulting | Last updated: August 9, 2026</p>
+    <p style="color: #999; margin-top: 1rem; font-size: 0.9rem;">ALS Consulting | Last updated: August 12, 2026</p>
   </header>
 
   <div class="container">
@@ -312,8 +312,8 @@
         <li>SQL injection protection via parameterized queries</li>
       </ul>
 
-      <div class="callout">
-        <strong>What We Don't Yet Formalize:</strong> Specific rate-limiting thresholds and HMAC payload signing are not yet implemented or verified — not claimed as current controls.
+      <div class="callout" style="border-left-color: var(--success-green);">
+        <strong>Updated 2026-08-12:</strong> HMAC payload signature verification and rate limiting are now live on the candidate intake webhook — every request requires a per-customer signed payload (HMAC-SHA256, 5-minute replay window, constant-time comparison) on top of API-key authentication, plus a 60 req/min per-customer rate limit. Full-schema Row Level Security has also been re-verified: all client-data tables confirmed RLS-enabled with active policies, not just spot-checked.
       </div>
 
       <h3>Offline Backups & Chain of Custody</h3>
@@ -322,9 +322,36 @@
       </div>
     </div>
 
-    <!-- Section 5: Compliance & Audits -->
+    <!-- Section 5: Development Process & Code Review -->
     <div class="section">
       <div class="section-number">5</div>
+      <h2>Development Process & Code Review</h2>
+
+      <h3>How F.A.S. Is Built</h3>
+      <ul>
+        <li>Developed by a solo founder using AI-assisted development (Claude Code), with every change reviewed and approved by the founder before it ships</li>
+        <li>No separate engineering team and no independent peer review process exists at present</li>
+        <li>Every AI-assisted change to source code, database schema, or deploy configuration requires explicit founder confirmation before being applied — a standing operating rule, not ad hoc</li>
+      </ul>
+
+      <h3>Verified Controls</h3>
+      <ul>
+        <li><strong>Row Level Security</strong> confirmed enabled with active policies across the full schema, tested via live cross-tenant impersonation — not just checking policies exist on paper</li>
+        <li><strong>Candidate identifiers</strong> HMAC-SHA256 hashed before storage, confirmed via direct code read</li>
+        <li><strong>Zero confirmed exposure</strong> to automated secret-file probing (<code>.env</code>, <code>.git/config</code>, WordPress paths) — real 30-day traffic analysis, all attempts returned 404</li>
+      </ul>
+
+      <div class="callout">
+        <strong>What We Don't Yet Formalize:</strong> There is no dedicated written SDLC document beyond an internal pre-deploy checklist, no staging environment separate from production, and no independent third-party code review.
+      </div>
+
+      <h3>Pre-Deploy Practice</h3>
+      <p>Changes to authentication, authorization, or data-access logic are tested against live cross-tenant scenarios before and after deployment, not assumed correct from reading the code alone. Schema and edge-function changes are version-controlled in git.</p>
+    </div>
+
+    <!-- Section 6: Compliance & Audits -->
+    <div class="section">
+      <div class="section-number">6</div>
       <h2>Compliance & Audits</h2>
 
       <h3>Subprocessor Compliance & Certifications</h3>
@@ -359,9 +386,9 @@
       </ul>
     </div>
 
-    <!-- Section 6: Incident Response -->
+    <!-- Section 7: Incident Response -->
     <div class="section">
-      <div class="section-number">6</div>
+      <div class="section-number">7</div>
       <h2>Incident Response</h2>
 
       <h3>Detection & Containment</h3>
@@ -393,9 +420,9 @@
       </ul>
     </div>
 
-    <!-- Section 7: Questions & Support -->
+    <!-- Section 8: Questions & Support -->
     <div class="section">
-      <div class="section-number">7</div>
+      <div class="section-number">8</div>
       <h2>Questions & Support</h2>
 
       <h3>Security Inquiries</h3>
@@ -425,7 +452,7 @@
     <p style="margin-top: 1.5rem; font-size: 0.9rem;">
       ALS Consulting | <a href="mailto:algorithmicbiasaudits@gmail.com" class="contact-email">algorithmicbiasaudits@gmail.com</a>
     </p>
-    <p style="margin-top: 1rem; color: #666; font-size: 0.85rem;">Last updated: August 9, 2026 | Version 2.0</p>
+    <p style="margin-top: 1rem; color: #666; font-size: 0.85rem;">Last updated: August 12, 2026 | Version 2.1</p>
   </footer>
 
 </body>
