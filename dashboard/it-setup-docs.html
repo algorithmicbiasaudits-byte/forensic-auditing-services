@@ -211,7 +211,7 @@
 
     .status-code { font-family: monospace; font-weight: 700; }
     .status-200 { color: #16a34a; }
-    .status-400, .status-401, .status-403, .status-500 { color: #dc2626; }
+    .status-400, .status-401, .status-403, .status-429, .status-500 { color: #dc2626; }
 
     ul.plain-list { margin-left: 18px; margin-bottom: 12px; }
     ul.plain-list li { margin-bottom: 6px; }
@@ -276,6 +276,8 @@
     <div class="docs-nav">
       <a class="docs-nav-item active" onclick="scrollToSection('section-overview', this)">📖 Overview</a>
       <a class="docs-nav-item" onclick="scrollToSection('section-auth', this)">🔑 Authentication</a>
+      <a class="docs-nav-item" onclick="scrollToSection('section-signing', this)">✍️ Request Signing</a>
+      <a class="docs-nav-item" onclick="scrollToSection('section-rate-limits', this)">⏱️ Rate Limiting</a>
       <a class="docs-nav-item" onclick="scrollToSection('section-request', this)">📤 Request Format</a>
       <a class="docs-nav-item" onclick="scrollToSection('section-proxy', this)">🔍 Proxy Flags</a>
       <a class="docs-nav-item" onclick="scrollToSection('section-response', this)">📥 Response Format</a>
@@ -310,6 +312,50 @@
             <li>The key identifies your organization server-side. You never need to send your organization ID or name in the request — it's resolved from the key.</li>
             <li>Missing or malformed <code>Authorization</code> header → <span class="status-code status-401">401</span>.</li>
             <li>A key that doesn't match any organization on file → <span class="status-code status-403">403</span>.</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- REQUEST SIGNING -->
+      <div class="docs-section" id="section-signing">
+        <div class="section-header">
+          <div class="section-title">✍️ Request Signing</div>
+          <div class="section-subtitle">Required as of 2026-08-12 — proves the request body wasn't tampered with or replayed</div>
+        </div>
+        <div class="section-body">
+          <p>Separate from your API key (which proves you're a valid caller), every request must also be signed with a per-organization signing secret, issued alongside your API key during onboarding. This proves the specific payload is genuine and fresh.</p>
+          <pre>X-Signature-256: &lt;hex-encoded HMAC-SHA256&gt;
+X-Timestamp: &lt;unix epoch seconds&gt;</pre>
+          <ul class="plain-list">
+            <li><strong>Signed value:</strong> <code>{timestamp}.{raw request body}</code> — the timestamp and the exact raw JSON body text (before any re-serialization), joined with a period.</li>
+            <li><strong>Algorithm:</strong> HMAC-SHA256, hex-encoded, using your signing secret.</li>
+            <li><strong>Timestamp tolerance:</strong> requests older than 5 minutes (or timestamped in the future) are rejected — this blocks a captured request from being replayed later, even with a technically-valid signature.</li>
+            <li>Missing either header, an invalid signature, or a stale timestamp → <span class="status-code status-401">401</span>.</li>
+          </ul>
+          <div class="info-callout"><strong>Example (Node.js):</strong>
+            <pre>const crypto = require('crypto');
+const timestamp = Math.floor(Date.now() / 1000).toString();
+const rawBody = JSON.stringify(payload);
+const signature = crypto
+  .createHmac('sha256', YOUR_SIGNING_SECRET)
+  .update(`${timestamp}.${rawBody}`)
+  .digest('hex');
+// send as X-Signature-256, with X-Timestamp: timestamp, and rawBody as the exact request body</pre>
+          </div>
+        </div>
+      </div>
+
+      <!-- RATE LIMITING -->
+      <div class="docs-section" id="section-rate-limits">
+        <div class="section-header">
+          <div class="section-title">⏱️ Rate Limiting</div>
+          <div class="section-subtitle">Added 2026-08-12</div>
+        </div>
+        <div class="section-body">
+          <ul class="plain-list">
+            <li><strong>60 requests per minute</strong> per organization (fixed 1-minute window).</li>
+            <li>Exceeding the limit → <span class="status-code status-429">429</span>. Retry after the current minute window rolls over.</li>
+            <li>If your integration needs a higher sustained volume, contact your F.A.S. point of contact — the threshold is adjustable per organization.</li>
           </ul>
         </div>
       </div>
@@ -393,8 +439,9 @@ not_collected</pre>
             <thead><tr><th>Status</th><th>Meaning</th></tr></thead>
             <tbody>
               <tr><td><span class="status-code status-400">400</span></td><td>A required field is missing, or <code>outcome</code>/<code>protected_class_cohort</code>/<code>demographic_source</code> failed enum validation.</td></tr>
-              <tr><td><span class="status-code status-401">401</span></td><td>Missing or malformed <code>Authorization</code> header.</td></tr>
+              <tr><td><span class="status-code status-401">401</span></td><td>Missing/malformed <code>Authorization</code> header, missing/invalid request signature, or a stale <code>X-Timestamp</code>.</td></tr>
               <tr><td><span class="status-code status-403">403</span></td><td>API key doesn't match any organization on file.</td></tr>
+              <tr><td><span class="status-code status-429">429</span></td><td>Rate limit exceeded (60 requests/minute per organization).</td></tr>
               <tr><td><span class="status-code status-500">500</span></td><td>Unexpected server-side error. Response body includes the error message.</td></tr>
             </tbody>
           </table>
@@ -407,10 +454,8 @@ not_collected</pre>
           <div class="section-title">💻 Example Request</div>
         </div>
         <div class="section-body">
-          <pre>curl -X POST \
-  -H "Authorization: Bearer &lt;your-api-key&gt;" \
-  -H "Content-Type: application/json" \
-  -d '{
+          <p>The signature must be computed over the exact raw body text you send — build the JSON string first, sign it, then send that same string as the request body (don't let your HTTP client re-serialize it separately).</p>
+          <pre>BODY='{
     "candidate_id": "CAND-48213",
     "job_id": "REQ-1029",
     "job_title": "Senior Operations Manager",
@@ -420,8 +465,29 @@ not_collected</pre>
     "protected_class_cohort": "protected_veteran",
     "demographic_source": "candidate_self_id",
     "occurred_at": "2026-07-22T14:30:00Z"
-  }' \
+  }'
+TS=$(date +%s)
+SIG=$(printf '%s.%s' "$TS" "$BODY" | openssl dgst -sha256 -hmac "&lt;your-signing-secret&gt;" | sed 's/^.* //')
+
+curl -X POST \
+  -H "Authorization: Bearer &lt;your-api-key&gt;" \
+  -H "Content-Type: application/json" \
+  -H "X-Signature-256: $SIG" \
+  -H "X-Timestamp: $TS" \
+  -d "$BODY" \
   https://znjvjofsfvxccmidfpgy.supabase.co/functions/v1/candidate-event-intake</pre>
+          <p style="margin-top:1rem;">Field reference, unsigned equivalent for readability:</p>
+          <pre>{
+    "candidate_id": "CAND-48213",
+    "job_id": "REQ-1029",
+    "job_title": "Senior Operations Manager",
+    "outcome": "rejected",
+    "rejection_reason_from_ats": "Candidate has a gap in employment history",
+    "years_experience": 7,
+    "protected_class_cohort": "protected_veteran",
+    "demographic_source": "candidate_self_id",
+    "occurred_at": "2026-07-22T14:30:00Z"
+  }</pre>
         </div>
       </div>
 
