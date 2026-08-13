@@ -299,7 +299,7 @@
         <div class="card-title">Engagement</div>
         <div class="toggle-row">
           <div>
-            <div class="label">FAS HITL (Integration + Monitoring)</div>
+            <div class="label">FAS HOTL (Integration + Monitoring)</div>
             <div class="sub">Off = audit-only. On = adds Integration Fee + per-lane Monitoring Fee.</div>
           </div>
           <label class="switch"><input type="checkbox" id="hitl-toggle" onchange="onHitlToggle()"><span class="slider"></span></label>
@@ -545,7 +545,7 @@
     total += auditTotal;
 
     if (hitlOn) {
-      lines.push({ desc: 'HITL Core Integration Fee', sub: 'One-time, 2 seats included', amt: rates.integration });
+      lines.push({ desc: 'HOTL Core Integration Fee', sub: 'One-time, 2 seats included', amt: rates.integration });
       total += rates.integration;
 
       const monitoringTotal = laneCount * rates.monitoring * 12;

@@ -412,7 +412,7 @@
           <div class="company-name">${escapeHtml(s.company_name)}</div>
           <div class="contact-sub">${escapeHtml(s.primary_contact_name)} · ${escapeHtml(s.contact_email)}</div>
         </td>
-        <td>${s.engagement_type === 'hitl' ? 'FAS HITL' : s.engagement_type === 'auditing' ? 'FAS Auditing' : '—'}
+        <td>${s.engagement_type === 'hitl' ? 'FAS HOTL' : s.engagement_type === 'auditing' ? 'FAS Auditing' : '—'}
           ${s.litigation_history ? '<div class="litigation-flag">⚠ Litigation history</div>' : ''}
           ${s.referred_by ? `<div class="referral-flag">★ Referred by ${escapeHtml(s.referred_by)}</div>` : ''}
         </td>
@@ -539,7 +539,7 @@
       <div class="detail-section">
         <div class="detail-section-title">Engagement Type</div>
         <div class="detail-grid">
-          <div class="detail-field"><label>Interested In</label>${fieldVal(s.engagement_type === 'hitl' ? 'FAS HITL' : s.engagement_type === 'auditing' ? 'FAS Auditing' : null)}</div>
+          <div class="detail-field"><label>Interested In</label>${fieldVal(s.engagement_type === 'hitl' ? 'FAS HOTL' : s.engagement_type === 'auditing' ? 'FAS Auditing' : null)}</div>
           <div class="detail-field"><label>Review SLA Expectations</label>${fieldVal(s.review_sla_expectations)}</div>
           <div class="detail-field"><label>Reviewer 1</label>${fieldVal(s.hitl_reviewer_1_name ? s.hitl_reviewer_1_name + ' (' + s.hitl_reviewer_1_email + ')' : null)}</div>
           <div class="detail-field"><label>Reviewer 2</label>${fieldVal(s.hitl_reviewer_2_name ? s.hitl_reviewer_2_name + ' (' + s.hitl_reviewer_2_email + ')' : null)}</div>

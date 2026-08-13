@@ -221,7 +221,7 @@ const FAS_JURISDICTIONS = {
     ],
     fasCapabilities: [
       'High-risk classification check and documentation',
-      'Human oversight logging (HITL audit trail)',
+      'Human oversight logging (HOTL audit trail)',
       'EU compliance reporting package',
       'Transparency disclosure generation',
     ],

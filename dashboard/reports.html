@@ -233,7 +233,7 @@
     <div class="stat-card">
       <div class="stat-value" id="statOverrides">—</div>
       <div class="stat-label">Reviewer Overrides</div>
-      <div class="stat-delta up" id="statOverridesDelta">HITL verified</div>
+      <div class="stat-delta up" id="statOverridesDelta">HOTL verified</div>
     </div>
     <div class="stat-card">
       <div class="stat-value" id="statCompliance">—</div>
@@ -341,7 +341,7 @@
         <div class="chart-header">
           <div>
             <div class="chart-title">Override Decisions</div>
-            <div class="chart-subtitle">HITL reviewer outcomes</div>
+            <div class="chart-subtitle">HOTL reviewer outcomes</div>
           </div>
         </div>
         <div class="chart-canvas-container">
@@ -1232,7 +1232,7 @@
     y += 6;
     const pendingCount = total - overrides;
     const attestations = [
-      `• ${overrides} of ${total} record${total === 1 ? '' : 's'} have a completed human-in-the-loop reviewer decision on file.`,
+      `• ${overrides} of ${total} record${total === 1 ? '' : 's'} have a completed human-on-the-loop reviewer decision on file.`,
       `• ${pendingCount} record${pendingCount === 1 ? '' : 's'} ${pendingCount === 1 ? 'is' : 'are'} still pending reviewer decision.`,
       '• This report is generated directly from the F.A.S. platform\'s live audit and reviewer-decision',
       '  records, intended to support Colorado SB 189 and NYC Local Law 144 filing preparation.'
@@ -1527,7 +1527,7 @@
     doc.setFont('helvetica', 'normal');
     doc.text('This certificate reports statistical audit findings. It does not certify that any identified', margin + 4, y + 13);
     doc.text('disparate impact, chi-square significance, or other flagged finding has been remediated.', margin + 4, y + 18);
-    doc.text(`Remediation is the responsibility of ${companyName || 'this organization'} unless a separate F.A.S. HITL`, margin + 4, y + 23);
+    doc.text(`Remediation is the responsibility of ${companyName || 'this organization'} unless a separate F.A.S. HOTL`, margin + 4, y + 23);
     doc.text('engagement is in place, which provides ongoing human-reviewed override authority over', margin + 4, y + 28);
     doc.text('flagged hiring decisions. Contact ALS Consulting for details.', margin + 4, y + 33);
     y += remediationBoxHeight + 12;
