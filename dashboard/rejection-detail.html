@@ -528,7 +528,7 @@
 
       <!-- Resume link -->
       <div class="left-section">
-        <div class="resume-link" onclick="alert('Resume viewer coming soon — PDF will open in a modal.')">
+        <div class="resume-link" id="resumeLink">
           <span>📄</span>
           <span>View Full Resume</span>
           <span style="margin-left:auto;font-size:10px;color:var(--text-dim);">PDF ↗</span>
@@ -963,6 +963,17 @@
     `).join('');
 
     renderInitialAuditLog();
+
+    // Resume viewer: only DEMO-R-* seed records have a real sample resume behind them.
+    // Real client records have no resume file captured anywhere in the system yet,
+    // so they keep the honest "coming soon" placeholder.
+    const resumeLink = document.getElementById('resumeLink');
+    if (resumeLink) {
+      const isDemoRecord = (currentRecord.candidate_id || '').startsWith('DEMO-R-');
+      resumeLink.onclick = isDemoRecord
+        ? () => window.open('sample-resume-demo.pdf', '_blank')
+        : () => alert('Resume viewer coming soon — PDF will open in a modal.');
+    }
   }
 
   function renderEvidencePanels() {
