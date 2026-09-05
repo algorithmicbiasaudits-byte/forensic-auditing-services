@@ -964,13 +964,15 @@
 
     renderInitialAuditLog();
 
-    // Resume viewer: only DEMO-R-* seed records have a real sample resume behind them.
-    // Real client records have no resume file captured anywhere in the system yet,
-    // so they keep the honest "coming soon" placeholder.
+    // Resume viewer: only DEMO-R-01 has a real sample resume behind it — the
+    // sample PDF's audit annotations are written for that record's specific
+    // flag profile (Keyword Mismatch / Proxy Discrimination / Disparate Impact),
+    // so it would be wrong to show it for any other record. Every other record,
+    // demo or real client, keeps the honest "coming soon" placeholder.
     const resumeLink = document.getElementById('resumeLink');
     if (resumeLink) {
-      const isDemoRecord = (currentRecord.candidate_id || '').startsWith('DEMO-R-');
-      resumeLink.onclick = isDemoRecord
+      const hasSampleResume = currentRecord.candidate_id === 'DEMO-R-01';
+      resumeLink.onclick = hasSampleResume
         ? () => window.open('sample-resume-demo.pdf', '_blank')
         : () => alert('Resume viewer coming soon — PDF will open in a modal.');
     }
