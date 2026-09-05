@@ -211,7 +211,7 @@
         <div class="export-menu-item" onclick="exportCSV()">📊 Export CSV</div>
         <div class="export-menu-item" onclick="exportPDF()">📄 Export PDF (Regulatory)</div>
         <div class="export-menu-item" onclick="exportQuarterlyPDF()">📑 Export Quarterly Report</div>
-        <div class="export-menu-item" onclick="exportCertificate()">🎖️ Certificate of Audit Completion</div>
+        <div class="export-menu-item" onclick="exportCertificate()">📄 Record of Audit Completion</div>
       </div>
     </div>
   </div>
@@ -1231,7 +1231,7 @@
     doc.setTextColor(184, 135, 46);
     doc.setFontSize(18);
     doc.setFont('helvetica', 'bold');
-    doc.text('ATTESTATION & CERTIFICATION', margin, 15);
+    doc.text('ATTESTATION', margin, 15);
     y = 35;
 
     doc.setTextColor(30, 41, 59);
@@ -1340,26 +1340,26 @@
     hidePDFProgress();
   }
 
-  // ─── CERTIFICATE OF INDEPENDENT AUDIT COMPLETION ───
-  // Certifies that an independent audit was PERFORMED — every line is a
+  // ─── RECORD OF INDEPENDENT AUDIT COMPLETION ───
+  // Attests that an independent audit was PERFORMED — every line is a
   // real, verifiable fact from the platform's own data. Deliberately does
-  // NOT certify legal compliance with any statute — that is a legal
+  // NOT assert legal compliance with any statute — that is a legal
   // determination for courts/regulators, not something an audit-trail
   // export can assert.
   async function exportCertificate() {
     // Pulls from `applications` (the real Auditing-tier statistical data,
     // via math/impactAnalysis.js) rather than `rejections` -- that table is
     // HITL-only and empty for every Auditing-only client, which meant this
-    // certificate previously refused to generate for them at all. Also
+    // record previously refused to generate for them at all. Also
     // deliberately drops any HITL review-completion language: this
-    // certificate certifies the AUDIT ran, not that remediation happened --
+    // record attests the AUDIT ran, not that remediation happened --
     // an Auditing-only client has no HITL review step to report on. Fixed
     // 2026-08-08.
     const { data: applications } = await supabaseClient
       .from('applications').select('protected_class_cohort, outcome, occurred_at').eq('customer_id', customerId);
 
-    if (!applications || !applications.length) { alert('No audit records on file yet — nothing to certify.'); return; }
-    showPDFProgress('Generating Certificate of Audit Completion...');
+    if (!applications || !applications.length) { alert('No audit records on file yet — nothing to document.'); return; }
+    showPDFProgress('Generating Record of Audit Completion...');
 
     const { jsPDF } = window.jspdf;
     const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'letter' });
@@ -1405,7 +1405,7 @@
     doc.setTextColor(10, 22, 40);
     doc.setFontSize(20);
     doc.setFont('helvetica', 'bold');
-    doc.text('Certificate of Independent', pageWidth / 2, y, { align: 'center' });
+    doc.text('Record of Independent', pageWidth / 2, y, { align: 'center' });
     y += 9;
     doc.text('Algorithmic Bias Audit Completion', pageWidth / 2, y, { align: 'center' });
     y += 16;
@@ -1413,7 +1413,7 @@
     doc.setFontSize(11);
     doc.setFont('helvetica', 'normal');
     doc.setTextColor(30, 41, 59);
-    doc.text('This certifies that', pageWidth / 2, y, { align: 'center' });
+    doc.text('This record confirms that', pageWidth / 2, y, { align: 'center' });
     y += 9;
     doc.setFontSize(16);
     doc.setFont('helvetica', 'bold');
@@ -1518,13 +1518,13 @@
     doc.rect(margin, y, pageWidth - margin * 2, 22, 'FD');
     doc.setFontSize(8);
     doc.setTextColor(120, 90, 10);
-    doc.text('This certificate confirms that an independent audit was performed. It does not constitute a', margin + 4, y + 8);
+    doc.text('This record confirms that an independent audit was performed. It does not constitute a', margin + 4, y + 8);
     doc.text('determination of legal compliance with any specific statute or regulation — compliance is a', margin + 4, y + 13);
     doc.text('legal determination made by courts or regulators, not by an audit-trail export.', margin + 4, y + 18);
     y += 32;
 
     // Remediation notice — same visual treatment as the disclaimer above.
-    // States plainly that this certificate reports findings, not that
+    // States plainly that this record reports findings, not that
     // findings have been remediated; ties to F.A.S. HITL as the separate
     // engagement that provides remediation/override capability.
     const remediationBoxHeight = 42;
@@ -1537,7 +1537,7 @@
     doc.setTextColor(120, 90, 10);
     doc.text('Remediation Notice', margin + 4, y + 7);
     doc.setFont('helvetica', 'normal');
-    doc.text('This certificate reports statistical audit findings. It does not certify that any identified', margin + 4, y + 13);
+    doc.text('This record reports statistical audit findings. It does not confirm that any identified', margin + 4, y + 13);
     doc.text('disparate impact, chi-square significance, or other flagged finding has been remediated.', margin + 4, y + 18);
     doc.text(`Remediation is the responsibility of ${companyName || 'this organization'} unless a separate F.A.S. HOTL`, margin + 4, y + 23);
     doc.text('engagement is in place, which provides ongoing human-reviewed override authority over', margin + 4, y + 28);
@@ -1560,7 +1560,7 @@
     doc.setTextColor(71, 85, 105);
     doc.text('Authorized F.A.S. Reviewer Signature', margin, y);
 
-    doc.save(`FAS_Certificate_of_Audit_Completion_${new Date().toISOString().slice(0,10)}.pdf`);
+    doc.save(`FAS_Record_of_Audit_Completion_${new Date().toISOString().slice(0,10)}.pdf`);
     hidePDFProgress();
   }
 
