@@ -52,9 +52,6 @@
     .quarterly-title { font-size: 16px; font-weight: 600; color: var(--text-primary); }
     .quarterly-subtitle { font-size: 12px; color: var(--text-muted); }
     .quarterly-controls { display: flex; gap: 8px; align-items: center; }
-    .quarter-btn { padding: 5px 12px; border: 1px solid var(--border); border-radius: 6px; background: var(--white); font-size: 11px; font-weight: 500; color: var(--text-secondary); cursor: pointer; }
-    .quarter-btn:hover { background: var(--bg-page); }
-    .quarter-btn.active { background: var(--navy); color: var(--white); border-color: var(--navy); }
     .quarterly-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
     .quarter-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 8px; padding: 16px; box-shadow: var(--shadow-sm); position: relative; overflow: hidden; }
     .quarter-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; background: var(--gold); opacity: 0; transition: opacity 0.15s ease; }
@@ -297,8 +294,7 @@
         <div class="quarterly-subtitle">Year-over-year audit metrics by fiscal quarter</div>
       </div>
       <div class="quarterly-controls">
-        <button class="quarter-btn active" data-year="2026" onclick="selectYear(this, 2026)">2026</button>
-        <button class="quarter-btn" data-year="2025" onclick="selectYear(this, 2025)">2025</button>
+        <select class="filter-select" id="yearSelect" onchange="onYearChange()"></select>
         <select class="filter-select" id="compareMetric" onchange="renderQuarterlyComparison()">
           <option value="audits">Total Audits</option>
           <option value="highRisk">High Risk Rate</option>
@@ -440,7 +436,7 @@
   let currentPage = 1;
   const PER_PAGE = 10;
   let customerId = null;
-  let selectedYear = 2026;
+  let selectedYear = new Date().getFullYear();
 
   let riskChartInst = null;
   let trendChartInst = null;
@@ -556,6 +552,7 @@
     computeStats(allRecords);
     updateTabCounts(allRecords);
     renderAllCharts(allRecords);
+    populateYearOptions();
     await renderQuarterlyComparison();
     await renderDisparateChart();
     applyFilters();
@@ -603,10 +600,25 @@
   }
 
   // ─── QUARTERLY COMPARISON ───
-  function selectYear(btn, year) {
-    document.querySelectorAll('.quarter-btn').forEach(b => b.classList.remove('active'));
-    btn.classList.add('active');
-    selectedYear = year;
+  // Dropdown range is derived from real data + the real current year, never
+  // hardcoded — so a new calendar year needs no manual edit here. Floor is
+  // the earliest year seen in allRecords (defaulting one year back if there's
+  // no data yet), so the range only grows as real history accumulates.
+  function populateYearOptions() {
+    const nowYear = new Date().getFullYear();
+    const recordYears = allRecords
+      .map(r => r.created_at ? new Date(r.created_at).getFullYear() : null)
+      .filter(Boolean);
+    const floorYear = Math.min(nowYear - 1, ...(recordYears.length ? recordYears : [nowYear - 1]));
+
+    const select = document.getElementById('yearSelect');
+    const options = [];
+    for (let y = nowYear; y >= floorYear; y--) options.push(y);
+    select.innerHTML = options.map(y => `<option value="${y}" ${y === selectedYear ? 'selected' : ''}>${y}</option>`).join('');
+  }
+
+  function onYearChange() {
+    selectedYear = Number(document.getElementById('yearSelect').value);
     renderQuarterlyComparison();
   }
 
