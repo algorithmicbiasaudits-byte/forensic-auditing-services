@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Compliance Audit Trail & Adverse Impact Matrix</title>
+    <title>Compliance Analysis & Adverse Impact Matrix</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
@@ -48,7 +48,7 @@
     <button class="hamburger-btn" onclick="toggleMobileSidebar()" aria-label="Toggle navigation">☰</button>
     <span class="logo">FAS</span>
     <span class="topnav-divider">|</span>
-    <span class="topnav-title">Audit Trail</span>
+    <span class="topnav-title">Compliance Analysis</span>
   </div>
   <div class="topnav-right">
     <span class="user-name" id="userName">—</span>
@@ -63,7 +63,7 @@
   <a href="rejections.html" class="sidebar-link"><span class="icon">🚨</span> Rejections</a>
   <a href="reports.html" class="sidebar-link"><span class="icon">📋</span> Reports</a>
   <div class="sidebar-section-label">COMPLIANCE</div>
-  <a href="audit-trail.html" class="sidebar-link active"><span class="icon">🔒</span> Audit Trail</a>
+  <a href="audit-trail.html" class="sidebar-link active"><span class="icon">🔒</span> Compliance Analysis</a>
   <a href="reviewers.html" class="sidebar-link"><span class="icon">👥</span> Reviewers</a>
   <div class="sidebar-section-label">SYSTEM</div>
   <a href="settings.html" class="sidebar-link"><span class="icon">⚙️</span> Settings</a>
@@ -82,7 +82,7 @@
 
         <div class="md:flex md:items-center md:justify-between border-b border-gray-200 pb-5 mb-8">
             <div class="flex-1 min-w-0">
-                <h1 class="text-3xl font-bold tracking-tight text-gray-900 sm:truncate">Systemic Compliance Audit Trail</h1>
+                <h1 class="text-3xl font-bold tracking-tight text-gray-900 sm:truncate">Systemic Compliance Analysis</h1>
                 <p class="mt-2 text-sm text-gray-500">Real-time disparate impact monitoring, proxy criteria tracking, and selection rate mathematical analysis.</p>
             </div>
             <div class="mt-4 md:mt-0 flex items-center gap-3">
@@ -603,7 +603,7 @@
             doc.setFontSize(16);
             doc.setFont('helvetica', 'bold');
             doc.setTextColor(30, 41, 59);
-            doc.text('F.A.S. Compliance Audit Trail Export', margin, 18);
+            doc.text('F.A.S. Compliance Analysis Export', margin, 18);
             doc.setFontSize(9);
             doc.setFont('helvetica', 'normal');
             doc.setTextColor(100, 116, 139);
