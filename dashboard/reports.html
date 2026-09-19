@@ -234,7 +234,7 @@
     </div>
     <div class="stat-card">
       <div class="stat-value" id="statCompliance">—</div>
-      <div class="stat-label">Compliance Score</div>
+      <div class="stat-label">Non-High-Risk Rate</div>
       <div class="stat-delta up" id="statComplianceDelta">System health</div>
     </div>
   </div>
@@ -299,7 +299,7 @@
           <option value="audits">Total Audits</option>
           <option value="highRisk">High Risk Rate</option>
           <option value="overrides">Override Rate</option>
-          <option value="compliance">Compliance Score</option>
+          <option value="compliance">Non-High-Risk Rate</option>
         </select>
       </div>
     </div>
@@ -1144,7 +1144,7 @@
     doc.text(`High Risk Flags: ${highRisk}`, margin + 60, y);
     y += 5;
     doc.text(`Reviewer Overrides: ${overrides}`, margin, y);
-    doc.text(`Compliance Score: ${complianceScore}%`, margin + 60, y);
+    doc.text(`Non-High-Risk Rate: ${complianceScore}%`, margin + 60, y);
     y += 10;
 
     // Data source note
