@@ -86,6 +86,8 @@ const FAS_JURISDICTIONS = {
     coreRules: [
       'Pre-use notice to consumers required',
       'Post-adverse-outcome disclosure within 30 days',
+      'Meaningful human review and reconsideration of adverse decisions (to the extent commercially reasonable)',
+      'Consumer right to access and correct inaccurate personal data used by the ADMT',
       '3-year record retention',
       '60-day cure period (new — not in SB 205)',
       'Up to $20,000/violation penalty',
@@ -109,9 +111,9 @@ const FAS_JURISDICTIONS = {
   illinoisHB3773: {
     id:         'illinoisHB3773',
     label:      'Illinois HB 3773',
-    fullName:   'Illinois HB 3773 — Artificial Intelligence Video Interview Act (expanded)',
-    citation:   'Pub. Act 103-0795',
-    enacted:    '2025',
+    fullName:   'Illinois HB 3773 — Amendment to the Illinois Human Rights Act (AI in employment)',
+    citation:   '775 ILCS 5/ (Illinois Human Rights Act, as amended by HB 3773)',
+    enacted:    '2024',
     scope:      'Employers using AI in employment decisions affecting Illinois residents',
     icon:       '🌾',
     color:      'warning',
