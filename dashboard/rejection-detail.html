@@ -964,16 +964,23 @@
 
     renderInitialAuditLog();
 
-    // Resume viewer: only DEMO-R-01 has a real sample resume behind it — the
-    // sample PDF's audit annotations are written for that record's specific
-    // flag profile (Keyword Mismatch / Proxy Discrimination / Disparate Impact),
-    // so it would be wrong to show it for any other record. Every other record,
-    // demo or real client, keeps the honest "coming soon" placeholder.
+    // Resume viewer: only these specific demo records have a real sample
+    // resume behind them — each PDF's audit annotations are written for
+    // that record's specific flag profile, so it would be wrong to show
+    // any of them for a different record. Every other record, demo or
+    // real client, keeps the honest "coming soon" placeholder.
+    const SAMPLE_RESUMES = {
+      'DEMO-R-01': 'sample-resume-demo.pdf',
+      'DEMO-R-13': 'demo-resume-DEMO-R-13.pdf',
+      'DEMO-R-14': 'demo-resume-DEMO-R-14.pdf',
+      'DEMO-R-15': 'demo-resume-DEMO-R-15.pdf',
+      'DEMO-R-16': 'demo-resume-DEMO-R-16.pdf',
+    };
     const resumeLink = document.getElementById('resumeLink');
     if (resumeLink) {
-      const hasSampleResume = currentRecord.candidate_id === 'DEMO-R-01';
-      resumeLink.onclick = hasSampleResume
-        ? () => window.open('sample-resume-demo.pdf', '_blank')
+      const sampleFile = SAMPLE_RESUMES[currentRecord.candidate_id];
+      resumeLink.onclick = sampleFile
+        ? () => window.open(sampleFile, '_blank')
         : () => alert('Resume viewer coming soon — PDF will open in a modal.');
     }
   }
