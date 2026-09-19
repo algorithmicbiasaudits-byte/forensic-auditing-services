@@ -115,9 +115,9 @@
                 <p class="text-xs text-gray-400 mt-1">Percentage of rejected applications flagged for keyword mismatch.</p>
             </div>
             <div class="bg-white overflow-hidden shadow rounded-lg border border-gray-200 p-5">
-                <dt class="text-sm font-medium text-gray-500 truncate">Audited Volume</dt>
-                <dd id="totalAuditedVolume" class="mt-1 text-3xl font-semibold tracking-tight text-gray-900">0</dd>
-                <p class="text-xs text-gray-400 mt-1">Total active applications under structural evaluation.</p>
+                <dt class="text-sm font-medium text-gray-500 truncate">High-Risk Rate</dt>
+                <dd id="highRiskRate" class="mt-1 text-3xl font-semibold tracking-tight text-gray-900">0.0%</dd>
+                <p class="text-xs text-gray-400 mt-1">Percentage of audited rejections flagged high-risk (red).</p>
             </div>
         </div>
 
@@ -210,6 +210,7 @@
         // not deleted.
 
         let cachedApplications = [];
+        let cachedRiskAudits = [];
         let filtersInitialized = false;
         let companyName = null;
 
@@ -267,6 +268,8 @@
                 companyName = customer?.company_name || null;
 
                 await fetchTenantApplicationRecords(resolvedCustomerId);
+                await fetchTenantRiskAudits(resolvedCustomerId);
+                processAndRenderAnalytics();
                 setupUIEventListeners();
 
             } catch (err) {
@@ -338,6 +341,30 @@
             }
         }
 
+        // High-Risk Rate is sourced directly from the audits table's real
+        // risk_level (the actual engine output), not reconstructed from
+        // applications-table flags — this page is shared with regulators,
+        // so the number shown must match what the audit engine itself
+        // determined, not a client-side approximation.
+        async function fetchTenantRiskAudits(customerId) {
+            try {
+                const { data, error } = await supabaseClient
+                    .from('rejections')
+                    .select('job_title, audits!inner(risk_level)')
+                    .eq('customer_id', customerId);
+
+                if (error) throw error;
+
+                cachedRiskAudits = (data || []).map(r => ({
+                    job_title: r.job_title,
+                    risk_level: Array.isArray(r.audits) ? r.audits[0]?.risk_level : r.audits?.risk_level,
+                }));
+            } catch (fetchErr) {
+                console.error("Risk-audit fetch exception:", fetchErr);
+                cachedRiskAudits = [];
+            }
+        }
+
         function populateJobTitleFilterOptions(applications) {
             const filterDropdown = document.getElementById('jobTitleFilter');
             if (!filterDropdown) return;
@@ -362,7 +389,14 @@
             currentIntakePage = 1; // filter changed (or first load) — back to page 1
 
             const totalCount = targetRecords.length;
-            document.getElementById('totalAuditedVolume').textContent = totalCount;
+
+            const targetAudits = selectedJobFilter === 'all'
+                ? cachedRiskAudits
+                : cachedRiskAudits.filter(a => a.job_title === selectedJobFilter);
+            const auditedCount = targetAudits.length;
+            const redCount = targetAudits.filter(a => a.risk_level === 'red').length;
+            const highRiskRate = auditedCount > 0 ? ((redCount / auditedCount) * 100).toFixed(1) : '0.0';
+            document.getElementById('highRiskRate').textContent = `${highRiskRate}%`;
 
             // Proxy flag rates — computed directly here (not via analyze()'s
             // computeProxyImpactRatios) since that function already restricts to
