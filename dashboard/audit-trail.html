@@ -6,8 +6,6 @@
     <title>Compliance Analysis & Adverse Impact Matrix</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
     <style>
       :root {
         --navy: #0a1628; --gold: #b8872e; --gold-light: #d4a040; --gold-bg: rgba(184,135,46,0.08);
@@ -136,7 +134,7 @@
                             <th scope="col" class="px-3 py-3.5 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Pending</th>
                             <th scope="col" class="px-3 py-3.5 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Selection Rate</th>
                             <th scope="col" class="px-3 py-3.5 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Impact Ratio</th>
-                            <th scope="col" class="px-3 py-3.5 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Compliance Status</th>
+                            <th scope="col" class="px-3 py-3.5 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">4/5ths Threshold Status</th>
                         </tr>
                     </thead>
                     <tbody id="impactMatrixTableBody" class="divide-y divide-gray-200 bg-white">
@@ -166,7 +164,6 @@
                 </div>
                 <div class="mt-3 md:mt-0 flex items-center gap-2">
                     <button id="exportCsvBtn" onclick="exportCSV()" class="inline-flex items-center rounded-md border border-gray-300 bg-white px-3 py-1.5 text-xs font-semibold text-gray-700 shadow-sm hover:bg-gray-50">Export CSV</button>
-                    <button id="exportPdfBtn" onclick="exportPDF()" class="inline-flex items-center rounded-md border border-indigo-600 bg-white px-3 py-1.5 text-xs font-semibold text-indigo-600 shadow-sm hover:bg-indigo-50">Export PDF</button>
                 </div>
             </div>
             <div class="overflow-x-auto">
@@ -506,7 +503,7 @@
 
                 const isViolation = ratio?.belowFourFifths === true;
                 const isUnknown = !ratio || ratio.belowFourFifths === null || ratio.belowFourFifths === undefined;
-                const statusLabel = isUnknown ? 'Insufficient Data' : (isViolation ? 'Adverse Impact Indicated' : 'Compliant (Pass)');
+                const statusLabel = isUnknown ? 'Insufficient Data' : (isViolation ? 'Below 4/5ths Threshold' : 'Within 4/5ths Threshold');
                 const badgeClass = isUnknown
                     ? "bg-gray-100 text-gray-700 border border-gray-200"
                     : isViolation
@@ -626,93 +623,6 @@
             URL.revokeObjectURL(url);
         }
 
-        function exportPDF() {
-            if (!currentFilteredRecords.length) { alert('No records to export.'); return; }
-            const { jsPDF } = window.jspdf;
-            const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'letter' });
-            const pageWidth = doc.internal.pageSize.getWidth();
-            const margin = 15;
-            const jobFilter = document.getElementById('jobTitleFilter')?.value || 'all';
-
-            doc.setFontSize(16);
-            doc.setFont('helvetica', 'bold');
-            doc.setTextColor(30, 41, 59);
-            doc.text('F.A.S. Compliance Analysis Export', margin, 18);
-            doc.setFontSize(9);
-            doc.setFont('helvetica', 'normal');
-            doc.setTextColor(100, 116, 139);
-            doc.text(companyName || 'Organization', margin, 25);
-            doc.text(`Job title filter: ${jobFilter === 'all' ? 'All jobs / requisitions' : jobFilter}`, margin, 30);
-            doc.text(`Generated: ${new Date().toLocaleString()}`, margin, 35);
-
-            let y = 44;
-            doc.setFontSize(12);
-            doc.setFont('helvetica', 'bold');
-            doc.setTextColor(30, 41, 59);
-            doc.text('Demographic Cohort Selection Rates & Adverse Impact Matrix', margin, y);
-            y += 6;
-
-            const keys = [...new Set([...Object.keys(currentMatrix), ...Object.keys(currentPendingByCohort)])].sort();
-            const matrixRows = keys.map(key => {
-                const c = currentMatrix[key] || { total: 0, selected: 0 };
-                const pending = currentPendingByCohort[key] || 0;
-                const ratio = currentRatiosByCohort[key];
-                const selRate = ratio ? (ratio.selectionRate * 100).toFixed(1) + '%' : '—';
-                const impactRatio = ratio && typeof ratio.impactRatio === 'number' ? ratio.impactRatio.toFixed(2) : '—';
-                const status = !ratio || ratio.belowFourFifths == null ? 'Insufficient Data' : (ratio.belowFourFifths ? 'Adverse Impact Indicated' : 'Compliant (Pass)');
-                return [formatCohortLabel(key), c.total, c.selected, pending, selRate, impactRatio, status];
-            });
-
-            doc.autoTable({
-                startY: y,
-                head: [['Cohort', 'Total Pool', 'Selected', 'Pending', 'Sel. Rate', 'Impact Ratio', 'Status']],
-                body: matrixRows.length ? matrixRows : [['No demographic cohort data available yet.', '', '', '', '', '', '']],
-                theme: 'grid',
-                headStyles: { fillColor: [30, 41, 59], fontSize: 8, fontStyle: 'bold' },
-                bodyStyles: { fontSize: 8 },
-                margin: { left: margin, right: margin }
-            });
-
-            y = doc.lastAutoTable.finalY + 12;
-            doc.setFontSize(12);
-            doc.setFont('helvetica', 'bold');
-            doc.text('Application Intake Log', margin, y);
-            y += 6;
-
-            const CAP = 200;
-            const intakeRows = currentFilteredRecords.slice(0, CAP).map(rec => [
-                rec.application_id.substring(0, 8) + '...',
-                new Date(rec.occurred_at).toLocaleString(),
-                rec.job_title || '—',
-                formatCohortLabel(rec.protected_class_cohort),
-                rec.outcome
-            ]);
-
-            doc.autoTable({
-                startY: y,
-                head: [['Application ID', 'Timestamp', 'Job Title', 'Cohort', 'Outcome']],
-                body: intakeRows,
-                theme: 'grid',
-                headStyles: { fillColor: [30, 41, 59], fontSize: 8, fontStyle: 'bold' },
-                bodyStyles: { fontSize: 7.5 },
-                margin: { left: margin, right: margin },
-                didDrawPage: (data) => {
-                    doc.setFontSize(7.5);
-                    doc.setTextColor(148, 163, 184);
-                    doc.text(`Page ${data.pageNumber} | F.A.S. Forensic Auditing Services`, margin, doc.internal.pageSize.getHeight() - 8);
-                }
-            });
-
-            if (currentFilteredRecords.length > CAP) {
-                const finalY = doc.lastAutoTable.finalY + 6;
-                doc.setFontSize(8);
-                doc.setTextColor(100, 116, 139);
-                doc.text(`* Showing first ${CAP} of ${currentFilteredRecords.length} records. Full dataset available via CSV export.`, margin, finalY);
-            }
-
-            doc.save(`FAS_Audit_Trail_${new Date().toISOString().slice(0, 10)}.pdf`);
-        }
-
         function setupUIEventListeners() {
             const filterSelect = document.getElementById('jobTitleFilter');
             if (filterSelect) {
@@ -737,7 +647,6 @@
         // onclick= handlers (static buttons, and pagination controls that are
         // regenerated on every render). Expose explicitly so those resolve.
         window.exportCSV = exportCSV;
-        window.exportPDF = exportPDF;
         window.goIntakePage = goIntakePage;
 
         document.addEventListener('DOMContentLoaded', initAuditTrail);
